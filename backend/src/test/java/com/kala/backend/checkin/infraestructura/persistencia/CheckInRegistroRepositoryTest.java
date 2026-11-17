@@ -1,11 +1,11 @@
-package com.kala.backend.repository;
+package com.kala.backend.checkin.infraestructura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.kala.backend.FilasPadre;
 import com.kala.backend.FilasPadre.ItemCompleto;
-import com.kala.backend.model.AgregadoItem;
-import com.kala.backend.model.SesionCheckin;
+import com.kala.backend.FilasPadre;
+import com.kala.backend.checkin.dominio.AgregadoItem;
+import com.kala.backend.checkin.dominio.SesionCheckin;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;

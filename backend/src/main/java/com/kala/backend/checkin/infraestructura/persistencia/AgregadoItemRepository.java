@@ -1,6 +1,7 @@
-package com.kala.backend.repository;
+package com.kala.backend.checkin.infraestructura.persistencia;
 
-import com.kala.backend.model.AgregadoItem;
+import com.kala.backend.checkin.aplicacion.puerto.AgregadosCheckin;
+import com.kala.backend.checkin.dominio.AgregadoItem;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -9,7 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AgregadoItemRepository extends JpaRepository<AgregadoItem, Long> {
+public interface AgregadoItemRepository extends JpaRepository<AgregadoItem, Long>, AgregadosCheckin {
 
     // Upsert atómico: crea el contador del día o le suma la respuesta, sin leer primero.
     @Modifying(flushAutomatically = true, clearAutomatically = true)

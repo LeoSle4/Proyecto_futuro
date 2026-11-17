@@ -1,11 +1,12 @@
-package com.kala.backend.controller;
+package com.kala.backend.checkin.infraestructura.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.kala.backend.service.CheckInRegistroService;
+import com.kala.backend.checkin.aplicacion.CheckInRegistroService;
+import com.kala.backend.organizacion.infraestructura.web.OrganizacionTestSecurityConfig;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,9 +85,10 @@ class CheckInSinRegistroDelCuerpoTest {
 
     @Test
     void elCodigoDelCheckInNoUsaNingunLogger() throws IOException {
-        Path base = Path.of("src/main/java/com/kala/backend");
-        for (String archivo : List.of("controller/CheckInController.java", "service/CheckInRegistroService.java",
-                "dto/CheckInEnvioRequest.java")) {
+        Path base = Path.of("src/main/java/com/kala/backend/checkin");
+        for (String archivo : List.of("infraestructura/web/CheckInController.java",
+                "aplicacion/CheckInRegistroService.java", "aplicacion/CheckInEnvioRequest.java",
+                "infraestructura/web/CheckInLoteRequest.java")) {
             String codigo = Files.readString(base.resolve(archivo));
             assertThat(codigo).as(archivo)
                     .doesNotContain("Logger")

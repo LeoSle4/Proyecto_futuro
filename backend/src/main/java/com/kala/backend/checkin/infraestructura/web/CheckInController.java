@@ -1,7 +1,7 @@
-package com.kala.backend.controller;
+package com.kala.backend.checkin.infraestructura.web;
 
-import com.kala.backend.dto.CheckInEnvioRequest;
-import com.kala.backend.service.CheckInRegistroService;
+import com.kala.backend.checkin.aplicacion.CheckInEnvioRequest;
+import com.kala.backend.checkin.aplicacion.CheckInRegistroService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -32,6 +32,16 @@ public class CheckInController {
     public ResponseEntity<Void> registrar(@AuthenticationPrincipal Jwt jwt,
                                           @Valid @RequestBody CheckInEnvioRequest request) {
         service.registrar(claim(jwt, "uid"), claim(jwt, "equipoId"), request);
+        return ResponseEntity.accepted().build();
+    }
+
+    // Batería (WHO-5, PHQ-8, GAD-7): hasta k ítems de un mismo cuestionario en una sola sesión.
+    // 202; 400 si el lote repite ítems, mezcla cuestionarios o excede k; 409 y 422 como el envío simple.
+    @PostMapping("/lote")
+    @PreAuthorize("hasRole('EMPLEADO')")
+    public ResponseEntity<Void> registrarLote(@AuthenticationPrincipal Jwt jwt,
+                                              @Valid @RequestBody CheckInLoteRequest request) {
+        service.registrarLote(claim(jwt, "uid"), claim(jwt, "equipoId"), request.respuestas());
         return ResponseEntity.accepted().build();
     }
 

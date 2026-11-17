@@ -1,4 +1,4 @@
-package com.kala.backend.controller;
+package com.kala.backend.checkin.infraestructura.web;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,10 +10,11 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.kala.backend.exception.CheckInDuplicadoException;
-import com.kala.backend.exception.ConfiguracionLdpNoVigenteException;
-import com.kala.backend.exception.ItemCuestionarioNoEncontradoException;
-import com.kala.backend.service.CheckInRegistroService;
+import com.kala.backend.checkin.aplicacion.CheckInRegistroService;
+import com.kala.backend.checkin.dominio.CheckInDuplicadoException;
+import com.kala.backend.checkin.dominio.CheckInInvalidoException;
+import com.kala.backend.checkin.dominio.ConfiguracionLdpNoVigenteException;
+import com.kala.backend.checkin.dominio.ItemCuestionarioNoEncontradoException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -141,5 +142,71 @@ class CheckInControllerTest {
                 .andExpect(status().isForbidden());
 
         verifyNoInteractions(service);
+    }
+
+    // ---- Baterias (lote) y valor Laplace ----
+
+    private static final String CUERPO_LOTE = """
+            { "respuestas": [
+                { "itemId": 31, "configuracionLdpId": 8, "valorRuidoso": 1.75 },
+                { "itemId": 32, "configuracionLdpId": 8, "valorRuidoso": -0.4 } ] }
+            """;
+
+    @Test
+    void empleadoEnviaUnLote_devuelve202_yElServicioRecibeLosDosItems() throws Exception {
+        mockMvc.perform(post("/api/checkin/lote")
+                        .with(empleado()).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CUERPO_LOTE))
+                .andExpect(status().isAccepted());
+
+        verify(service).registrarLote(eq(11L), eq(3L), org.mockito.ArgumentMatchers.argThat(l -> l.size() == 2));
+    }
+
+    @Test
+    void loteVacio_devuelve400_yNoLlegaAlServicio() throws Exception {
+        mockMvc.perform(post("/api/checkin/lote")
+                        .with(empleado()).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"respuestas\": [] }"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void loteDeUnaPersonaQueNoEsEmpleado_devuelve403() throws Exception {
+        mockMvc.perform(post("/api/checkin/lote")
+                        .with(jwt().jwt(token -> token.claim("uid", 1L))
+                                .authorities(new SimpleGrantedAuthority("ROLE_RRHH")))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CUERPO_LOTE))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void envioInvalidoDelServicio_devuelve400SinEcoDelValor() throws Exception {
+        doThrow(new com.kala.backend.checkin.dominio.CheckInInvalidoException("Un ítem Laplace requiere valorRuidoso"))
+                .when(service).registrar(any(), any(), any());
+
+        mockMvc.perform(post("/api/checkin")
+                        .with(empleado()).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CUERPO_VALIDO))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void envioLaplaceConValorRuidoso_llegaAlServicio() throws Exception {
+        mockMvc.perform(post("/api/checkin")
+                        .with(empleado()).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"itemId\": 21, \"configuracionLdpId\": 8, \"valorRuidoso\": 2.37 }"))
+                .andExpect(status().isAccepted());
+
+        verify(service).registrar(eq(11L), eq(3L), org.mockito.ArgumentMatchers.argThat(
+                r -> r.valorRuidoso() != null && r.valorRuidoso().toPlainString().equals("2.37")
+                        && r.respuestaRuidosa() == null));
     }
 }
