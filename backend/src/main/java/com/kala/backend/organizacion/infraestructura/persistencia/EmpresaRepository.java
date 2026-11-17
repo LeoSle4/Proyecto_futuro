@@ -3,9 +3,11 @@ package com.kala.backend.organizacion.infraestructura.persistencia;
 
 import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
 import com.kala.backend.organizacion.dominio.Empresa;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -29,6 +31,11 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long>, Empresa
     List<Empresa> buscarPorNombreEnEmpresa(
             @Param("empresaId") Long empresaId,
             @Param("texto") String texto);
+
+    @Override
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM Empresa e WHERE e.id = :id")
+    Optional<Empresa> bloquear(@Param("id") Long id);
 
     @Override
     default List<Empresa> todas() {

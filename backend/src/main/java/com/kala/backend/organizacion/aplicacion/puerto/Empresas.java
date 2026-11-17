@@ -13,6 +13,10 @@ public interface Empresas {
 
     boolean existe(Long id);
 
+    // Busca la empresa y toma un bloqueo de escritura sobre su fila hasta que termine la transacción. Sirve para
+    // serializar operaciones que deciden según el estado de la empresa (por ejemplo el presupuesto de privacidad).
+    Optional<Empresa> bloquear(Long id);
+
     List<Empresa> buscarPorNombre(String texto);
 
     List<Empresa> buscarPorNombreEnEmpresa(Long empresaId, String texto);
