@@ -1,4 +1,4 @@
-package com.kala.backend.service;
+package com.kala.backend.privacidad.dominio;
 
 // Clase pura: sin Spring y sin estado. Estima la proporción real a partir de respuestas perturbadas con
 // Randomized Response: π = (λ − (1 − p)) / (2p − 1), con λ = respuestasSi / total y p = probabilidad de verdad.

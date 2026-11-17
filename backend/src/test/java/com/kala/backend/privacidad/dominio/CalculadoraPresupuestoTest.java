@@ -1,4 +1,4 @@
-package com.kala.backend.service;
+package com.kala.backend.privacidad.dominio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

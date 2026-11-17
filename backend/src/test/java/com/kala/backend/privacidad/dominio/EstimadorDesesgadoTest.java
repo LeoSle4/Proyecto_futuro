@@ -1,9 +1,9 @@
-package com.kala.backend.service;
-
-import org.junit.jupiter.api.Test;
+package com.kala.backend.privacidad.dominio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 class EstimadorDesesgadoTest {
 
