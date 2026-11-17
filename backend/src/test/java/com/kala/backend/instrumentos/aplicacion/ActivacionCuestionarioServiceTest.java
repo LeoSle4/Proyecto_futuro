@@ -21,6 +21,7 @@ import com.kala.backend.instrumentos.dominio.ItemCuestionario;
 import com.kala.backend.instrumentos.dominio.PresupuestoExcedidoException;
 import com.kala.backend.instrumentos.dominio.PresupuestoPrivacidad;
 import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
+import com.kala.backend.organizacion.dominio.Empresa;
 import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -52,6 +53,7 @@ class ActivacionCuestionarioServiceTest {
         service = new ActivacionCuestionarioService(empresas, cuestionarios, items, configuraciones,
                 activaciones, presupuestos, reloj, 20.0);
         when(empresas.existe(EMPRESA)).thenReturn(true);
+        when(empresas.bloquear(EMPRESA)).thenReturn(Optional.of(new com.kala.backend.organizacion.dominio.Empresa("20123456789", "ACME", "TI")));
         when(cuestionarios.activosDeEmpresa(EMPRESA)).thenReturn(List.of());
         when(activaciones.porId(any(), any())).thenReturn(Optional.empty());
         when(presupuestos.vigenteEn(any(), any())).thenReturn(Optional.empty());
@@ -230,5 +232,37 @@ class ActivacionCuestionarioServiceTest {
 
         assertThatThrownBy(() -> service.fijarPresupuesto(99L, new BigDecimal("10")))
                 .isInstanceOf(EmpresaNoEncontradaException.class);
+    }
+
+    // ---- concurrencia: las operaciones de presupuesto se serializan por empresa ----
+
+    @Test
+    void activarDesactivarYFijarTomanElBloqueoDeLaEmpresaAntesDeLeerElGasto() {
+        Cuestionario c = cuestionarioConUnItem(10L, 7);
+        org.mockito.InOrder orden = org.mockito.Mockito.inOrder(empresas, cuestionarios);
+
+        service.activar(EMPRESA, 10L);
+        orden.verify(empresas).bloquear(EMPRESA);
+        orden.verify(cuestionarios).activosDeEmpresa(EMPRESA);
+
+        org.mockito.Mockito.clearInvocations(empresas, cuestionarios);
+        service.desactivar(EMPRESA, 10L);
+        orden = org.mockito.Mockito.inOrder(empresas, cuestionarios);
+        orden.verify(empresas).bloquear(EMPRESA);
+        orden.verify(cuestionarios).activosDeEmpresa(EMPRESA);
+
+        org.mockito.Mockito.clearInvocations(empresas, cuestionarios);
+        service.fijarPresupuesto(EMPRESA, new BigDecimal("30"));
+        orden = org.mockito.Mockito.inOrder(empresas, cuestionarios);
+        orden.verify(empresas).bloquear(EMPRESA);
+        orden.verify(cuestionarios).activosDeEmpresa(EMPRESA);
+        assertThat(c).isNotNull();
+    }
+
+    @Test
+    void consultarElPresupuestoEsDeSoloLectura_yNoTomaBloqueo() {
+        service.consultarPresupuesto(EMPRESA);
+
+        verify(empresas, never()).bloquear(any());
     }
 }

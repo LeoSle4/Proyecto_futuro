@@ -72,7 +72,7 @@ public class ActivacionCuestionarioService {
     // Si lo excede lanza PresupuestoExcedidoException y no se escribe nada.
     @Transactional
     public ResultadoActivacion activar(Long empresaId, Long cuestionarioId) {
-        verificarEmpresa(empresaId);
+        bloquearEmpresa(empresaId);
         Cuestionario nuevo = cuestionarios.porId(cuestionarioId)
                 .orElseThrow(() -> new CuestionarioNoEncontradoException(cuestionarioId));
 
@@ -94,7 +94,7 @@ public class ActivacionCuestionarioService {
     // Apaga un cuestionario. Es idempotente: si nunca estuvo activo no escribe nada. Devuelve el gasto que queda.
     @Transactional
     public ResultadoActivacion desactivar(Long empresaId, Long cuestionarioId) {
-        verificarEmpresa(empresaId);
+        bloquearEmpresa(empresaId);
         cuestionarios.porId(cuestionarioId).orElseThrow(() -> new CuestionarioNoEncontradoException(cuestionarioId));
 
         activaciones.porId(empresaId, cuestionarioId).filter(EmpresaCuestionario::isActivo).ifPresent(activacion -> {
@@ -116,7 +116,7 @@ public class ActivacionCuestionarioService {
     // gastan los cuestionarios activos: primero habría que desactivar alguno.
     @Transactional
     public ResultadoPresupuesto fijarPresupuesto(Long empresaId, BigDecimal epsilonMaximoPersona) {
-        verificarEmpresa(empresaId);
+        bloquearEmpresa(empresaId);
         if (epsilonMaximoPersona == null || epsilonMaximoPersona.signum() <= 0
                 || epsilonMaximoPersona.compareTo(EPSILON_MAXIMO_ADMITIDO) > 0) {
             throw new IllegalArgumentException("El presupuesto debe ser mayor que 0 y no superar " + EPSILON_MAXIMO_ADMITIDO);
@@ -132,6 +132,13 @@ public class ActivacionCuestionarioService {
         String periodo = periodoActual();
         presupuestos.guardar(new PresupuestoPrivacidad(empresaId, periodo, maximo));
         return new ResultadoPresupuesto(empresaId, periodo, maximo.doubleValue(), gasto);
+    }
+
+    // Las operaciones que deciden según el gasto actual (activar, desactivar, fijar el presupuesto) toman primero un
+    // bloqueo de escritura sobre la empresa: dos peticiones simultáneas se ejecutan una detrás de la otra y la segunda
+    // ve el gasto ya actualizado. Sin esto, dos activaciones que caben por separado podían excederlo juntas.
+    private void bloquearEmpresa(Long empresaId) {
+        empresas.bloquear(empresaId).orElseThrow(() -> new EmpresaNoEncontradaException(empresaId));
     }
 
     private void verificarEmpresa(Long empresaId) {
