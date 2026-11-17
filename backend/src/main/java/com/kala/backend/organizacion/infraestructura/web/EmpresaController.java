@@ -1,17 +1,17 @@
-package com.kala.backend.controller;
+package com.kala.backend.organizacion.infraestructura.web;
 
-import com.kala.backend.dto.EmpresaConEquiposRequest;
-import com.kala.backend.dto.EmpresaRequest;
-import com.kala.backend.exception.EmpresaNoEncontradaException;
-import com.kala.backend.model.Empresa;
-import com.kala.backend.service.EmpresaService;
+import com.kala.backend.organizacion.aplicacion.EmpresaConEquiposRequest;
+import com.kala.backend.organizacion.aplicacion.EmpresaRequest;
+import com.kala.backend.organizacion.aplicacion.EmpresaService;
+import com.kala.backend.organizacion.dominio.Empresa;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -1,10 +1,10 @@
 
-package com.kala.backend.repository;
+package com.kala.backend.organizacion.infraestructura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.kala.backend.model.Empresa;
-import com.kala.backend.model.Equipo;
+import com.kala.backend.organizacion.dominio.Empresa;
+import com.kala.backend.organizacion.dominio.Equipo;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;

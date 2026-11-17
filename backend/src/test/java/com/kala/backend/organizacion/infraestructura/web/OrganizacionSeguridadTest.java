@@ -1,4 +1,4 @@
-package com.kala.backend.controller;
+package com.kala.backend.organizacion.infraestructura.web;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -13,12 +13,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.kala.backend.exception.EquipoNoEncontradoException;
-import com.kala.backend.dto.EquipoRequest;
-import com.kala.backend.model.Empresa;
-import com.kala.backend.model.Equipo;
-import com.kala.backend.service.EmpresaService;
-import com.kala.backend.service.EquipoService;
+import com.kala.backend.organizacion.aplicacion.EmpresaService;
+import com.kala.backend.organizacion.aplicacion.EquipoRequest;
+import com.kala.backend.organizacion.aplicacion.EquipoService;
+import com.kala.backend.organizacion.dominio.Empresa;
+import com.kala.backend.organizacion.dominio.Equipo;
+import com.kala.backend.organizacion.dominio.EquipoNoEncontradoException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

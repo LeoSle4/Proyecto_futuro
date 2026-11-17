@@ -1,9 +1,9 @@
-package com.kala.backend.controller;
+package com.kala.backend.organizacion.infraestructura.web;
 
-import com.kala.backend.dto.EquipoRequest;
-import com.kala.backend.exception.EmpresaNoEncontradaException;
-import com.kala.backend.model.Equipo;
-import com.kala.backend.service.EquipoService;
+import com.kala.backend.organizacion.aplicacion.EquipoRequest;
+import com.kala.backend.organizacion.aplicacion.EquipoService;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
+import com.kala.backend.organizacion.dominio.Equipo;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
