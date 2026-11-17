@@ -1,5 +1,7 @@
-package com.kala.backend.model;
+package com.kala.backend.instrumentos.dominio;
 
+import com.kala.backend.privacidad.dominio.Laplace;
+import com.kala.backend.privacidad.dominio.RandomizedResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,8 +17,8 @@ import java.time.LocalDateTime;
 @Table(name = "configuracion_ldp")
 public class ConfiguracionLdp {
 
-    public static final String RANDOMIZED_RESPONSE = "RANDOMIZED_RESPONSE";
-    public static final String LAPLACE = "LAPLACE";
+    public static final String RANDOMIZED_RESPONSE = RandomizedResponse.CODIGO;
+    public static final String LAPLACE = Laplace.CODIGO;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

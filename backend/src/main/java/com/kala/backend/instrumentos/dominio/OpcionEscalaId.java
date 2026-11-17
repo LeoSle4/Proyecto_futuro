@@ -1,4 +1,4 @@
-package com.kala.backend.model;
+package com.kala.backend.instrumentos.dominio;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

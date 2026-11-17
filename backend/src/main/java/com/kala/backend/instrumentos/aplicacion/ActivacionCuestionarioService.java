@@ -1,20 +1,19 @@
-package com.kala.backend.service;
+package com.kala.backend.instrumentos.aplicacion;
 
-import com.kala.backend.exception.CuestionarioNoEncontradoException;
-import com.kala.backend.exception.EmpresaNoEncontradaException;
-import com.kala.backend.exception.PresupuestoExcedidoException;
-import com.kala.backend.model.ConfiguracionLdp;
-import com.kala.backend.model.Cuestionario;
-import com.kala.backend.model.EmpresaCuestionario;
-import com.kala.backend.model.EmpresaCuestionarioId;
-import com.kala.backend.model.ItemCuestionario;
-import com.kala.backend.model.PresupuestoPrivacidadId;
-import com.kala.backend.repository.ConfiguracionLdpRepository;
-import com.kala.backend.repository.CuestionarioRepository;
-import com.kala.backend.repository.EmpresaCuestionarioRepository;
-import com.kala.backend.repository.EmpresaRepository;
-import com.kala.backend.repository.ItemCuestionarioRepository;
-import com.kala.backend.repository.PresupuestoPrivacidadRepository;
+import com.kala.backend.instrumentos.aplicacion.puerto.Activaciones;
+import com.kala.backend.instrumentos.aplicacion.puerto.ConfiguracionesLdp;
+import com.kala.backend.instrumentos.aplicacion.puerto.Cuestionarios;
+import com.kala.backend.instrumentos.aplicacion.puerto.ItemsDeCuestionario;
+import com.kala.backend.instrumentos.aplicacion.puerto.Presupuestos;
+import com.kala.backend.instrumentos.dominio.ConfiguracionLdp;
+import com.kala.backend.instrumentos.dominio.Cuestionario;
+import com.kala.backend.instrumentos.dominio.CuestionarioNoEncontradoException;
+import com.kala.backend.instrumentos.dominio.EmpresaCuestionario;
+import com.kala.backend.instrumentos.dominio.ItemCuestionario;
+import com.kala.backend.instrumentos.dominio.PresupuestoExcedidoException;
+import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
+import com.kala.backend.privacidad.dominio.CalculadoraPresupuesto;
 import java.time.Clock;
 import java.time.YearMonth;
 import java.util.List;
@@ -31,22 +30,22 @@ public class ActivacionCuestionarioService {
 
     private final CalculadoraPresupuesto calculadora = new CalculadoraPresupuesto();
 
-    private final EmpresaRepository empresas;
-    private final CuestionarioRepository cuestionarios;
-    private final ItemCuestionarioRepository items;
-    private final ConfiguracionLdpRepository configuraciones;
-    private final EmpresaCuestionarioRepository activaciones;
-    private final PresupuestoPrivacidadRepository presupuestos;
+    private final Empresas empresas;
+    private final Cuestionarios cuestionarios;
+    private final ItemsDeCuestionario items;
+    private final ConfiguracionesLdp configuraciones;
+    private final Activaciones activaciones;
+    private final Presupuestos presupuestos;
     private final Clock reloj;
     private final double epsilonMaximoPorDefecto;
 
     public ActivacionCuestionarioService(
-            EmpresaRepository empresas,
-            CuestionarioRepository cuestionarios,
-            ItemCuestionarioRepository items,
-            ConfiguracionLdpRepository configuraciones,
-            EmpresaCuestionarioRepository activaciones,
-            PresupuestoPrivacidadRepository presupuestos,
+            Empresas empresas,
+            Cuestionarios cuestionarios,
+            ItemsDeCuestionario items,
+            ConfiguracionesLdp configuraciones,
+            Activaciones activaciones,
+            Presupuestos presupuestos,
             Clock reloj,
             @Value("${kala.privacidad.epsilon-maximo-persona}") double epsilonMaximoPorDefecto) {
         this.empresas = empresas;
@@ -63,13 +62,13 @@ public class ActivacionCuestionarioService {
     // Si lo excede lanza PresupuestoExcedidoException y no se escribe nada.
     @Transactional
     public ResultadoActivacion activar(Long empresaId, Long cuestionarioId) {
-        if (!empresas.existsById(empresaId)) {
+        if (!empresas.existe(empresaId)) {
             throw new EmpresaNoEncontradaException(empresaId);
         }
-        Cuestionario nuevo = cuestionarios.findById(cuestionarioId)
+        Cuestionario nuevo = cuestionarios.porId(cuestionarioId)
                 .orElseThrow(() -> new CuestionarioNoEncontradoException(cuestionarioId));
 
-        double gastoActual = cuestionarios.listarActivosDeEmpresa(empresaId).stream()
+        double gastoActual = cuestionarios.activosDeEmpresa(empresaId).stream()
                 .filter(activo -> !activo.getId().equals(cuestionarioId))
                 .mapToDouble(this::epsilonMensualDe)
                 .sum();
@@ -80,23 +79,23 @@ public class ActivacionCuestionarioService {
             throw new PresupuestoExcedidoException(total, maximo);
         }
 
-        EmpresaCuestionario activacion = activaciones.findById(new EmpresaCuestionarioId(empresaId, cuestionarioId))
+        EmpresaCuestionario activacion = activaciones.porId(empresaId, cuestionarioId)
                 .orElseGet(() -> new EmpresaCuestionario(empresaId, cuestionarioId, true));
         activacion.setActivo(true);
-        activaciones.save(activacion);
+        activaciones.guardar(activacion);
 
         return new ResultadoActivacion(empresaId, cuestionarioId, total, maximo);
     }
 
     private double epsilonMaximo(Long empresaId) {
         String periodo = YearMonth.now(reloj).toString();
-        return presupuestos.findById(new PresupuestoPrivacidadId(empresaId, periodo))
+        return presupuestos.deEmpresaYPeriodo(empresaId, periodo)
                 .map(p -> p.getEpsilonMaximoPersona().doubleValue())
                 .orElse(epsilonMaximoPorDefecto);
     }
 
     private double epsilonMensualDe(Cuestionario cuestionario) {
-        List<Double> epsilons = items.listarPorCuestionario(cuestionario.getId()).stream()
+        List<Double> epsilons = items.deCuestionario(cuestionario.getId()).stream()
                 .map(this::epsilonDe)
                 .toList();
         Integer k = cuestionario.getItemsPorEnvio() != null ? cuestionario.getItemsPorEnvio().intValue() : null;
@@ -104,7 +103,7 @@ public class ActivacionCuestionarioService {
     }
 
     private double epsilonDe(ItemCuestionario item) {
-        ConfiguracionLdp config = configuraciones.findById(item.getConfiguracionLdpId())
+        ConfiguracionLdp config = configuraciones.porId(item.getConfiguracionLdpId())
                 .orElseThrow(() -> new IllegalStateException(
                         "El ítem " + item.getId() + " referencia una configuración inexistente"));
         return calculadora.epsilonItem(config.getMecanismo(), config.getProbabilidadVerdad(), config.getEpsilon());

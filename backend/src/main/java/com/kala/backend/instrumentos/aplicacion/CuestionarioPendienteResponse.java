@@ -1,4 +1,4 @@
-package com.kala.backend.dto;
+package com.kala.backend.instrumentos.aplicacion;
 
 import java.math.BigDecimal;
 import java.util.List;
