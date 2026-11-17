@@ -42,6 +42,7 @@ class GestionUsuariosServiceTest {
     private HasherDeClaves hasher;
     private Empresas empresas;
     private Equipos equipos;
+    private RefrescoDeSesionService refresco;
     private GestionUsuariosService service;
 
     @BeforeEach
@@ -54,7 +55,8 @@ class GestionUsuariosServiceTest {
         equipos = mock(Equipos.class);
         when(hasher.cifrar(any())).thenAnswer((InvocationOnMock i) -> "hash(" + i.getArgument(0) + ")");
         when(usuarios.guardar(any())).thenAnswer(i -> i.getArgument(0));
-        service = new GestionUsuariosService(usuarios, empleados, personal, hasher, empresas, equipos);
+        refresco = mock(RefrescoDeSesionService.class);
+        service = new GestionUsuariosService(usuarios, empleados, personal, hasher, empresas, equipos, refresco);
     }
 
     // ---- personal de empresa (lo crea el ADMIN) ----
@@ -286,6 +288,43 @@ class GestionUsuariosServiceTest {
         assertThatThrownBy(() -> service.cambiarClave(7L, "la-clave-actual-1", "otra-clave-nueva-2"))
                 .isInstanceOf(CredencialesInvalidasException.class);
         verify(usuarios, never()).guardar(any());
+    }
+
+    @Test
+    void cambiarClave_revocaTodasLasSesionesDeLaPersona() {
+        Usuario u = new Usuario("ana@kala.test", "hash-viejo", "Ana");
+        org.springframework.test.util.ReflectionTestUtils.setField(u, "id", 7L);
+        when(usuarios.porId(7L)).thenReturn(Optional.of(u));
+        when(hasher.coincide("la-clave-actual-1", "hash-viejo")).thenReturn(true);
+
+        service.cambiarClave(7L, "la-clave-actual-1", "otra-clave-nueva-2");
+
+        verify(refresco).revocarTodos(7L);
+    }
+
+    @Test
+    void cambiarClave_conLaActualIncorrecta_noRevocaNada() {
+        Usuario u = new Usuario("ana@kala.test", "hash-viejo", "Ana");
+        org.springframework.test.util.ReflectionTestUtils.setField(u, "id", 7L);
+        when(usuarios.porId(7L)).thenReturn(Optional.of(u));
+        when(hasher.coincide(any(), any())).thenReturn(false);
+
+        assertThatThrownBy(() -> service.cambiarClave(7L, "equivocada-123456", "otra-clave-nueva-2"))
+                .isInstanceOf(CredencialesInvalidasException.class);
+
+        verifyNoInteractions(refresco);
+    }
+
+    @Test
+    void desactivarUnaCuenta_revocaSusSesiones_peroReactivarlaNo() {
+        Usuario objetivo = usuarioConId(8L, true);
+        when(usuarios.porId(8L)).thenReturn(Optional.of(objetivo));
+
+        service.cambiarEstado(1L, true, null, 8L, false);
+        verify(refresco).revocarTodos(8L);
+
+        service.cambiarEstado(1L, true, null, 8L, true);
+        verify(refresco, org.mockito.Mockito.times(1)).revocarTodos(any());
     }
 
     @SuppressWarnings("unused")

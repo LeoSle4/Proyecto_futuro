@@ -38,15 +38,18 @@ public class GestionUsuariosService {
     private final HasherDeClaves hasher;
     private final Empresas empresas;
     private final Equipos equipos;
+    private final RefrescoDeSesionService refresco;
 
     public GestionUsuariosService(Usuarios usuarios, Empleados empleados, PersonalDeEmpresa personal,
-                                  HasherDeClaves hasher, Empresas empresas, Equipos equipos) {
+                                  HasherDeClaves hasher, Empresas empresas, Equipos equipos,
+                                  RefrescoDeSesionService refresco) {
         this.usuarios = usuarios;
         this.empleados = empleados;
         this.personal = personal;
         this.hasher = hasher;
         this.empresas = empresas;
         this.equipos = equipos;
+        this.refresco = refresco;
     }
 
     @Transactional
@@ -92,6 +95,8 @@ public class GestionUsuariosService {
         }
         usuario.cambiarClave(hasher.cifrar(claveNueva));
         usuarios.guardar(usuario);
+        // Cambiar la clave cierra todas las sesiones de larga duración: la app vuelve a iniciar sesión.
+        refresco.revocarTodos(usuarioId);
     }
 
     // Activa o desactiva una cuenta. El ADMIN puede con cualquiera menos la suya; el personal de empresa solo con
@@ -109,6 +114,9 @@ public class GestionUsuariosService {
         if (usuario.isActivo() != activo) {
             usuario.setActivo(activo);
             usuarios.guardar(usuario);
+        }
+        if (!activo) {
+            refresco.revocarTodos(usuarioId);
         }
     }
 

@@ -36,6 +36,6 @@ class BackendApplicationTests {
     @Test
     void todasLasMigracionesEstanAplicadas() {
         assertThat(flyway.info().pending()).isEmpty();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("11");
     }
 }
