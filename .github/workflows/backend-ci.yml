@@ -1,0 +1,46 @@
+name: backend-ci
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      # Sin secretos corren las pruebas unitarias y de controladores; las que necesitan la base de datos se omiten.
+      # Para correrlas también en CI, define en Settings > Secrets > Actions estos tres valores (rama de pruebas de Neon):
+      # KALA_TEST_DB_URL, KALA_TEST_DB_USER y KALA_TEST_DB_PASSWORD. Los PR desde forks no reciben secretos.
+      - name: Pruebas
+        run: ./mvnw -B -ntp test
+        env:
+          KALA_TEST_DB_URL: ${{ secrets.KALA_TEST_DB_URL }}
+          KALA_TEST_DB_USER: ${{ secrets.KALA_TEST_DB_USER }}
+          KALA_TEST_DB_PASSWORD: ${{ secrets.KALA_TEST_DB_PASSWORD }}
