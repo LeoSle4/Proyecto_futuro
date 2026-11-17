@@ -11,9 +11,12 @@ import com.kala.backend.instrumentos.dominio.CuestionarioNoEncontradoException;
 import com.kala.backend.instrumentos.dominio.EmpresaCuestionario;
 import com.kala.backend.instrumentos.dominio.ItemCuestionario;
 import com.kala.backend.instrumentos.dominio.PresupuestoExcedidoException;
+import com.kala.backend.instrumentos.dominio.PresupuestoPrivacidad;
 import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
 import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
 import com.kala.backend.privacidad.dominio.CalculadoraPresupuesto;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.YearMonth;
 import java.util.List;
@@ -27,6 +30,13 @@ public class ActivacionCuestionarioService {
     // Resultado de una activación: lo que gastaría una persona al mes con todo lo activo, y el máximo vigente.
     public record ResultadoActivacion(Long empresaId, Long cuestionarioId, double epsilonMensual, double epsilonMaximo) {
     }
+
+    // El presupuesto vigente del mes y lo que gastaría hoy una persona con los cuestionarios activos.
+    public record ResultadoPresupuesto(Long empresaId, String periodo, double epsilonMaximo, double epsilonMensual) {
+    }
+
+    // ε máximo por persona que se admite fijar: la columna es NUMERIC(6,3).
+    private static final BigDecimal EPSILON_MAXIMO_ADMITIDO = new BigDecimal("999.999");
 
     private final CalculadoraPresupuesto calculadora = new CalculadoraPresupuesto();
 
@@ -62,17 +72,11 @@ public class ActivacionCuestionarioService {
     // Si lo excede lanza PresupuestoExcedidoException y no se escribe nada.
     @Transactional
     public ResultadoActivacion activar(Long empresaId, Long cuestionarioId) {
-        if (!empresas.existe(empresaId)) {
-            throw new EmpresaNoEncontradaException(empresaId);
-        }
+        verificarEmpresa(empresaId);
         Cuestionario nuevo = cuestionarios.porId(cuestionarioId)
                 .orElseThrow(() -> new CuestionarioNoEncontradoException(cuestionarioId));
 
-        double gastoActual = cuestionarios.activosDeEmpresa(empresaId).stream()
-                .filter(activo -> !activo.getId().equals(cuestionarioId))
-                .mapToDouble(this::epsilonMensualDe)
-                .sum();
-        double total = gastoActual + epsilonMensualDe(nuevo);
+        double total = gastoMensualSin(empresaId, cuestionarioId) + epsilonMensualDe(nuevo);
         double maximo = epsilonMaximo(empresaId);
 
         if (total > maximo) {
@@ -87,9 +91,69 @@ public class ActivacionCuestionarioService {
         return new ResultadoActivacion(empresaId, cuestionarioId, total, maximo);
     }
 
+    // Apaga un cuestionario. Es idempotente: si nunca estuvo activo no escribe nada. Devuelve el gasto que queda.
+    @Transactional
+    public ResultadoActivacion desactivar(Long empresaId, Long cuestionarioId) {
+        verificarEmpresa(empresaId);
+        cuestionarios.porId(cuestionarioId).orElseThrow(() -> new CuestionarioNoEncontradoException(cuestionarioId));
+
+        activaciones.porId(empresaId, cuestionarioId).filter(EmpresaCuestionario::isActivo).ifPresent(activacion -> {
+            activacion.setActivo(false);
+            activaciones.guardar(activacion);
+        });
+
+        double gasto = gastoMensualSin(empresaId, cuestionarioId);
+        return new ResultadoActivacion(empresaId, cuestionarioId, gasto, epsilonMaximo(empresaId));
+    }
+
+    @Transactional(readOnly = true)
+    public ResultadoPresupuesto consultarPresupuesto(Long empresaId) {
+        verificarEmpresa(empresaId);
+        return new ResultadoPresupuesto(empresaId, periodoActual(), epsilonMaximo(empresaId), gastoMensualSin(empresaId, null));
+    }
+
+    // Fija el presupuesto del mes actual; sigue vigente los meses siguientes. No se admite uno menor que lo que ya
+    // gastan los cuestionarios activos: primero habría que desactivar alguno.
+    @Transactional
+    public ResultadoPresupuesto fijarPresupuesto(Long empresaId, BigDecimal epsilonMaximoPersona) {
+        verificarEmpresa(empresaId);
+        if (epsilonMaximoPersona == null || epsilonMaximoPersona.signum() <= 0
+                || epsilonMaximoPersona.compareTo(EPSILON_MAXIMO_ADMITIDO) > 0) {
+            throw new IllegalArgumentException("El presupuesto debe ser mayor que 0 y no superar " + EPSILON_MAXIMO_ADMITIDO);
+        }
+        BigDecimal maximo = epsilonMaximoPersona.setScale(3, RoundingMode.HALF_UP);
+        if (maximo.signum() <= 0) {
+            throw new IllegalArgumentException("El presupuesto debe ser mayor que 0 y no superar " + EPSILON_MAXIMO_ADMITIDO);
+        }
+        double gasto = gastoMensualSin(empresaId, null);
+        if (gasto > maximo.doubleValue()) {
+            throw new PresupuestoExcedidoException(gasto, maximo.doubleValue());
+        }
+        String periodo = periodoActual();
+        presupuestos.guardar(new PresupuestoPrivacidad(empresaId, periodo, maximo));
+        return new ResultadoPresupuesto(empresaId, periodo, maximo.doubleValue(), gasto);
+    }
+
+    private void verificarEmpresa(Long empresaId) {
+        if (!empresas.existe(empresaId)) {
+            throw new EmpresaNoEncontradaException(empresaId);
+        }
+    }
+
+    // Lo que gasta una persona al mes con todo lo activo, sin contar el cuestionario indicado (puede ser null).
+    private double gastoMensualSin(Long empresaId, Long excluidoId) {
+        return cuestionarios.activosDeEmpresa(empresaId).stream()
+                .filter(activo -> !activo.getId().equals(excluidoId))
+                .mapToDouble(this::epsilonMensualDe)
+                .sum();
+    }
+
+    private String periodoActual() {
+        return YearMonth.now(reloj).toString();
+    }
+
     private double epsilonMaximo(Long empresaId) {
-        String periodo = YearMonth.now(reloj).toString();
-        return presupuestos.deEmpresaYPeriodo(empresaId, periodo)
+        return presupuestos.vigenteEn(empresaId, periodoActual())
                 .map(p -> p.getEpsilonMaximoPersona().doubleValue())
                 .orElse(epsilonMaximoPorDefecto);
     }

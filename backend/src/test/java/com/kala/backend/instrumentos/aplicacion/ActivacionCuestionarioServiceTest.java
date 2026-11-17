@@ -54,7 +54,7 @@ class ActivacionCuestionarioServiceTest {
         when(empresas.existe(EMPRESA)).thenReturn(true);
         when(cuestionarios.activosDeEmpresa(EMPRESA)).thenReturn(List.of());
         when(activaciones.porId(any(), any())).thenReturn(Optional.empty());
-        when(presupuestos.deEmpresaYPeriodo(any(), any())).thenReturn(Optional.empty());
+        when(presupuestos.vigenteEn(any(), any())).thenReturn(Optional.empty());
     }
 
     // Cuestionario con un solo ítem de Randomized Response con p = 0.75 y la cadencia indicada.
@@ -114,7 +114,7 @@ class ActivacionCuestionarioServiceTest {
     @Test
     void laFilaDePresupuestoDelMesTienePrioridadSobreElValorPorDefecto() {
         cuestionarioConUnItem(10L, 7);
-        when(presupuestos.deEmpresaYPeriodo(EMPRESA, "2026-03"))
+        when(presupuestos.vigenteEn(EMPRESA, "2026-03"))
                 .thenReturn(Optional.of(new PresupuestoPrivacidad(EMPRESA, "2026-03", new BigDecimal("5.000"))));
 
         assertThatThrownBy(() -> service.activar(EMPRESA, 10L))
@@ -130,5 +130,105 @@ class ActivacionCuestionarioServiceTest {
         when(cuestionarios.porId(5L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.activar(EMPRESA, 5L)).isInstanceOf(CuestionarioNoEncontradoException.class);
         verify(activaciones, never()).guardar(any());
+    }
+
+    // ---- desactivar ----
+
+    @Test
+    void desactivar_apagaElCuestionarioYDevuelveElGastoQueQueda() {
+        Cuestionario otro = cuestionarioConUnItem(10L, 7);
+        Cuestionario aApagar = cuestionarioConUnItem(11L, 7);
+        when(cuestionarios.activosDeEmpresa(EMPRESA)).thenReturn(List.of(otro, aApagar));
+        EmpresaCuestionario activacion = new EmpresaCuestionario(EMPRESA, 11L, true);
+        when(activaciones.porId(EMPRESA, 11L)).thenReturn(Optional.of(activacion));
+
+        var resultado = service.desactivar(EMPRESA, 11L);
+
+        assertThat(activacion.isActivo()).isFalse();
+        verify(activaciones).guardar(activacion);
+        assertThat(resultado.epsilonMensual()).isCloseTo(5.49, org.assertj.core.data.Offset.offset(0.01));
+        assertThat(resultado.epsilonMaximo()).isEqualTo(20.0);
+    }
+
+    @Test
+    void desactivar_unCuestionarioQueNuncaSeActivo_esIdempotenteYNoEscribe() {
+        cuestionarioConUnItem(11L, 7);
+
+        var resultado = service.desactivar(EMPRESA, 11L);
+
+        assertThat(resultado.epsilonMensual()).isZero();
+        verify(activaciones, never()).guardar(any());
+    }
+
+    @Test
+    void desactivar_empresaOCuestionarioInexistente_son404() {
+        when(empresas.existe(99L)).thenReturn(false);
+        assertThatThrownBy(() -> service.desactivar(99L, 10L)).isInstanceOf(EmpresaNoEncontradaException.class);
+
+        when(cuestionarios.porId(5L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.desactivar(EMPRESA, 5L)).isInstanceOf(CuestionarioNoEncontradoException.class);
+        verify(activaciones, never()).guardar(any());
+    }
+
+    // ---- presupuesto de privacidad ----
+
+    @Test
+    void consultarPresupuesto_sinFilaUsaElValorPorDefectoYElGastoActual() {
+        Cuestionario activo = cuestionarioConUnItem(10L, 7);
+        when(cuestionarios.activosDeEmpresa(EMPRESA)).thenReturn(List.of(activo));
+
+        var r = service.consultarPresupuesto(EMPRESA);
+
+        assertThat(r.periodo()).isEqualTo("2026-03");
+        assertThat(r.epsilonMaximo()).isEqualTo(20.0);
+        assertThat(r.epsilonMensual()).isCloseTo(5.49, org.assertj.core.data.Offset.offset(0.01));
+    }
+
+    @Test
+    void consultarPresupuesto_usaElPresupuestoVigenteAunqueSeaDeUnMesAnterior() {
+        when(presupuestos.vigenteEn(EMPRESA, "2026-03"))
+                .thenReturn(Optional.of(new PresupuestoPrivacidad(EMPRESA, "2026-01", new BigDecimal("12.500"))));
+
+        assertThat(service.consultarPresupuesto(EMPRESA).epsilonMaximo()).isEqualTo(12.5);
+    }
+
+    @Test
+    void fijarPresupuesto_guardaLaFilaDelMesActualConTresDecimales() {
+        var r = service.fijarPresupuesto(EMPRESA, new BigDecimal("25.12345"));
+
+        org.mockito.ArgumentCaptor<PresupuestoPrivacidad> captor = org.mockito.ArgumentCaptor.forClass(PresupuestoPrivacidad.class);
+        verify(presupuestos).guardar(captor.capture());
+        assertThat(captor.getValue().getId().getEmpresaId()).isEqualTo(EMPRESA);
+        assertThat(captor.getValue().getId().getPeriodo()).isEqualTo("2026-03");
+        assertThat(captor.getValue().getEpsilonMaximoPersona()).isEqualByComparingTo("25.123");
+        assertThat(r.epsilonMaximo()).isEqualTo(25.123);
+    }
+
+    @Test
+    void fijarPresupuesto_pordebajoDelGastoYaActivo_lanza422YNoGuarda() {
+        Cuestionario activo = cuestionarioConUnItem(10L, 7);
+        when(cuestionarios.activosDeEmpresa(EMPRESA)).thenReturn(List.of(activo));
+
+        assertThatThrownBy(() -> service.fijarPresupuesto(EMPRESA, new BigDecimal("5.000")))
+                .isInstanceOf(PresupuestoExcedidoException.class);
+        verify(presupuestos, never()).guardar(any());
+    }
+
+    @Test
+    void fijarPresupuesto_conUnValorFueraDeRango_esInvalido() {
+        for (BigDecimal invalido : new BigDecimal[] {null, BigDecimal.ZERO, new BigDecimal("-1"), new BigDecimal("1000"),
+                new BigDecimal("0.0001")}) {
+            assertThatThrownBy(() -> service.fijarPresupuesto(EMPRESA, invalido))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+        verify(presupuestos, never()).guardar(any());
+    }
+
+    @Test
+    void fijarPresupuesto_enUnaEmpresaInexistente_es404() {
+        when(empresas.existe(99L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.fijarPresupuesto(99L, new BigDecimal("10")))
+                .isInstanceOf(EmpresaNoEncontradaException.class);
     }
 }
