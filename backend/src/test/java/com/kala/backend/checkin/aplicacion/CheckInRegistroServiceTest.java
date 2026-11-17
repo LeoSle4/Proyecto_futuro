@@ -18,6 +18,7 @@ import com.kala.backend.checkin.dominio.CheckInDuplicadoException;
 import com.kala.backend.checkin.dominio.CheckInInvalidoException;
 import com.kala.backend.checkin.dominio.ConfiguracionLdpNoVigenteException;
 import com.kala.backend.checkin.dominio.ItemCuestionarioNoEncontradoException;
+import com.kala.backend.privacidad.dominio.ParametrosLdp;
 import com.kala.backend.privacidad.dominio.SesionHasher;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -129,7 +130,8 @@ class CheckInRegistroServiceTest {
     // ---- Laplace y baterias ----
 
     private static ItemCuestionarioInfo laplace(long cuestionario, long config, int cadencia, Integer k, int total) {
-        return new ItemCuestionarioInfo(cuestionario, config, "LAPLACE", cadencia, k, total);
+        return new ItemCuestionarioInfo(cuestionario, config, "LAPLACE", cadencia, k, total,
+                new com.kala.backend.privacidad.dominio.ParametrosLdp(null, new BigDecimal("1.000")), 0, 5);
     }
 
     @Test
@@ -236,5 +238,17 @@ class CheckInRegistroServiceTest {
         verify(sesiones, org.mockito.Mockito.times(3)).insertarSiNoExiste(anyString(), eq(4L), ventanas.capture());
         assertThat(ventanas.getAllValues().get(0)).isEqualTo(ventanas.getAllValues().get(1));
         assertThat(ventanas.getAllValues().get(2)).isEqualTo(ventanas.getAllValues().get(0).plusDays(14));
+    }
+
+    @Test
+    void unValorRuidosoFueraDeLaCotaDelItem_esInvalidoYNoGuardaNada() {
+        when(items.buscar(21L)).thenReturn(Optional.of(laplace(4L, 8L, 14, 1, 5)));
+
+        // delta = 5 y epsilon = 1: el tope es 5 + 250 = 255.
+        assertThatThrownBy(() -> service.registrar(7L, 5L, new CheckInEnvioRequest(21L, 8L, null, new BigDecimal("255.5"))))
+                .isInstanceOf(CheckInInvalidoException.class)
+                .hasMessageNotContaining("255");
+
+        verifyNoInteractions(sesiones, agregados);
     }
 }

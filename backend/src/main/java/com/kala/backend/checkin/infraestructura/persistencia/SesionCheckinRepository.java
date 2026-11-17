@@ -21,4 +21,9 @@ public interface SesionCheckinRepository extends JpaRepository<SesionCheckin, St
     int insertarSiNoExiste(@Param("hash") String hash,
                            @Param("cuestionarioId") Long cuestionarioId,
                            @Param("ventanaInicio") LocalDate ventanaInicio);
+
+    @Override
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "DELETE FROM sesion_checkin WHERE ventana_inicio < :fecha", nativeQuery = true)
+    int borrarAnterioresA(@Param("fecha") LocalDate fecha);
 }

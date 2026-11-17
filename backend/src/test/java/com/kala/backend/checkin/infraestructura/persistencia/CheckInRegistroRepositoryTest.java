@@ -92,4 +92,23 @@ class CheckInRegistroRepositoryTest {
         assertThat(sesion.getCuestionarioId()).isEqualTo(cuestionarioId);
         assertThat(sesion.getVentanaInicio()).isEqualTo(DIA);
     }
+
+    @Test
+    void laPurgaBorraSoloLasSesionesAnterioresALaFechaYNoToca_losAgregados() {
+        LocalDate corte = LocalDate.of(2026, 9, 18);
+        sesiones.insertarSiNoExiste("a".repeat(64), cuestionarioId, corte.minusDays(7));
+        sesiones.insertarSiNoExiste("b".repeat(64), cuestionarioId, corte.minusDays(1));
+        sesiones.insertarSiNoExiste("c".repeat(64), cuestionarioId, corte);
+        sesiones.insertarSiNoExiste("d".repeat(64), cuestionarioId, corte.plusDays(30));
+        agregados.registrarRespuesta(equipoId, itemId, configId, corte.minusDays(30), BigDecimal.ONE);
+
+        int borradas = sesiones.borrarAnterioresA(corte);
+
+        assertThat(borradas).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM sesion_checkin WHERE cuestionario_id = ?", Long.class, cuestionarioId))
+                .isEqualTo(2L);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM agregado_item WHERE equipo_id = ?", Long.class, equipoId))
+                .isEqualTo(1L);
+        assertThat(sesiones.borrarAnterioresA(corte)).isZero();
+    }
 }

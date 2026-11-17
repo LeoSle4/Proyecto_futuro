@@ -117,7 +117,8 @@ public class CheckInRegistroService {
     // Lo que se suma al agregado lo decide la estrategia del mecanismo del ítem (RR: 1 o 0; Laplace: el valor tal cual).
     private static BigDecimal aSuma(CheckInEnvioRequest r, ItemCuestionarioInfo item) {
         try {
-            return MecanismosLdp.de(item.mecanismo()).aSuma(r.respuestaRuidosa(), r.valorRuidoso());
+            return MecanismosLdp.de(item.mecanismo()).aSuma(r.respuestaRuidosa(), r.valorRuidoso(), item.parametros(),
+                    item.valorMin(), item.valorMax());
         } catch (IllegalArgumentException e) {
             throw new CheckInInvalidoException(e.getMessage());
         }
