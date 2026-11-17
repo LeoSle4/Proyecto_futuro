@@ -1,4 +1,4 @@
-package com.kala.backend.service;
+package com.kala.backend.privacidad.dominio;
 
 import java.util.random.RandomGenerator;
 

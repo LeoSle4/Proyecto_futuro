@@ -1,6 +1,6 @@
-package com.kala.backend.config;
+package com.kala.backend.privacidad.infraestructura.config;
 
-import com.kala.backend.service.EstimadorDesesgado;
+import com.kala.backend.privacidad.dominio.EstimadorDesesgado;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
