@@ -1,8 +1,18 @@
-package com.kala.backend.exception;
+package com.kala.backend.compartido.infraestructura.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.kala.backend.dto.ErrorResponse;
+import com.kala.backend.checkin.dominio.CheckInDuplicadoException;
+import com.kala.backend.checkin.dominio.ConfiguracionLdpNoVigenteException;
+import com.kala.backend.checkin.dominio.ItemCuestionarioNoEncontradoException;
+import com.kala.backend.dashboard.dominio.SemanaInvalidaException;
+import com.kala.backend.identidad.dominio.CredencialesInvalidasException;
+import com.kala.backend.instrumentos.dominio.CuestionarioNoEncontradoException;
+import com.kala.backend.instrumentos.dominio.PresupuestoExcedidoException;
+import com.kala.backend.organizacion.dominio.EmpresaConEquiposException;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
+import com.kala.backend.organizacion.dominio.EquipoNoEncontradoException;
+import com.kala.backend.organizacion.dominio.NombreDuplicadoException;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;

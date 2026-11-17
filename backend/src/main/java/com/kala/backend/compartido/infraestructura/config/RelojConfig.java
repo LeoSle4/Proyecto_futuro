@@ -1,4 +1,4 @@
-package com.kala.backend.config;
+package com.kala.backend.compartido.infraestructura.config;
 
 import java.time.Clock;
 import java.time.ZoneId;

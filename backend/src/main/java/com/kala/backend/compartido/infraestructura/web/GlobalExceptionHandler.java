@@ -1,6 +1,19 @@
-package com.kala.backend.exception;
+package com.kala.backend.compartido.infraestructura.web;
 
-import com.kala.backend.dto.ErrorResponse;
+import com.kala.backend.ayuda.dominio.ContactoAyudaNoEncontradoException;
+import com.kala.backend.ayuda.dominio.SolicitudAyudaEstadoException;
+import com.kala.backend.ayuda.dominio.SolicitudAyudaNoEncontradaException;
+import com.kala.backend.checkin.dominio.CheckInDuplicadoException;
+import com.kala.backend.checkin.dominio.ConfiguracionLdpNoVigenteException;
+import com.kala.backend.checkin.dominio.ItemCuestionarioNoEncontradoException;
+import com.kala.backend.dashboard.dominio.SemanaInvalidaException;
+import com.kala.backend.identidad.dominio.CredencialesInvalidasException;
+import com.kala.backend.instrumentos.dominio.CuestionarioNoEncontradoException;
+import com.kala.backend.instrumentos.dominio.PresupuestoExcedidoException;
+import com.kala.backend.organizacion.dominio.EmpresaConEquiposException;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
+import com.kala.backend.organizacion.dominio.EquipoNoEncontradoException;
+import com.kala.backend.organizacion.dominio.NombreDuplicadoException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -24,7 +37,9 @@ public class GlobalExceptionHandler {
             EmpresaNoEncontradaException.class,
             EquipoNoEncontradoException.class,
             CuestionarioNoEncontradoException.class,
-            ItemCuestionarioNoEncontradoException.class
+            ItemCuestionarioNoEncontradoException.class,
+            ContactoAyudaNoEncontradoException.class,
+            SolicitudAyudaNoEncontradaException.class
     })
     public ResponseEntity<ErrorResponse> noEncontrado(
             RuntimeException ex,
@@ -37,7 +52,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             NombreDuplicadoException.class,
             EmpresaConEquiposException.class,
-            CheckInDuplicadoException.class
+            CheckInDuplicadoException.class,
+            SolicitudAyudaEstadoException.class
     })
     public ResponseEntity<ErrorResponse> conflicto(
             RuntimeException ex,

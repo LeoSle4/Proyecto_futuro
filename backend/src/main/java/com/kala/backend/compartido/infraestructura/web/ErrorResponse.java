@@ -1,4 +1,4 @@
-package com.kala.backend.dto;
+package com.kala.backend.compartido.infraestructura.web;
 
 import java.time.LocalDateTime;
 

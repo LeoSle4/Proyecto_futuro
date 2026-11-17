@@ -1,4 +1,4 @@
-package com.kala.backend.controller;
+package com.kala.backend.compartido.infraestructura.web;
 
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
