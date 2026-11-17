@@ -8,6 +8,9 @@ import com.kala.backend.checkin.dominio.ConfiguracionLdpNoVigenteException;
 import com.kala.backend.checkin.dominio.ItemCuestionarioNoEncontradoException;
 import com.kala.backend.dashboard.dominio.SemanaInvalidaException;
 import com.kala.backend.identidad.dominio.CredencialesInvalidasException;
+import com.kala.backend.identidad.dominio.DemasiadosIntentosException;
+import com.kala.backend.identidad.dominio.EmailEnUsoException;
+import com.kala.backend.identidad.dominio.UsuarioNoEncontradoException;
 import com.kala.backend.instrumentos.dominio.CuestionarioNoEncontradoException;
 import com.kala.backend.instrumentos.dominio.PresupuestoExcedidoException;
 import com.kala.backend.organizacion.dominio.EmpresaConEquiposException;
@@ -39,7 +42,8 @@ public class GlobalExceptionHandler {
             CuestionarioNoEncontradoException.class,
             ItemCuestionarioNoEncontradoException.class,
             ContactoAyudaNoEncontradoException.class,
-            SolicitudAyudaNoEncontradaException.class
+            SolicitudAyudaNoEncontradaException.class,
+            UsuarioNoEncontradoException.class
     })
     public ResponseEntity<ErrorResponse> noEncontrado(
             RuntimeException ex,
@@ -53,7 +57,8 @@ public class GlobalExceptionHandler {
             NombreDuplicadoException.class,
             EmpresaConEquiposException.class,
             CheckInDuplicadoException.class,
-            SolicitudAyudaEstadoException.class
+            SolicitudAyudaEstadoException.class,
+            EmailEnUsoException.class
     })
     public ResponseEntity<ErrorResponse> conflicto(
             RuntimeException ex,
@@ -91,6 +96,18 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
 
         return construir(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
+    }
+
+    // 429: demasiados inicios de sesión fallidos. Retry-After dice cuántos segundos esperar.
+    @ExceptionHandler(DemasiadosIntentosException.class)
+    public ResponseEntity<ErrorResponse> demasiadosIntentos(
+            DemasiadosIntentosException ex,
+            HttpServletRequest request) {
+
+        ResponseEntity<ErrorResponse> base = construir(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), request);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(ex.getReintentarEnSegundos()))
+                .body(base.getBody());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

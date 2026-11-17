@@ -7,7 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.kala.backend.identidad.aplicacion.LimitadorIntentosLogin;
 import com.kala.backend.identidad.dominio.CredencialesInvalidasException;
+import com.kala.backend.identidad.dominio.DemasiadosIntentosException;
 import com.kala.backend.identidad.infraestructura.persistencia.IdentidadLector.Identidad;
 import com.kala.backend.identidad.infraestructura.persistencia.IdentidadLector;
 import com.kala.backend.identidad.infraestructura.web.LoginRequest;
@@ -27,6 +29,7 @@ class AutenticacionServiceTest {
     private AuthenticationManager manager;
     private IdentidadLector identidades;
     private TokenService tokens;
+    private LimitadorIntentosLogin limitador;
     private AutenticacionService service;
 
     @BeforeEach
@@ -34,7 +37,9 @@ class AutenticacionServiceTest {
         manager = mock(AuthenticationManager.class);
         identidades = mock(IdentidadLector.class);
         tokens = mock(TokenService.class);
-        service = new AutenticacionService(manager, identidades, tokens);
+        limitador = new LimitadorIntentosLogin(3, java.time.Duration.ofMinutes(15), java.time.Duration.ofMinutes(15),
+                java.time.Clock.systemUTC());
+        service = new AutenticacionService(manager, identidades, tokens, limitador);
     }
 
     @Test
@@ -70,5 +75,40 @@ class AutenticacionServiceTest {
         assertThatThrownBy(() -> service.login(new LoginRequest("ana@kala.test", "clave-segura-123")))
                 .isInstanceOf(CredencialesInvalidasException.class)
                 .hasMessage("Credenciales inválidas");
+    }
+
+    @Test
+    void tras_losFallosPermitidos_bloqueaSinPedirleNadaAlAuthenticationManager() {
+        when(manager.authenticate(any())).thenThrow(new BadCredentialsException("mal"));
+        for (int i = 0; i < 3; i++) {
+            assertThatThrownBy(() -> service.login(new LoginRequest("ANA@kala.test", "otra")))
+                    .isInstanceOf(CredencialesInvalidasException.class);
+        }
+
+        assertThatThrownBy(() -> service.login(new LoginRequest("ana@kala.test", "clave-segura-123")))
+                .isInstanceOf(DemasiadosIntentosException.class);
+        org.mockito.Mockito.verify(manager, org.mockito.Mockito.times(3)).authenticate(any());
+    }
+
+    @Test
+    void unInicioDeSesionExitoso_reiniciaLaCuentaDeFallos() {
+        Authentication autenticado = UsernamePasswordAuthenticationToken.authenticated(
+                "ana@kala.test", null, List.of(new SimpleGrantedAuthority("ROLE_RRHH")));
+        when(manager.authenticate(any()))
+                .thenThrow(new BadCredentialsException("mal"))
+                .thenThrow(new BadCredentialsException("mal"))
+                .thenReturn(autenticado)
+                .thenThrow(new BadCredentialsException("mal"))
+                .thenThrow(new BadCredentialsException("mal"))
+                .thenReturn(autenticado);
+        when(identidades.porEmail("ana@kala.test")).thenReturn(new Identidad(7L, 9L, null));
+        when(tokens.crearToken(any(), any())).thenReturn("t");
+        for (int ronda = 0; ronda < 2; ronda++) {
+            for (int i = 0; i < 2; i++) {
+                assertThatThrownBy(() -> service.login(new LoginRequest("ana@kala.test", "mal")))
+                        .isInstanceOf(CredencialesInvalidasException.class);
+            }
+            assertThat(service.login(new LoginRequest("ana@kala.test", "bien")).accessToken()).isEqualTo("t");
+        }
     }
 }

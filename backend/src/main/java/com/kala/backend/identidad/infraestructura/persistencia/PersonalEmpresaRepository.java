@@ -1,7 +1,12 @@
 package com.kala.backend.identidad.infraestructura.persistencia;
 
+import com.kala.backend.identidad.aplicacion.puerto.PersonalDeEmpresa;
 import com.kala.backend.identidad.dominio.PersonalEmpresa;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PersonalEmpresaRepository extends JpaRepository<PersonalEmpresa, Long> {
+public interface PersonalEmpresaRepository extends JpaRepository<PersonalEmpresa, Long>, PersonalDeEmpresa {
+    @Override
+    default PersonalEmpresa guardar(PersonalEmpresa personal) {
+        return save(personal);
+    }
 }

@@ -59,6 +59,11 @@ public class Usuario {
         return nombre;
     }
 
+    // Reemplaza el hash de la clave. Recibe el hash ya calculado: el dominio nunca ve la clave en claro.
+    public void cambiarClave(String nuevoHash) {
+        this.passwordHash = nuevoHash;
+    }
+
     public boolean isActivo() {
         return activo;
     }

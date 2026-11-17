@@ -166,4 +166,35 @@ class InstrumentosRepositoryTest {
         assertThat(config.getMecanismo()).isEqualTo("RANDOMIZED_RESPONSE");
         assertThat(config.getProbabilidadVerdad()).isEqualByComparingTo("0.750");
     }
+
+    @Test
+    void elPresupuestoVigenteEsElDelUltimoMesFijadoHastaElPeriodoConsultado() {
+        Long empresa = FilasPadre.empresa(jdbc);
+        Long otra = FilasPadre.empresa(jdbc);
+        presupuestos.saveAndFlush(new PresupuestoPrivacidad(empresa, "2026-01", new BigDecimal("10.000")));
+        presupuestos.saveAndFlush(new PresupuestoPrivacidad(empresa, "2026-03", new BigDecimal("5.000")));
+        presupuestos.saveAndFlush(new PresupuestoPrivacidad(otra, "2026-02", new BigDecimal("99.000")));
+
+        assertThat(presupuestos.vigenteEn(empresa, "2026-02")).get()
+                .extracting(p -> p.getEpsilonMaximoPersona().doubleValue()).isEqualTo(10.0);
+        assertThat(presupuestos.vigenteEn(empresa, "2026-03")).get()
+                .extracting(p -> p.getEpsilonMaximoPersona().doubleValue()).isEqualTo(5.0);
+        assertThat(presupuestos.vigenteEn(empresa, "2027-12")).get()
+                .extracting(p -> p.getEpsilonMaximoPersona().doubleValue()).isEqualTo(5.0);
+        assertThat(presupuestos.vigenteEn(empresa, "2025-12")).isEmpty();
+        assertThat(presupuestos.vigenteEn(otra, "2026-01")).isEmpty();
+    }
+
+    @Test
+    void guardarUnPresupuestoDelMismoMesLoActualizaEnVezDeDuplicarlo() {
+        Long empresa = FilasPadre.empresa(jdbc);
+        presupuestos.saveAndFlush(new PresupuestoPrivacidad(empresa, "2026-03", new BigDecimal("10.000")));
+        presupuestos.guardar(new PresupuestoPrivacidad(empresa, "2026-03", new BigDecimal("18.500")));
+        presupuestos.flush();
+
+        assertThat(presupuestos.vigenteEn(empresa, "2026-03")).get()
+                .extracting(p -> p.getEpsilonMaximoPersona().doubleValue()).isEqualTo(18.5);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM presupuesto_privacidad WHERE empresa_id = ?",
+                Long.class, empresa)).isEqualTo(1L);
+    }
 }

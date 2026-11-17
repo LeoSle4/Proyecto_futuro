@@ -37,16 +37,16 @@ public class EmpresaController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH', 'COORDINADOR_BIENESTAR')")
-    public List<Empresa> listar(@AuthenticationPrincipal Jwt jwt) {
+    public List<EmpresaResponse> listar(@AuthenticationPrincipal Jwt jwt) {
         if (esAdmin(jwt)) {
-            return service.listar();
+            return service.listar().stream().map(EmpresaResponse::de).toList();
         }
-        return List.of(service.buscarPorId(empresaId(jwt)));
+        return List.of(EmpresaResponse.de(service.buscarPorId(empresaId(jwt))));
     }
 
     @GetMapping("/buscar")
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH', 'COORDINADOR_BIENESTAR')")
-    public List<Empresa> buscarPorNombre(
+    public List<EmpresaResponse> buscarPorNombre(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam("texto") String texto) {
 
@@ -58,51 +58,51 @@ public class EmpresaController {
         }
 
         if (esAdmin(jwt)) {
-            return service.buscarPorNombre(texto);
+            return service.buscarPorNombre(texto).stream().map(EmpresaResponse::de).toList();
         }
-        return service.buscarPorNombre(texto, empresaId(jwt));
+        return service.buscarPorNombre(texto, empresaId(jwt)).stream().map(EmpresaResponse::de).toList();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH', 'COORDINADOR_BIENESTAR')")
-    public Empresa buscarPorId(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    public EmpresaResponse buscarPorId(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         if (!esAdmin(jwt) && !id.equals(empresaId(jwt))) {
             throw new EmpresaNoEncontradaException(id);
         }
-        return service.buscarPorId(id);
+        return EmpresaResponse.de(service.buscarPorId(id));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Empresa> crear(
+    public ResponseEntity<EmpresaResponse> crear(
             @Valid @RequestBody EmpresaRequest request) {
 
         Empresa creada = service.crear(request);
 
         return ResponseEntity
                 .created(URI.create("/api/empresas/" + creada.getId()))
-                .body(creada);
+                .body(EmpresaResponse.de(creada));
     }
 
     @PostMapping("/con-equipos")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Empresa> crearConEquipos(
+    public ResponseEntity<EmpresaResponse> crearConEquipos(
             @Valid @RequestBody EmpresaConEquiposRequest request) {
 
         Empresa creada = service.crearConEquipos(request);
 
         return ResponseEntity
                 .created(URI.create("/api/empresas/" + creada.getId()))
-                .body(creada);
+                .body(EmpresaResponse.de(creada));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Empresa actualizar(
+    public EmpresaResponse actualizar(
             @PathVariable Long id,
             @Valid @RequestBody EmpresaRequest request) {
 
-        return service.actualizar(id, request);
+        return EmpresaResponse.de(service.actualizar(id, request));
     }
 
     @DeleteMapping("/{id}")

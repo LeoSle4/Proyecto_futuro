@@ -36,47 +36,47 @@ public class EquipoController {
     // required = false -> el filtro por empresa es opcional.
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH', 'COORDINADOR_BIENESTAR')")
-    public List<Equipo> listar(
+    public List<EquipoResponse> listar(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam(required = false) Long empresaId) {
         if (esAdmin(jwt)) {
-            return service.listarPorEmpresa(empresaId);
+            return service.listarPorEmpresa(empresaId).stream().map(EquipoResponse::de).toList();
         }
-        return service.listarPorEmpresa(empresaId(jwt));
+        return service.listarPorEmpresa(empresaId(jwt)).stream().map(EquipoResponse::de).toList();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH', 'COORDINADOR_BIENESTAR')")
-    public Equipo buscarPorId(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    public EquipoResponse buscarPorId(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         if (!esAdmin(jwt)) {
-            return service.buscarPorIdEnEmpresa(id, empresaId(jwt));
+            return EquipoResponse.de(service.buscarPorIdEnEmpresa(id, empresaId(jwt)));
         }
-        return service.buscarPorId(id);
+        return EquipoResponse.de(service.buscarPorId(id));
     }
 
     // 201 Created + header Location con la URL del recurso creado.
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH')")
-    public ResponseEntity<Equipo> crear(
+    public ResponseEntity<EquipoResponse> crear(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody EquipoRequest request) {
         if (!esAdmin(jwt) && !empresaId(jwt).equals(request.empresaId())) {
             throw new EmpresaNoEncontradaException(request.empresaId());
         }
         Equipo creado = service.crear(request);
-        return ResponseEntity.created(URI.create("/api/equipos/" + creado.getId())).body(creado);
+        return ResponseEntity.created(URI.create("/api/equipos/" + creado.getId())).body(EquipoResponse.de(creado));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH')")
-    public Equipo actualizar(
+    public EquipoResponse actualizar(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long id,
             @Valid @RequestBody EquipoRequest request) {
         if (!esAdmin(jwt)) {
-            return service.actualizarEnEmpresa(id, request, empresaId(jwt));
+            return EquipoResponse.de(service.actualizarEnEmpresa(id, request, empresaId(jwt)));
         }
-        return service.actualizar(id, request);
+        return EquipoResponse.de(service.actualizar(id, request));
     }
 
     // 204 No Content: se eliminó y no hay cuerpo que devolver.

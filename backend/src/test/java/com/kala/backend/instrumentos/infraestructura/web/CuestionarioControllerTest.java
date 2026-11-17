@@ -1,16 +1,19 @@
 package com.kala.backend.instrumentos.infraestructura.web;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.ResultadoActivacion;
+import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.ResultadoPresupuesto;
 import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioConsultaService;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioPendienteResponse.Escala;
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -173,5 +177,75 @@ class CuestionarioControllerTest {
             mockMvc.perform(get("/api/cuestionarios/pendientes").with(jwtDe(rol, 1L)))
                     .andExpect(status().isForbidden());
         }
+    }
+
+    // ---- desactivar y presupuesto de privacidad ----
+
+    @Test
+    void desactivar_soloAdmin_yDevuelveElGastoQueQueda() throws Exception {
+        when(activacion.desactivar(1L, 10L)).thenReturn(new ResultadoActivacion(1L, 10L, 5.49, 20.0));
+
+        mockMvc.perform(post("/api/empresas/1/cuestionarios/10/desactivar").with(jwtDe("ROLE_ADMIN", null)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.epsilonMensual").value(5.49));
+        for (String rol : List.of("ROLE_RRHH", "ROLE_COORDINADOR_BIENESTAR", "ROLE_EMPLEADO")) {
+            mockMvc.perform(post("/api/empresas/1/cuestionarios/10/desactivar").with(jwtDe(rol, 1L)))
+                    .andExpect(status().isForbidden());
+        }
+        mockMvc.perform(post("/api/empresas/1/cuestionarios/10/desactivar")).andExpect(status().isUnauthorized());
+        verify(activacion, org.mockito.Mockito.times(1)).desactivar(any(), any());
+    }
+
+    @Test
+    void presupuesto_adminVeCualquierEmpresa_yElPersonalSoloLaSuya() throws Exception {
+        when(activacion.consultarPresupuesto(1L))
+                .thenReturn(new ActivacionCuestionarioService.ResultadoPresupuesto(1L, "2026-03", 20.0, 5.49));
+
+        mockMvc.perform(get("/api/empresas/1/presupuesto").with(jwtDe("ROLE_ADMIN", null)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.epsilonMaximo").value(20.0))
+                .andExpect(jsonPath("$.periodo").value("2026-03"));
+        mockMvc.perform(get("/api/empresas/1/presupuesto").with(jwtDe("ROLE_RRHH", 1L)))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/empresas/1/presupuesto").with(jwtDe("ROLE_COORDINADOR_BIENESTAR", 2L)))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/empresas/1/presupuesto").with(jwtDe("ROLE_EMPLEADO", 1L)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void fijarPresupuesto_soloAdmin() throws Exception {
+        when(activacion.fijarPresupuesto(eq(1L), any()))
+                .thenReturn(new ActivacionCuestionarioService.ResultadoPresupuesto(1L, "2026-03", 25.0, 5.49));
+
+        mockMvc.perform(put("/api/empresas/1/presupuesto").with(jwtDe("ROLE_ADMIN", null))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"epsilonMaximoPersona\": 25}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.epsilonMaximo").value(25.0));
+        for (String rol : List.of("ROLE_RRHH", "ROLE_COORDINADOR_BIENESTAR", "ROLE_EMPLEADO")) {
+            mockMvc.perform(put("/api/empresas/1/presupuesto").with(jwtDe(rol, 1L))
+                            .contentType(MediaType.APPLICATION_JSON).content("{\"epsilonMaximoPersona\": 25}"))
+                    .andExpect(status().isForbidden());
+        }
+    }
+
+    @Test
+    void fijarPresupuesto_conCuerpoInvalido_devuelve400() throws Exception {
+        for (String cuerpo : List.of("{}", "{\"epsilonMaximoPersona\": 0}", "{\"epsilonMaximoPersona\": -3}",
+                "{\"epsilonMaximoPersona\": 1000}", "{\"epsilonMaximoPersona\": \"mucho\"}")) {
+            mockMvc.perform(put("/api/empresas/1/presupuesto").with(jwtDe("ROLE_ADMIN", null))
+                            .contentType(MediaType.APPLICATION_JSON).content(cuerpo))
+                    .andExpect(status().isBadRequest());
+        }
+        verify(activacion, never()).fijarPresupuesto(any(), any());
+    }
+
+    @Test
+    void fijarPresupuesto_pordebajoDelGastoActual_devuelve422() throws Exception {
+        when(activacion.fijarPresupuesto(eq(1L), any())).thenThrow(new PresupuestoExcedidoException(8.49, 5.0));
+
+        mockMvc.perform(put("/api/empresas/1/presupuesto").with(jwtDe("ROLE_ADMIN", null))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"epsilonMaximoPersona\": 5}"))
+                .andExpect(status().isUnprocessableContent());
     }
 }

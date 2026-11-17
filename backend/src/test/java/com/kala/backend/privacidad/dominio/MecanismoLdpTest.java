@@ -53,9 +53,9 @@ class MecanismoLdpTest {
     void rr_laRespuestaSeSumaComoUnoOCero_yExigeRespuestaRuidosa() {
         var rr = MecanismosLdp.de("RANDOMIZED_RESPONSE");
 
-        assertThat(rr.aSuma(true, null)).isEqualByComparingTo("1");
-        assertThat(rr.aSuma(false, new BigDecimal("9"))).isEqualByComparingTo("0");
-        assertThatThrownBy(() -> rr.aSuma(null, new BigDecimal("1")))
+        assertThat(rr.aSuma(true, null, RR, 0, 1)).isEqualByComparingTo("1");
+        assertThat(rr.aSuma(false, new BigDecimal("9"), RR, 0, 1)).isEqualByComparingTo("0");
+        assertThatThrownBy(() -> rr.aSuma(null, new BigDecimal("1"), RR, 0, 1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Un ítem Randomized Response requiere respuestaRuidosa");
     }
@@ -98,13 +98,47 @@ class MecanismoLdpTest {
     void laplace_sumaElValorRuidosoSinRecortar_yExigeValorRuidoso() {
         var laplace = MecanismosLdp.de("LAPLACE");
 
-        assertThat(laplace.aSuma(null, new BigDecimal("-1.37"))).isEqualByComparingTo("-1.37");
-        assertThatThrownBy(() -> laplace.aSuma(true, null))
+        assertThat(laplace.aSuma(null, new BigDecimal("-1.37"), LAP, 0, 5)).isEqualByComparingTo("-1.37");
+        assertThatThrownBy(() -> laplace.aSuma(true, null, LAP, 0, 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Un ítem Laplace requiere valorRuidoso");
-        assertThatThrownBy(() -> laplace.aSuma(null, new BigDecimal("1000001")))
+    }
+
+    // La cota depende del ítem: la escala (delta = max - min) y epsilon fijan la escala del ruido b = delta / epsilon;
+    // se admite hasta 50 b fuera de la escala (la probabilidad de pasarse es del orden de 2e-22).
+    @Test
+    void laplace_aceptaHastaCincuentaEscalasDeRuidoFueraDeLaEscalaDelItem() {
+        var laplace = MecanismosLdp.de("LAPLACE");
+
+        // delta = 5, epsilon = 1 -> b = 5 -> el valor puede ir de 0 - 250 a 5 + 250.
+        assertThat(laplace.aSuma(null, new BigDecimal("255"), LAP, 0, 5)).isEqualByComparingTo("255");
+        assertThat(laplace.aSuma(null, new BigDecimal("-250"), LAP, 0, 5)).isEqualByComparingTo("-250");
+        assertThatThrownBy(() -> laplace.aSuma(null, new BigDecimal("255.01"), LAP, 0, 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("valorRuidoso está fuera del rango admitido");
+        assertThatThrownBy(() -> laplace.aSuma(null, new BigDecimal("-250.01"), LAP, 0, 5))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("valorRuidoso está fuera del rango admitido");
+    }
+
+    @Test
+    void laplace_conMasEpsilonLaCotaSeEstrecha_yConUnaEscalaMasCortaTambien() {
+        var laplace = MecanismosLdp.de("LAPLACE");
+        var epsilonDiez = new ParametrosLdp(null, new BigDecimal("10.000"));
+
+        // delta = 3, epsilon = 10 -> b = 0.3 -> hasta 3 + 15 = 18.
+        assertThat(laplace.aSuma(null, new BigDecimal("18"), epsilonDiez, 0, 3)).isEqualByComparingTo("18");
+        assertThatThrownBy(() -> laplace.aSuma(null, new BigDecimal("18.5"), epsilonDiez, 0, 3))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void laplace_sinEpsilonEnLaConfiguracion_noPuedeValidarElValor() {
+        var laplace = MecanismosLdp.de("LAPLACE");
+
+        assertThatThrownBy(() -> laplace.aSuma(null, BigDecimal.ONE, new ParametrosLdp(null, null), 0, 5))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Laplace requiere un epsilon positivo");
     }
 
     @Test

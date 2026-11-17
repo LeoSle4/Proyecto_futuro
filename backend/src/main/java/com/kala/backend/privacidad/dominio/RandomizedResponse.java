@@ -28,7 +28,8 @@ public final class RandomizedResponse implements MecanismoLdp {
     }
 
     @Override
-    public BigDecimal aSuma(Boolean respuestaRuidosa, BigDecimal valorRuidoso) {
+    public BigDecimal aSuma(Boolean respuestaRuidosa, BigDecimal valorRuidoso, ParametrosLdp parametros,
+                            double valorMin, double valorMax) {
         if (respuestaRuidosa == null) {
             throw new IllegalArgumentException("Un ítem Randomized Response requiere respuestaRuidosa");
         }

@@ -7,4 +7,7 @@ public interface SesionesCheckin {
 
     // Atómico y sin carreras: devuelve 1 si insertó y 0 si el hash ya existía (envío duplicado).
     int insertarSiNoExiste(String hash, Long cuestionarioId, LocalDate ventanaInicio);
+
+    // Borra las sesiones de ventanas que empezaron antes de la fecha y devuelve cuántas. Nunca toca los agregados.
+    int borrarAnterioresA(LocalDate fecha);
 }
