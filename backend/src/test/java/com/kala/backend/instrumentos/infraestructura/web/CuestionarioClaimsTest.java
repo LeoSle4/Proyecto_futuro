@@ -1,6 +1,6 @@
-package com.kala.backend.controller;
+package com.kala.backend.instrumentos.infraestructura.web;
 
-import static com.kala.backend.controller.CuestionarioControllerTest.jwtDe;
+import static com.kala.backend.instrumentos.infraestructura.web.CuestionarioControllerTest.jwtDe;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -10,10 +10,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.kala.backend.model.Cuestionario;
-import com.kala.backend.service.ActivacionCuestionarioService;
-import com.kala.backend.service.ActivacionCuestionarioService.ResultadoActivacion;
-import com.kala.backend.service.CuestionarioConsultaService;
+import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.ResultadoActivacion;
+import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService;
+import com.kala.backend.instrumentos.aplicacion.CuestionarioConsultaService;
+import com.kala.backend.instrumentos.dominio.Cuestionario;
+import com.kala.backend.organizacion.infraestructura.web.OrganizacionTestSecurityConfig;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

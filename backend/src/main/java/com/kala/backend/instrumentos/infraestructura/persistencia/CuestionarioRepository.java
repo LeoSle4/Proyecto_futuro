@@ -1,13 +1,14 @@
-package com.kala.backend.repository;
+package com.kala.backend.instrumentos.infraestructura.persistencia;
 
-import com.kala.backend.model.Cuestionario;
+import com.kala.backend.instrumentos.aplicacion.puerto.Cuestionarios;
+import com.kala.backend.instrumentos.dominio.Cuestionario;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface CuestionarioRepository extends JpaRepository<Cuestionario, Long> {
+public interface CuestionarioRepository extends JpaRepository<Cuestionario, Long>, Cuestionarios {
 
     Optional<Cuestionario> findByCodigo(String codigo);
 
@@ -23,4 +24,14 @@ public interface CuestionarioRepository extends JpaRepository<Cuestionario, Long
             ORDER BY c.codigo ASC
             """)
     List<Cuestionario> listarActivosDeEmpresa(@Param("empresaId") Long empresaId);
+
+    @Override
+    default Optional<Cuestionario> porId(Long id) {
+        return findById(id);
+    }
+
+    @Override
+    default List<Cuestionario> activosDeEmpresa(Long empresaId) {
+        return listarActivosDeEmpresa(empresaId);
+    }
 }

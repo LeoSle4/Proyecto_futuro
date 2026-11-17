@@ -1,6 +1,6 @@
-package com.kala.backend.dto;
+package com.kala.backend.instrumentos.infraestructura.web;
 
-import com.kala.backend.model.Cuestionario;
+import com.kala.backend.instrumentos.dominio.Cuestionario;
 
 // Un cuestionario activo de la empresa, sin sus ítems.
 public record CuestionarioResponse(

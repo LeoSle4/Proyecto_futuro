@@ -1,13 +1,13 @@
-package com.kala.backend.repository;
+package com.kala.backend.instrumentos.infraestructura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kala.backend.FilasPadre;
-import com.kala.backend.model.ConfiguracionLdp;
-import com.kala.backend.model.Cuestionario;
-import com.kala.backend.model.EmpresaCuestionario;
-import com.kala.backend.model.EscalaRespuesta;
-import com.kala.backend.model.ItemCuestionario;
+import com.kala.backend.instrumentos.dominio.ConfiguracionLdp;
+import com.kala.backend.instrumentos.dominio.Cuestionario;
+import com.kala.backend.instrumentos.dominio.EmpresaCuestionario;
+import com.kala.backend.instrumentos.dominio.EscalaRespuesta;
+import com.kala.backend.instrumentos.dominio.ItemCuestionario;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;

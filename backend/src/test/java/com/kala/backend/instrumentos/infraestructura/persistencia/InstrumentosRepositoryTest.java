@@ -1,19 +1,19 @@
-package com.kala.backend.repository;
+package com.kala.backend.instrumentos.infraestructura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.kala.backend.FilasPadre;
-import com.kala.backend.model.ConfiguracionLdp;
-import com.kala.backend.model.Cuestionario;
-import com.kala.backend.model.EmpresaCuestionario;
-import com.kala.backend.model.EmpresaCuestionarioId;
-import com.kala.backend.model.EscalaRespuesta;
-import com.kala.backend.model.ItemCuestionario;
-import com.kala.backend.model.OpcionEscala;
-import com.kala.backend.model.OpcionEscalaId;
-import com.kala.backend.model.PresupuestoPrivacidad;
-import com.kala.backend.model.PresupuestoPrivacidadId;
+import com.kala.backend.instrumentos.dominio.ConfiguracionLdp;
+import com.kala.backend.instrumentos.dominio.Cuestionario;
+import com.kala.backend.instrumentos.dominio.EmpresaCuestionario;
+import com.kala.backend.instrumentos.dominio.EmpresaCuestionarioId;
+import com.kala.backend.instrumentos.dominio.EscalaRespuesta;
+import com.kala.backend.instrumentos.dominio.ItemCuestionario;
+import com.kala.backend.instrumentos.dominio.OpcionEscala;
+import com.kala.backend.instrumentos.dominio.OpcionEscalaId;
+import com.kala.backend.instrumentos.dominio.PresupuestoPrivacidad;
+import com.kala.backend.instrumentos.dominio.PresupuestoPrivacidadId;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;

@@ -1,12 +1,10 @@
-package com.kala.backend.controller;
+package com.kala.backend.instrumentos.infraestructura.web;
 
-import com.kala.backend.dto.ActivacionResponse;
-import com.kala.backend.dto.CuestionarioPendienteResponse;
-import com.kala.backend.dto.CuestionarioResponse;
-import com.kala.backend.exception.EmpresaNoEncontradaException;
-import com.kala.backend.service.ActivacionCuestionarioService;
-import com.kala.backend.service.ActivacionCuestionarioService.ResultadoActivacion;
-import com.kala.backend.service.CuestionarioConsultaService;
+import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.ResultadoActivacion;
+import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService;
+import com.kala.backend.instrumentos.aplicacion.CuestionarioConsultaService;
+import com.kala.backend.instrumentos.aplicacion.CuestionarioPendienteResponse;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
 import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
