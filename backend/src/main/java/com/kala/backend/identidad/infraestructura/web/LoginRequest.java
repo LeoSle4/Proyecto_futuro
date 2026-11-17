@@ -1,9 +1,10 @@
 package com.kala.backend.identidad.infraestructura.web;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public record LoginRequest(
-        @NotBlank String username,
-        @NotBlank String password
+        @NotBlank @Size(max = 254) String username,
+        @NotBlank @Size(max = 256) String password
 ) {
 }

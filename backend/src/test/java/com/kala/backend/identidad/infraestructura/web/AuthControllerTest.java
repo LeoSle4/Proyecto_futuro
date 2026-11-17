@@ -88,4 +88,16 @@ class AuthControllerTest {
     void me_sinToken_devuelve401() throws Exception {
         mockMvc.perform(get("/api/auth/me")).andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void loginConUsuarioOContrasenaEnormes_devuelve400SinLlegarAlServicio() throws Exception {
+        String enorme = "a".repeat(300);
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"username\": \"" + enorme + "\", \"password\": \"clave-segura-123\" }"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"username\": \"ana@kala.test\", \"password\": \"" + "p".repeat(300) + "\" }"))
+                .andExpect(status().isBadRequest());
+        org.mockito.Mockito.verifyNoInteractions(autenticacion);
+    }
 }
