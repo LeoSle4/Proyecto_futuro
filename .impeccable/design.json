@@ -1,0 +1,96 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-11-17T22:11:08.616157+00:00",
+ "title": "Design System: Kala",
+ "extensions": {
+  "colorMeta": {
+   "mar": {
+    "role": "primary",
+    "displayName": "Verde Mar",
+    "canonical": "#1d6a73"
+   },
+   "sol": {
+    "role": "secondary",
+    "displayName": "Sol de Garúa",
+    "canonical": "#f0b44c"
+   },
+   "niebla-alta": {
+    "role": "neutral",
+    "displayName": "Niebla Alta",
+    "canonical": "#f0f3f5"
+   }
+  },
+  "shadows": [
+   {
+    "name": "punto-solar",
+    "value": "0 3px 8px rgb(37 52 63 / 0.25)",
+    "purpose": "Despega el punto de la estimación."
+   }
+  ],
+  "motion": [],
+  "breakpoints": [
+   {
+    "name": "apilado",
+    "value": "900px"
+   },
+   {
+    "name": "movil",
+    "value": "720px"
+   }
+  ]
+ },
+ "components": [
+  {
+   "name": "Primary Button",
+   "kind": "button",
+   "refersTo": "button-primary",
+   "description": "Acción principal.",
+   "html": "<button class=\"ds-btn\">Entrar</button>",
+   "css": ".ds-btn{background:#1d6a73;color:#fff;min-height:44px;padding:0 20px;border:1px solid #1d6a73;border-radius:12px;font-weight:600;cursor:pointer}.ds-btn:hover{background:#14535b}.ds-btn:focus-visible{outline:3px solid #1d6a73;outline-offset:3px}"
+  },
+  {
+   "name": "Team Card Active",
+   "kind": "card",
+   "refersTo": "card-equipo-activo",
+   "description": "Equipo elegido.",
+   "html": "<button class=\"ds-team\"><b>Operaciones Lima</b><span>38 respuestas · con resultado</span></button>",
+   "css": ".ds-team{display:grid;gap:2px;text-align:left;width:280px;padding:16px 18px;background:#1d6a73;color:#fff;border:1px solid #1d6a73;border-radius:16px}.ds-team span{font-size:.9375rem;color:#e4f1f2}"
+  },
+  {
+   "name": "Veil Card",
+   "kind": "card",
+   "refersTo": "card-indicador",
+   "description": "Grupo sin resultado.",
+   "html": "<div class=\"ds-veil\"><b>Sin resultado</b><p>19 de 30 respuestas.</p></div>",
+   "css": ".ds-veil{padding:26px 32px;border:1px solid #cdd8de;border-radius:24px;color:#4a5c68;background:repeating-linear-gradient(135deg,rgb(255 255 255/.8),rgb(255 255 255/.8) 10px,#e9eff2 10px,#e9eff2 20px)}"
+  }
+ ],
+ "narrative": {
+  "northStar": "La Garúa",
+  "overview": "Kala se lee como la luz difusa de Lima: niebla perlada, un solo verde mar y un único destello de sol. La incertidumbre se dibuja; un grupo pequeño es un velo, no un hueco.",
+  "keyCharacteristics": [
+   "Fondo de niebla fría, nunca crema.",
+   "El sol marca solo la estimación.",
+   "Un velo rayado marca lo que no se puede afirmar."
+  ],
+  "rules": [
+   {
+    "name": "The One Sun Rule",
+    "body": "El amarillo sol marca la estimación y nada más.",
+    "section": "colors"
+   },
+   {
+    "name": "The No Alarm Rule",
+    "body": "Ningún resultado bajo se pinta de rojo ni de color de alarma.",
+    "section": "colors"
+   }
+  ],
+  "dos": [
+   "Do mostrar siempre el margen de cada estimación junto a la cifra."
+  ],
+  "donts": [
+   "Don't usar rojo ni colores de alarma para resultados bajos.",
+   "Don't mostrar nunca información de una persona individual."
+  ]
+ }
+}
