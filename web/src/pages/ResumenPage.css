@@ -1,0 +1,28 @@
+.resumen { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
+.resumen-equipos { display: grid; gap: 12px; }
+.resumen-lateral-titulo { font-size: 1.125rem; font-weight: 800; margin-bottom: 4px; }
+.resumen-centro { display: grid; gap: 20px; }
+.resumen-cabecera { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: end; }
+.resumen-cabecera h1 { font-size: 2.25rem; font-weight: 800; }
+.resumen-sub { color: var(--tinta-suave); margin-top: 6px; max-width: 65ch; }
+.resumen-semana { display: flex; align-items: center; gap: 10px; }
+.resumen-semana-texto { min-width: 11ch; text-align: center; font-weight: 600; }
+.resumen-semana .boton { min-width: 44px; padding: 0; }
+.resumen-semana .boton:disabled { opacity: 0.45; cursor: not-allowed; }
+.resumen-indicadores { display: grid; gap: 20px; }
+.resumen-aviso, .resumen-aviso-demo { color: var(--tinta-suave); }
+.resumen-aviso-demo { font-weight: 600; }
+.resumen-vacio { display: grid; gap: 8px; padding-top: 24px; max-width: 65ch; }
+.resumen-vacio h1 { font-size: 2.25rem; font-weight: 800; }
+.resumen-saber {
+  display: grid; gap: 6px; background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: var(--radio-chico); padding: 18px 24px; color: var(--tinta-suave);
+}
+.resumen-saber strong { color: var(--tinta); }
+@media (max-width: 900px) {
+  .resumen { grid-template-columns: 1fr; }
+  .resumen-equipos { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .resumen-lateral-titulo { grid-column: 1 / -1; }
+  .resumen-cabecera h1 { font-size: 1.75rem; }
+  .indicador-cifra-grande { font-size: 3.25rem; }
+}

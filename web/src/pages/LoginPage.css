@@ -1,0 +1,15 @@
+.login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.login-tarjeta {
+  width: min(440px, 100%); display: grid; gap: 8px; padding: 36px 36px 32px;
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio);
+}
+.login-marca { font-size: 2rem; font-weight: 800; color: var(--mar); }
+.login-titulo { font-size: 1.5rem; font-weight: 800; margin-top: 8px; }
+.login-texto { color: var(--tinta-suave); margin-bottom: 12px; }
+.login-tarjeta label { font-weight: 600; margin-top: 8px; }
+.login-tarjeta input {
+  min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--tinta-tenue); background: #fff;
+}
+.login-tarjeta input[aria-invalid='true'] { border-color: var(--error); border-width: 2px; }
+.login-error { color: var(--error); font-weight: 600; margin-top: 4px; }
+.login-tarjeta .boton { margin-top: 16px; }
