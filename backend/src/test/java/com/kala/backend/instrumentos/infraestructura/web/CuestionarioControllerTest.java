@@ -158,7 +158,7 @@ class CuestionarioControllerTest {
                 10L, "PULSO", "Pulso semanal", 7, null, List.of(new ItemPendiente(
                         3L, 1, "Pulso", "¿Hoy te sentiste bien?",
                         new Escala("BINARIA", 0, 1, List.of(new Opcion(0, "No"), new Opcion(1, "Sí"))),
-                        2L, "RANDOMIZED_RESPONSE", new BigDecimal("0.750"))))));
+                        2L, "RANDOMIZED_RESPONSE", new BigDecimal("0.750"), null)))));
 
         mockMvc.perform(get("/api/cuestionarios/pendientes").with(jwtDe("ROLE_EMPLEADO", 1L)))
                 .andExpect(status().isOk())
@@ -168,6 +168,21 @@ class CuestionarioControllerTest {
                 .andExpect(jsonPath("$[0].items[0].mecanismo").value("RANDOMIZED_RESPONSE"))
                 .andExpect(jsonPath("$[0].items[0].probabilidadVerdad").value(0.75))
                 .andExpect(jsonPath("$[0].items[0].escala.opciones[1].etiqueta").value("Sí"));
+    }
+
+    @Test
+    void pendientes_enUnItemLaplaceIncluyeElEpsilonParaEscalarElRuido() throws Exception {
+        when(consulta.pendientes(1L)).thenReturn(List.of(new CuestionarioPendienteResponse(
+                11L, "WHO5", "Bienestar", 14, null, List.of(new ItemPendiente(
+                        4L, 1, "Calma", "Me he sentido tranquilo(a)",
+                        new Escala("WHO5", 0, 5, List.of(new Opcion(0, "Nunca"), new Opcion(5, "Siempre"))),
+                        3L, "LAPLACE", null, new BigDecimal("1.0"))))));
+
+        mockMvc.perform(get("/api/cuestionarios/pendientes").with(jwtDe("ROLE_EMPLEADO", 1L)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].items[0].mecanismo").value("LAPLACE"))
+                .andExpect(jsonPath("$[0].items[0].epsilon").value(1.0))
+                .andExpect(jsonPath("$[0].items[0].escala.valorMax").value(5));
     }
 
     @Test

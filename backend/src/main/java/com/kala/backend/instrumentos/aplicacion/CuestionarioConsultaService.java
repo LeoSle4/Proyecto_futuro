@@ -79,6 +79,6 @@ public class CuestionarioConsultaService {
                 .toList();
         return new ItemPendiente(item.getId(), item.getOrden(), item.getTema(), item.getTexto(),
                 new Escala(escala.getCodigo(), escala.getValorMin(), escala.getValorMax(), opcionesDto),
-                config.getId(), config.getMecanismo(), config.getProbabilidadVerdad());
+                config.getId(), config.getMecanismo(), config.getProbabilidadVerdad(), config.getEpsilon());
     }
 }
