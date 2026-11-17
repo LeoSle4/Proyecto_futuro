@@ -1,4 +1,4 @@
-package com.kala.backend.exception;
+package com.kala.backend.checkin.dominio;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
