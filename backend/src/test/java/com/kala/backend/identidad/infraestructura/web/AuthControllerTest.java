@@ -100,4 +100,48 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest());
         org.mockito.Mockito.verifyNoInteractions(autenticacion);
     }
+
+    // ---- refresh y logout ----
+
+    @Test
+    void refresh_sinToken_devuelveUnJwtNuevoYElRefreshRotado() throws Exception {
+        when(autenticacion.refrescar("viejo-refresh"))
+                .thenReturn(new TokenResponse("Bearer", "jwt-nuevo", 1800L, "nuevo-refresh", 2_592_000L));
+
+        mockMvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"refreshToken\": \"viejo-refresh\" }"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("jwt-nuevo"))
+                .andExpect(jsonPath("$.refreshToken").value("nuevo-refresh"))
+                .andExpect(jsonPath("$.refreshExpiresInSeconds").value(2_592_000));
+    }
+
+    @Test
+    void refresh_conUnTokenInvalido_devuelve401() throws Exception {
+        when(autenticacion.refrescar(org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new com.kala.backend.identidad.dominio.CredencialesInvalidasException());
+
+        mockMvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"refreshToken\": \"cualquiera\" }"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void refresh_conCuerpoInvalido_devuelve400SinLlegarAlServicio() throws Exception {
+        for (String cuerpo : java.util.List.of("{}", "{ \"refreshToken\": \"\" }",
+                "{ \"refreshToken\": \"" + "a".repeat(300) + "\" }")) {
+            mockMvc.perform(post("/api/auth/refresh").contentType(MediaType.APPLICATION_JSON).content(cuerpo))
+                    .andExpect(status().isBadRequest());
+        }
+        org.mockito.Mockito.verifyNoInteractions(autenticacion);
+    }
+
+    @Test
+    void logout_devuelve204_aunSinJwt_yRevocaLaFamilia() throws Exception {
+        mockMvc.perform(post("/api/auth/logout").contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"refreshToken\": \"activo\" }"))
+                .andExpect(status().isNoContent());
+
+        org.mockito.Mockito.verify(autenticacion).cerrarSesion("activo");
+    }
 }
