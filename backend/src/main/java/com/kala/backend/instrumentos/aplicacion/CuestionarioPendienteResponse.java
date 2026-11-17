@@ -21,7 +21,9 @@ public record CuestionarioPendienteResponse(
             Escala escala,
             Long configuracionLdpId,
             String mecanismo,
-            BigDecimal probabilidadVerdad
+            BigDecimal probabilidadVerdad,
+            // Solo para Laplace: el dispositivo lo necesita para escalar el ruido (delta / epsilon).
+            BigDecimal epsilon
     ) {
     }
 
