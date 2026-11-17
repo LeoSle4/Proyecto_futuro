@@ -1,14 +1,14 @@
-package com.kala.backend.service;
+package com.kala.backend.checkin.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.kala.backend.dto.CheckInEnvioRequest;
-import com.kala.backend.repository.AgregadoItemRepository;
-import com.kala.backend.repository.SesionCheckinRepository;
-import com.kala.backend.service.ItemCuestionarioLector.ItemCuestionarioInfo;
+import com.kala.backend.checkin.aplicacion.puerto.ItemsCuestionario.ItemCuestionarioInfo;
+import com.kala.backend.checkin.aplicacion.puerto.ItemsCuestionario;
+import com.kala.backend.checkin.infraestructura.persistencia.AgregadoItemRepository;
+import com.kala.backend.checkin.infraestructura.persistencia.SesionCheckinRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 class CheckInRegistroTransaccionTest {
 
     @MockitoBean
-    private ItemCuestionarioLector items;
+    private ItemsCuestionario items;
     @MockitoBean
     private AgregadoItemRepository agregados;
 
@@ -50,7 +50,7 @@ class CheckInRegistroTransaccionTest {
     void siFallaLaSuma_laSesionNoQuedaGuardada() {
         // El test corre sin transaccion propia: se usa el cuestionario PULSO del seed (V6) para no escribir filas padre.
         Long pulso = jdbc.queryForObject("SELECT id FROM cuestionario WHERE codigo = 'PULSO'", Long.class);
-        when(items.buscar(9L)).thenReturn(Optional.of(new ItemCuestionarioInfo(pulso, 2L)));
+        when(items.buscar(9L)).thenReturn(Optional.of(ItemCuestionarioInfo.pulso(pulso, 2L)));
         when(agregados.registrarRespuesta(any(), any(), any(), any(), any()))
                 .thenThrow(new IllegalStateException("fallo simulado de la suma"));
         long antes = sesiones.count();
