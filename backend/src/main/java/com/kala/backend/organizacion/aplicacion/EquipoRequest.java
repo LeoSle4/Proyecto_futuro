@@ -1,4 +1,4 @@
-package com.kala.backend.dto;
+package com.kala.backend.organizacion.aplicacion;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,15 +1,13 @@
 
-package com.kala.backend.service;
+package com.kala.backend.organizacion.aplicacion;
 
-import com.kala.backend.dto.EmpresaConEquiposRequest;
-import com.kala.backend.dto.EmpresaRequest;
-import com.kala.backend.exception.EmpresaConEquiposException;
-import com.kala.backend.exception.EmpresaNoEncontradaException;
-import com.kala.backend.exception.NombreDuplicadoException;
-import com.kala.backend.model.Empresa;
-import com.kala.backend.model.Equipo;
-import com.kala.backend.repository.EmpresaRepository;
-import com.kala.backend.repository.EquipoRepository;
+import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
+import com.kala.backend.organizacion.aplicacion.puerto.Equipos;
+import com.kala.backend.organizacion.dominio.Empresa;
+import com.kala.backend.organizacion.dominio.EmpresaConEquiposException;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
+import com.kala.backend.organizacion.dominio.Equipo;
+import com.kala.backend.organizacion.dominio.NombreDuplicadoException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -20,24 +18,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmpresaService {
 
-    private final EmpresaRepository empresaRepository;
-    private final EquipoRepository equipoRepository;
+    private final Empresas empresaRepository;
+    private final Equipos equipoRepository;
 
     public EmpresaService(
-            EmpresaRepository empresaRepository,
-            EquipoRepository equipoRepository) {
+            Empresas empresaRepository,
+            Equipos equipoRepository) {
         this.empresaRepository = empresaRepository;
         this.equipoRepository = equipoRepository;
     }
 
     @Transactional(readOnly = true)
     public List<Empresa> listar() {
-        return empresaRepository.findAll();
+        return empresaRepository.todas();
     }
 
     @Transactional(readOnly = true)
     public Empresa buscarPorId(Long id) {
-        return empresaRepository.findById(id)
+        return empresaRepository.porId(id)
                 .orElseThrow(() -> new EmpresaNoEncontradaException(id));
     }
 
@@ -66,7 +64,7 @@ public class EmpresaService {
                 request.nombre(),
                 request.rubro()
         );
-        return empresaRepository.save(empresa);
+        return empresaRepository.guardar(empresa);
     }
 
 
@@ -83,7 +81,7 @@ public Empresa crearConEquipos(EmpresaConEquiposRequest request) {
             request.rubro()
     );
 
-    Empresa guardada = empresaRepository.save(empresa);
+    Empresa guardada = empresaRepository.guardar(empresa);
     Set<String> nombres = new HashSet<>();
 
     for (String nombreOriginal : request.equipos()) {
@@ -95,7 +93,7 @@ public Empresa crearConEquipos(EmpresaConEquiposRequest request) {
         }
 
         Equipo equipo = new Equipo(nombre, guardada.getId());
-        equipoRepository.save(equipo);
+        equipoRepository.guardar(equipo);
     }
 
     return guardada;
@@ -108,15 +106,15 @@ public Empresa crearConEquipos(EmpresaConEquiposRequest request) {
         empresa.setRuc(request.ruc());
         empresa.setNombre(request.nombre());
         empresa.setRubro(request.rubro());
-        return empresaRepository.save(empresa);
+        return empresaRepository.guardar(empresa);
     }
 
     @Transactional
     public void eliminar(Long id) {
         Empresa empresa = buscarPorId(id);
-        if (equipoRepository.existsByEmpresaId(id)) {
+        if (equipoRepository.tieneEquipos(id)) {
             throw new EmpresaConEquiposException(id);
         }
-        empresaRepository.delete(empresa);
+        empresaRepository.eliminar(empresa);
     }
 }

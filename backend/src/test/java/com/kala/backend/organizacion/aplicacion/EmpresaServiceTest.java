@@ -1,6 +1,6 @@
 
 
-package com.kala.backend.service;
+package com.kala.backend.organizacion.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,12 +8,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.kala.backend.dto.EmpresaRequest;
-import com.kala.backend.exception.EmpresaConEquiposException;
-import com.kala.backend.exception.EmpresaNoEncontradaException;
-import com.kala.backend.model.Empresa;
-import com.kala.backend.repository.EmpresaRepository;
-import com.kala.backend.repository.EquipoRepository;
+import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
+import com.kala.backend.organizacion.aplicacion.puerto.Equipos;
+import com.kala.backend.organizacion.dominio.Empresa;
+import com.kala.backend.organizacion.dominio.EmpresaConEquiposException;
+import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class EmpresaServiceTest {
 
     @Mock
-    private EmpresaRepository empresaRepository;
+    private Empresas empresaRepository;
 
     @Mock
-    private EquipoRepository equipoRepository;
+    private Equipos equipoRepository;
 
     private EmpresaService service;
 
@@ -46,7 +45,7 @@ class EmpresaServiceTest {
 
         empresas.get(0).setRuc("20123456789");
 
-        when(empresaRepository.findAll()).thenReturn(empresas);
+        when(empresaRepository.todas()).thenReturn(empresas);
 
         assertThat(service.listar()).isEqualTo(empresas);
     }
@@ -68,7 +67,7 @@ class EmpresaServiceTest {
         EmpresaRequest request =
                 new EmpresaRequest("20123456789", "ACME", "Tecnologia");
 
-        when(empresaRepository.save(any(Empresa.class)))
+        when(empresaRepository.guardar(any(Empresa.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         Empresa creada = service.crear(request);
@@ -77,12 +76,12 @@ class EmpresaServiceTest {
         assertThat(creada.getNombre()).isEqualTo("ACME");
         assertThat(creada.getRubro()).isEqualTo("Tecnologia");
 
-        verify(empresaRepository).save(any(Empresa.class));
+        verify(empresaRepository).guardar(any(Empresa.class));
     }
 
     @Test
     void buscarPorIdInexistente_lanzaEmpresaNoEncontradaException() {
-        when(empresaRepository.findById(999L)).thenReturn(Optional.empty());
+        when(empresaRepository.porId(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.buscarPorId(999L))
                 .isInstanceOf(EmpresaNoEncontradaException.class)
@@ -98,9 +97,9 @@ class EmpresaServiceTest {
         EmpresaRequest request =
                 new EmpresaRequest("20987654321", "ACME Corp", "Software");
 
-        when(empresaRepository.findById(1L))
+        when(empresaRepository.porId(1L))
                 .thenReturn(Optional.of(existente));
-        when(empresaRepository.save(existente)).thenReturn(existente);
+        when(empresaRepository.guardar(existente)).thenReturn(existente);
 
         Empresa actualizada = service.actualizar(1L, request);
 
@@ -109,12 +108,12 @@ class EmpresaServiceTest {
         assertThat(actualizada.getNombre()).isEqualTo("ACME Corp");
         assertThat(actualizada.getRubro()).isEqualTo("Software");
 
-        verify(empresaRepository).save(existente);
+        verify(empresaRepository).guardar(existente);
     }
 
     @Test
     void eliminarEmpresaInexistente_lanzaEmpresaNoEncontradaException() {
-        when(empresaRepository.findById(999L)).thenReturn(Optional.empty());
+        when(empresaRepository.porId(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.eliminar(999L))
                 .isInstanceOf(EmpresaNoEncontradaException.class);
@@ -126,9 +125,9 @@ class EmpresaServiceTest {
                 new Empresa(1L, "ACME", "Tecnologia");
         empresa.setRuc("20123456789");
 
-        when(empresaRepository.findById(1L))
+        when(empresaRepository.porId(1L))
                 .thenReturn(Optional.of(empresa));
-        when(equipoRepository.existsByEmpresaId(1L)).thenReturn(true);
+        when(equipoRepository.tieneEquipos(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> service.eliminar(1L))
                 .isInstanceOf(EmpresaConEquiposException.class)

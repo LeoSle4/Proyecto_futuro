@@ -1,13 +1,15 @@
 
-package com.kala.backend.repository;
+package com.kala.backend.organizacion.infraestructura.persistencia;
 
-import com.kala.backend.model.Empresa;
+import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
+import com.kala.backend.organizacion.dominio.Empresa;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
+public interface EmpresaRepository extends JpaRepository<Empresa, Long>, Empresas {
 
     @Query("""
             SELECT e
@@ -27,4 +29,29 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
     List<Empresa> buscarPorNombreEnEmpresa(
             @Param("empresaId") Long empresaId,
             @Param("texto") String texto);
+
+    @Override
+    default List<Empresa> todas() {
+        return findAll();
+    }
+
+    @Override
+    default Optional<Empresa> porId(Long id) {
+        return findById(id);
+    }
+
+    @Override
+    default boolean existe(Long id) {
+        return existsById(id);
+    }
+
+    @Override
+    default Empresa guardar(Empresa empresa) {
+        return save(empresa);
+    }
+
+    @Override
+    default void eliminar(Empresa empresa) {
+        delete(empresa);
+    }
 }

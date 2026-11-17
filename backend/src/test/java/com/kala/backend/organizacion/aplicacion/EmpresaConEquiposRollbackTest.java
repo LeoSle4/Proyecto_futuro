@@ -1,13 +1,12 @@
 
-package com.kala.backend.service;
+package com.kala.backend.organizacion.aplicacion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.kala.backend.dto.EmpresaConEquiposRequest;
-import com.kala.backend.exception.NombreDuplicadoException;
-import com.kala.backend.repository.EmpresaRepository;
-import com.kala.backend.repository.EquipoRepository;
+import com.kala.backend.organizacion.dominio.NombreDuplicadoException;
+import com.kala.backend.organizacion.infraestructura.persistencia.EmpresaRepository;
+import com.kala.backend.organizacion.infraestructura.persistencia.EquipoRepository;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

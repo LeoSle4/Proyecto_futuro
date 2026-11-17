@@ -1,10 +1,9 @@
 
-package com.kala.backend.service;
+package com.kala.backend.organizacion.aplicacion;
 
-import com.kala.backend.dto.EquipoRequest;
-import com.kala.backend.exception.EquipoNoEncontradoException;
-import com.kala.backend.model.Equipo;
-import com.kala.backend.repository.EquipoRepository;
+import com.kala.backend.organizacion.aplicacion.puerto.Equipos;
+import com.kala.backend.organizacion.dominio.Equipo;
+import com.kala.backend.organizacion.dominio.EquipoNoEncontradoException;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EquipoService {
 
-    private final EquipoRepository equipoRepository;
+    private final Equipos equipoRepository;
     private final EmpresaService empresaService;
 
     public EquipoService(
-            EquipoRepository equipoRepository,
+            Equipos equipoRepository,
             EmpresaService empresaService) {
         this.equipoRepository = equipoRepository;
         this.empresaService = empresaService;
@@ -25,21 +24,21 @@ public class EquipoService {
     @Transactional(readOnly = true)
     public List<Equipo> listarPorEmpresa(Long empresaId) {
         if (empresaId == null) {
-            return equipoRepository.findAll();
+            return equipoRepository.todos();
         }
 
-        return equipoRepository.findByEmpresaId(empresaId);
+        return equipoRepository.deEmpresa(empresaId);
     }
 
     @Transactional(readOnly = true)
     public Equipo buscarPorId(Long id) {
-        return equipoRepository.findById(id)
+        return equipoRepository.porId(id)
                 .orElseThrow(() -> new EquipoNoEncontradoException(id));
     }
 
     @Transactional(readOnly = true)
     public Equipo buscarPorIdEnEmpresa(Long id, Long empresaId) {
-        return equipoRepository.findByIdAndEmpresaId(id, empresaId)
+        return equipoRepository.porIdEnEmpresa(id, empresaId)
                 .orElseThrow(() -> new EquipoNoEncontradoException(id));
     }
 
@@ -52,7 +51,7 @@ public class EquipoService {
                 request.empresaId()
         );
 
-        return equipoRepository.save(equipo);
+        return equipoRepository.guardar(equipo);
     }
 
     @Transactional
@@ -63,7 +62,7 @@ public class EquipoService {
         equipo.setNombre(request.nombre());
         equipo.setEmpresaId(request.empresaId());
 
-        return equipoRepository.save(equipo);
+        return equipoRepository.guardar(equipo);
     }
 
     @Transactional
@@ -75,19 +74,19 @@ public class EquipoService {
         validar(request);
         Equipo equipo = buscarPorIdEnEmpresa(id, empresaId);
         equipo.setNombre(request.nombre());
-        return equipoRepository.save(equipo);
+        return equipoRepository.guardar(equipo);
     }
 
     @Transactional
     public void eliminar(Long id) {
         Equipo equipo = buscarPorId(id);
-        equipoRepository.delete(equipo);
+        equipoRepository.eliminar(equipo);
     }
 
     @Transactional
     public void eliminarEnEmpresa(Long id, Long empresaId) {
         Equipo equipo = buscarPorIdEnEmpresa(id, empresaId);
-        equipoRepository.delete(equipo);
+        equipoRepository.eliminar(equipo);
     }
 
     private void validar(EquipoRequest request) {
