@@ -7,6 +7,9 @@ import com.kala.backend.checkin.dominio.ConfiguracionLdpNoVigenteException;
 import com.kala.backend.checkin.dominio.ItemCuestionarioNoEncontradoException;
 import com.kala.backend.dashboard.dominio.SemanaInvalidaException;
 import com.kala.backend.identidad.dominio.CredencialesInvalidasException;
+import com.kala.backend.identidad.dominio.DemasiadosIntentosException;
+import com.kala.backend.identidad.dominio.EmailEnUsoException;
+import com.kala.backend.identidad.dominio.UsuarioNoEncontradoException;
 import com.kala.backend.instrumentos.dominio.CuestionarioNoEncontradoException;
 import com.kala.backend.instrumentos.dominio.PresupuestoExcedidoException;
 import com.kala.backend.organizacion.dominio.EmpresaConEquiposException;
@@ -40,7 +43,10 @@ class GlobalExceptionHandlerMapeoTest {
                 Arguments.of(new ConfiguracionLdpNoVigenteException(1L), 422),
                 Arguments.of(new SemanaInvalidaException(LocalDate.of(2026, 3, 10)), 400),
                 Arguments.of(new IllegalArgumentException("argumento"), 400),
-                Arguments.of(new CredencialesInvalidasException(), 401)
+                Arguments.of(new CredencialesInvalidasException(), 401),
+                Arguments.of(new EmailEnUsoException(), 409),
+                Arguments.of(new DemasiadosIntentosException(60), 429),
+                Arguments.of(new UsuarioNoEncontradoException(8L), 404)
         );
     }
 
@@ -64,20 +70,32 @@ class GlobalExceptionHandlerMapeoTest {
 
     private ResponseEntity<ErrorResponse> invocar(RuntimeException ex, MockHttpServletRequest peticion) {
         if (ex instanceof EmpresaNoEncontradaException || ex instanceof EquipoNoEncontradoException
-                || ex instanceof CuestionarioNoEncontradoException || ex instanceof ItemCuestionarioNoEncontradoException) {
+                || ex instanceof CuestionarioNoEncontradoException || ex instanceof ItemCuestionarioNoEncontradoException
+                || ex instanceof UsuarioNoEncontradoException) {
             return handler.noEncontrado(ex, peticion);
         }
         if (ex instanceof NombreDuplicadoException || ex instanceof EmpresaConEquiposException
-                || ex instanceof CheckInDuplicadoException) {
+                || ex instanceof CheckInDuplicadoException || ex instanceof EmailEnUsoException) {
             return handler.conflicto(ex, peticion);
         }
         if (ex instanceof PresupuestoExcedidoException || ex instanceof ConfiguracionLdpNoVigenteException) {
             return handler.reglaDePrivacidad(ex, peticion);
         }
+        if (ex instanceof DemasiadosIntentosException d) {
+            return handler.demasiadosIntentos(d, peticion);
+        }
         if (ex instanceof CredencialesInvalidasException c) {
             return handler.credencialesInvalidas(c, peticion);
         }
         return handler.argumentoInvalido(ex, peticion);
+    }
+
+    @org.junit.jupiter.api.Test
+    void demasiadosIntentos_incluyeRetryAfterConLosSegundosDeEspera() {
+        var respuesta = handler.demasiadosIntentos(new DemasiadosIntentosException(840), new MockHttpServletRequest("POST", "/api/auth/login"));
+
+        assertThat(respuesta.getStatusCode().value()).isEqualTo(429);
+        assertThat(respuesta.getHeaders().getFirst("Retry-After")).isEqualTo("840");
     }
 
     @org.junit.jupiter.api.Test
