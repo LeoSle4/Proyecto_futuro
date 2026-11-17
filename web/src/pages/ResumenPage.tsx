@@ -14,7 +14,7 @@ export function ResumenPage() {
   const [equipos, setEquipos] = useState<Equipo[] | null>(null)
   const [semana, setSemana] = useState(lunesActual)
   const [elegido, setElegido] = useState<number | null>(null)
-  const [resumenes, setResumenes] = useState<Record<number, Resumen>>({})
+  const [resumenes, setResumenes] = useState<Record<string, Resumen>>({})
   const [falloEquipos, setFalloEquipos] = useState<string | null>(null)
 
   useEffect(() => {
@@ -39,11 +39,10 @@ export function ResumenPage() {
   useEffect(() => {
     if (!equipos) return
     let vigente = true
-    setResumenes({})
     equipos.forEach((equipo) => {
       api.dashboard(equipo.id, semana).then(
-        (d) => vigente && setResumenes((previos) => ({ ...previos, [equipo.id]: d })),
-        () => vigente && setResumenes((previos) => ({ ...previos, [equipo.id]: 'error' })),
+        (d) => vigente && setResumenes((previos) => ({ ...previos, [`${semana}:${equipo.id}`]: d })),
+        () => vigente && setResumenes((previos) => ({ ...previos, [`${semana}:${equipo.id}`]: 'error' })),
       )
     })
     return () => {
@@ -52,7 +51,7 @@ export function ResumenPage() {
   }, [equipos, semana])
 
   const equipo = useMemo(() => equipos?.find((e) => e.id === elegido) ?? null, [equipos, elegido])
-  const resumen = elegido !== null ? resumenes[elegido] : undefined
+  const resumen = elegido !== null ? resumenes[`${semana}:${elegido}`] : undefined
   const esActual = semana === lunesActual()
 
   if (falloEquipos) return <p role="alert" className="resumen-aviso">{falloEquipos}</p>
@@ -73,7 +72,7 @@ export function ResumenPage() {
           <TarjetaEquipo
             key={e.id}
             equipo={e}
-            resumen={resumenes[e.id] ?? null}
+            resumen={resumenes[`${semana}:${e.id}`] ?? null}
             activo={e.id === elegido}
             alElegir={() => setElegido(e.id)}
           />
