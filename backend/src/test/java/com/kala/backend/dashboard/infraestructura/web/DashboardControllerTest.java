@@ -1,4 +1,4 @@
-package com.kala.backend.controller;
+package com.kala.backend.dashboard.infraestructura.web;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -8,11 +8,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.kala.backend.exception.EquipoNoEncontradoException;
-import com.kala.backend.exception.SemanaInvalidaException;
-import com.kala.backend.service.DashboardService;
-import com.kala.backend.service.DashboardService.ItemEstimado;
-import com.kala.backend.service.DashboardService.ResultadoDashboard;
+import com.kala.backend.dashboard.aplicacion.DashboardService.ItemEstimado;
+import com.kala.backend.dashboard.aplicacion.DashboardService.ResultadoDashboard;
+import com.kala.backend.dashboard.aplicacion.DashboardService;
+import com.kala.backend.dashboard.dominio.SemanaInvalidaException;
+import com.kala.backend.organizacion.dominio.EquipoNoEncontradoException;
+import com.kala.backend.organizacion.infraestructura.web.OrganizacionTestSecurityConfig;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;

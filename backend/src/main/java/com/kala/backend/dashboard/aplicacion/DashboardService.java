@@ -1,13 +1,13 @@
-package com.kala.backend.service;
+package com.kala.backend.dashboard.aplicacion;
 
-import com.kala.backend.exception.EquipoNoEncontradoException;
-import com.kala.backend.exception.SemanaInvalidaException;
-import com.kala.backend.model.ConfiguracionLdp;
-import com.kala.backend.model.ConsultaDashboard;
-import com.kala.backend.repository.ConsultaDashboardRepository;
-import com.kala.backend.repository.DashboardRepository;
-import com.kala.backend.repository.DashboardRepository.FilaItem;
-import java.math.RoundingMode;
+import com.kala.backend.dashboard.aplicacion.puerto.AuditoriaDashboard;
+import com.kala.backend.dashboard.aplicacion.puerto.LecturaDashboard.FilaItem;
+import com.kala.backend.dashboard.aplicacion.puerto.LecturaDashboard;
+import com.kala.backend.dashboard.dominio.ConsultaDashboard;
+import com.kala.backend.dashboard.dominio.SemanaInvalidaException;
+import com.kala.backend.organizacion.dominio.EquipoNoEncontradoException;
+import com.kala.backend.privacidad.dominio.MecanismosLdp;
+import com.kala.backend.privacidad.dominio.ParametrosLdp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,8 +21,14 @@ public class DashboardService {
     public static final String OK = "OK";
     public static final String DATOS_INSUFICIENTES = "DATOS_INSUFICIENTES";
 
-    // Estimación de un ítem. proporcionEstimada y margenError95 son nulos si el ítem no alcanza el n mínimo.
-    public record ItemEstimado(Long itemId, String tema, Double proporcionEstimada, Double margenError95) {
+    // Estimación de un ítem. Randomized Response llena proporcionEstimada (0 a 1); Laplace llena mediaEstimada
+    // (en la escala del ítem). El estimado y el margen son nulos si el ítem no alcanza el n mínimo.
+    public record ItemEstimado(Long itemId, String tema, Double proporcionEstimada, Double margenError95,
+                               Double mediaEstimada) {
+
+        public ItemEstimado(Long itemId, String tema, Double proporcionEstimada, Double margenError95) {
+            this(itemId, tema, proporcionEstimada, margenError95, null);
+        }
     }
 
     // totalRespuestas es el mayor n entre los ítems de la ventana (0 si no hay respuestas).
@@ -30,13 +36,13 @@ public class DashboardService {
                                      long totalRespuestas, List<ItemEstimado> items) {
     }
 
-    private final DashboardRepository repositorio;
-    private final ConsultaDashboardRepository auditoria;
+    private final LecturaDashboard repositorio;
+    private final AuditoriaDashboard auditoria;
     private final int nMinimo;
 
     public DashboardService(
-            DashboardRepository repositorio,
-            ConsultaDashboardRepository auditoria,
+            LecturaDashboard repositorio,
+            AuditoriaDashboard auditoria,
             @Value("${kala.privacidad.n-minimo}") int nMinimo) {
         this.repositorio = repositorio;
         this.auditoria = auditoria;
@@ -62,20 +68,19 @@ public class DashboardService {
         boolean hayDatosSuficientes = filas.stream().anyMatch(f -> f.n() >= nMinimo);
         String resultado = hayDatosSuficientes ? OK : DATOS_INSUFICIENTES;
 
-        auditoria.save(new ConsultaDashboard(usuarioId, equipoId, semana, hasta, resultado));
+        auditoria.guardar(new ConsultaDashboard(usuarioId, equipoId, semana, hasta, resultado));
         return new ResultadoDashboard(equipoId, semana, resultado, total, items);
     }
 
     private ItemEstimado estimar(FilaItem fila) {
-        boolean reportable = fila.n() >= nMinimo
-                && ConfiguracionLdp.RANDOMIZED_RESPONSE.equals(fila.mecanismo());
-        if (!reportable) {
+        if (fila.n() < nMinimo) {
             return new ItemEstimado(fila.itemId(), fila.tema(), null, null);
         }
-        int si = fila.suma().setScale(0, RoundingMode.HALF_UP).intValueExact();
-        int n = Math.toIntExact(fila.n());
-        EstimadorDesesgado estimador = new EstimadorDesesgado(fila.probabilidadVerdad().doubleValue());
-        return new ItemEstimado(fila.itemId(), fila.tema(),
-                estimador.estimarProporcion(si, n), estimador.margenError95(si, n));
+        ParametrosLdp parametros = new ParametrosLdp(fila.probabilidadVerdad(), fila.epsilon());
+        return MecanismosLdp.buscar(fila.mecanismo())
+                .flatMap(m -> m.estimar(parametros, fila.valorMin(), fila.valorMax(), fila.suma(), fila.n()))
+                .map(e -> new ItemEstimado(fila.itemId(), fila.tema(), e.proporcionEstimada(), e.margenError95(),
+                        e.mediaEstimada()))
+                .orElseGet(() -> new ItemEstimado(fila.itemId(), fila.tema(), null, null));
     }
 }

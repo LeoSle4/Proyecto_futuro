@@ -1,8 +1,8 @@
-package com.kala.backend.repository;
+package com.kala.backend.dashboard.infraestructura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.kala.backend.repository.DashboardRepository.FilaItem;
+import com.kala.backend.dashboard.aplicacion.puerto.LecturaDashboard.FilaItem;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;

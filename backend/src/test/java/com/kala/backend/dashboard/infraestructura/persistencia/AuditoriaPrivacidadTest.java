@@ -1,4 +1,4 @@
-package com.kala.backend.repository;
+package com.kala.backend.dashboard.infraestructura.persistencia;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

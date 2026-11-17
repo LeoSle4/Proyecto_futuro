@@ -1,9 +1,8 @@
-package com.kala.backend.controller;
+package com.kala.backend.dashboard.infraestructura.web;
 
-import com.kala.backend.dto.DashboardResponse;
-import com.kala.backend.dto.DashboardResponse.ItemDashboard;
-import com.kala.backend.service.DashboardService;
-import com.kala.backend.service.DashboardService.ResultadoDashboard;
+import com.kala.backend.dashboard.aplicacion.DashboardService.ResultadoDashboard;
+import com.kala.backend.dashboard.aplicacion.DashboardService;
+import com.kala.backend.dashboard.infraestructura.web.DashboardResponse.ItemDashboard;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.AccessDeniedException;
@@ -44,7 +43,7 @@ public class DashboardController {
                 r.resultado(),
                 r.totalRespuestas(),
                 r.items().stream()
-                        .map(i -> new ItemDashboard(i.itemId(), i.tema(), i.proporcionEstimada(), i.margenError95()))
+                        .map(i -> new ItemDashboard(i.itemId(), i.tema(), i.proporcionEstimada(), i.margenError95(), i.mediaEstimada()))
                         .toList());
     }
 

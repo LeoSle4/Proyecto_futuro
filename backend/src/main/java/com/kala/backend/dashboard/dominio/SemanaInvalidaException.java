@@ -1,4 +1,4 @@
-package com.kala.backend.exception;
+package com.kala.backend.dashboard.dominio;
 
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;

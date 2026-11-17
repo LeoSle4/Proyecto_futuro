@@ -1,6 +1,7 @@
-package com.kala.backend.repository;
+package com.kala.backend.dashboard.infraestructura.persistencia;
 
-import java.math.BigDecimal;
+import com.kala.backend.dashboard.aplicacion.puerto.LecturaDashboard.FilaItem;
+import com.kala.backend.dashboard.aplicacion.puerto.LecturaDashboard;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -8,22 +9,7 @@ import org.springframework.stereotype.Repository;
 
 // Lee los agregados de varios módulos con SQL directo, sin importar sus clases.
 @Repository
-public class DashboardRepository {
-
-    // Un ítem agregado en la ventana. En Randomized Response, suma = respuestas reportadas como "sí" y n = total.
-    public record FilaItem(
-            Long itemId,
-            String tema,
-            Long configuracionLdpId,
-            String mecanismo,
-            BigDecimal probabilidadVerdad,
-            BigDecimal epsilon,
-            int valorMin,
-            int valorMax,
-            BigDecimal suma,
-            long n
-    ) {
-    }
+public class DashboardRepository implements LecturaDashboard {
 
     private final JdbcClient jdbc;
 
@@ -31,6 +17,7 @@ public class DashboardRepository {
         this.jdbc = jdbc;
     }
 
+    @Override
     public boolean equipoPerteneceAEmpresa(Long equipoId, Long empresaId) {
         return jdbc.sql("SELECT COUNT(*) FROM equipo WHERE id = :equipoId AND empresa_id = :empresaId")
                 .param("equipoId", equipoId)
@@ -39,6 +26,7 @@ public class DashboardRepository {
                 .single() > 0;
     }
 
+    @Override
     public List<FilaItem> agregadosDeVentana(Long equipoId, LocalDate desde, LocalDate hasta) {
         return jdbc.sql("""
                         SELECT a.item_id, i.tema, a.configuracion_ldp_id, c.mecanismo, c.probabilidad_verdad, c.epsilon,
