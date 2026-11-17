@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import com.kala.backend.service.RandomizedResponseReferencia;
-import com.kala.backend.service.VentanaSemanal;
+import com.kala.backend.privacidad.dominio.RandomizedResponseReferencia;
+import com.kala.backend.privacidad.dominio.VentanaSemanal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;

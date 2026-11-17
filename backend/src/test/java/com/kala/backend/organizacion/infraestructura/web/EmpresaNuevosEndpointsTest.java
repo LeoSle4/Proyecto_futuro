@@ -1,0 +1,119 @@
+
+package com.kala.backend.organizacion.infraestructura.web;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.kala.backend.organizacion.aplicacion.EmpresaConEquiposRequest;
+import com.kala.backend.organizacion.aplicacion.EmpresaService;
+import com.kala.backend.organizacion.dominio.Empresa;
+import com.kala.backend.organizacion.dominio.NombreDuplicadoException;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
+@WebMvcTest(EmpresaController.class)
+@Import(OrganizacionTestSecurityConfig.class)
+@TestPropertySource(properties = {
+        "app.jwt.issuer=kala-api",
+        "app.jwt.ttl-minutes=30",
+        "app.jwt.secret-base64=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+})
+class EmpresaNuevosEndpointsTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private EmpresaService empresaService;
+
+    @Test
+    void buscarConTextoVacioDevuelve400() throws Exception {
+        mockMvc.perform(get("/api/empresas/buscar")
+                        .param("texto", "")
+                        .with(admin()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void buscarConTextoDevuelveEmpresas() throws Exception {
+        Empresa empresa = new Empresa(1L, "Acme", "Tecnología");
+
+        when(empresaService.buscarPorNombre("acme"))
+                .thenReturn(List.of(empresa));
+
+        mockMvc.perform(get("/api/empresas/buscar")
+                        .param("texto", "acme")
+                        .with(admin()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].nombre").value("Acme"));
+    }
+
+    @Test
+    void crearConEquiposDevuelve201YLocation() throws Exception {
+        Empresa empresa = new Empresa(10L, "Acme", "Tecnología");
+
+        when(empresaService.crearConEquipos(
+                any(EmpresaConEquiposRequest.class)))
+                .thenReturn(empresa);
+
+        String json = """
+                {
+                    "ruc": "20123456789",
+                    "nombre": "Acme",
+                    "rubro": "Tecnología",
+                    "equipos": ["Desarrollo", "Soporte"]
+                }
+                """;
+
+        mockMvc.perform(post("/api/empresas/con-equipos").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(header().string(
+                        "Location", "/api/empresas/10"))
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.nombre").value("Acme"));
+    }
+
+    @Test
+    void crearConEquiposDuplicadosDevuelve409() throws Exception {
+        when(empresaService.crearConEquipos(
+                any(EmpresaConEquiposRequest.class)))
+                .thenThrow(new NombreDuplicadoException("Desarrollo"));
+
+        String json = """
+                {
+                    "ruc": "20123456789",
+                    "nombre": "Acme",
+                    "rubro": "Tecnología",
+                    "equipos": ["Desarrollo", "desarrollo"]
+                }
+                """;
+
+        mockMvc.perform(post("/api/empresas/con-equipos").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isConflict());
+    }
+
+    private static RequestPostProcessor admin() {
+        return jwt().jwt(jwt -> jwt.claim("roles", List.of("ROLE_ADMIN")))
+                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
+}
