@@ -8,8 +8,9 @@ public final class Laplace implements MecanismoLdp {
 
     public static final String CODIGO = "LAPLACE";
 
-    // Cota de cordura para un valor ruidoso: con Laplace la cola es larga, pero nunca llega a este orden.
-    private static final BigDecimal LIMITE_VALOR = new BigDecimal("1000000");
+    // El ruido Laplace de escala b = delta / epsilon supera a k b con probabilidad e^-k: con k = 50 es del orden de
+    // 2e-22, así que un valor más lejos que eso de la escala del ítem no puede venir de un dispositivo honesto.
+    private static final double ESCALAS_DE_RUIDO_ADMITIDAS = 50;
 
     @Override
     public String codigo() {
@@ -25,11 +26,15 @@ public final class Laplace implements MecanismoLdp {
     }
 
     @Override
-    public BigDecimal aSuma(Boolean respuestaRuidosa, BigDecimal valorRuidoso) {
+    public BigDecimal aSuma(Boolean respuestaRuidosa, BigDecimal valorRuidoso, ParametrosLdp parametros,
+                            double valorMin, double valorMax) {
         if (valorRuidoso == null) {
             throw new IllegalArgumentException("Un ítem Laplace requiere valorRuidoso");
         }
-        if (valorRuidoso.abs().compareTo(LIMITE_VALOR) > 0) {
+        double epsilon = epsilonItem(parametros);
+        double margen = ESCALAS_DE_RUIDO_ADMITIDAS * (valorMax - valorMin) / epsilon;
+        double valor = valorRuidoso.doubleValue();
+        if (!Double.isFinite(valor) || valor < valorMin - margen || valor > valorMax + margen) {
             throw new IllegalArgumentException("valorRuidoso está fuera del rango admitido");
         }
         return valorRuidoso;
