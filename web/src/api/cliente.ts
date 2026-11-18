@@ -143,7 +143,16 @@ export const api = {
     return USAR_DEMO ? Promise.resolve(demo.empleados()) : conRenovacion<Empleado[]>('/api/empleados')
   },
   async crearEmpleado(d: NuevoEmpleadoSolicitud): Promise<void> {
-    if (USAR_DEMO) return demo.crearEmpleado(d)
+    if (USAR_DEMO) {
+      try {
+        return demo.crearEmpleado(d)
+      } catch (e) {
+        if (e instanceof Error && 'estado' in e && e.estado === 409) {
+          throw new ErrorApi(409, 'Ese correo ya tiene una cuenta. Usa otro o pídele a esa persona que entre con la suya.')
+        }
+        throw e
+      }
+    }
     try {
       await conRenovacion<unknown>('/api/empleados', { method: 'POST', body: JSON.stringify(d) })
     } catch (e) {
