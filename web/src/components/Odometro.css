@@ -1,0 +1,15 @@
+.odo { display: inline-flex; align-items: baseline; line-height: 1; white-space: nowrap; }
+.odo .dg { display: inline-block; height: 1em; overflow: hidden; line-height: 1; }
+.odo .st { display: flex; flex-direction: column; transform: translateY(0); will-change: transform; }
+.odo .st i { display: block; height: 1em; line-height: 1; font-style: normal; }
+.odo.rodando .dg {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+.odo .ch { opacity: 0; }
+.odo.on .ch { opacity: 1; transition: opacity 400ms var(--ease-enter) 700ms; }
+.odo.on .st {
+  transform: translateY(calc(var(--t) * -1em));
+  transition: transform 1200ms var(--ease-enter);
+  transition-delay: calc(var(--k) * 70ms);
+}

@@ -1,0 +1,34 @@
+.medidor { position: relative; height: 128px; margin-top: 14px; }
+.medidor:focus-visible { outline: 2px solid var(--turquesa); outline-offset: 4px; border-radius: 8px; }
+.m-eje { position: absolute; left: 0; right: 0; top: 62px; height: 2px; background: #cfd1c8; }
+.m-marca { position: absolute; top: 57px; width: 1px; height: 12px; background: #9aa29c; }
+.m-marca.mayor { top: 54px; height: 18px; background: var(--tinta-3); }
+.m-etiqueta { position: absolute; top: 102px; font-size: 0.8125rem; font-weight: 600; color: var(--tinta-3); transform: translateX(-50%); white-space: nowrap; }
+.m-etiqueta.inicio { transform: none; }
+.m-etiqueta.fin { transform: translateX(-100%); }
+.m-banda { position: absolute; border-radius: 999px; transform-origin: 50% 50%; animation: abre 1100ms var(--ease-enter) var(--bd, 0ms) both; }
+.m-banda.halo { top: 34px; height: 56px; background: linear-gradient(90deg, rgba(8, 145, 178, 0.04), rgba(8, 145, 178, 0.13) 50%, rgba(8, 145, 178, 0.04)); }
+.m-banda.nucleo { top: 45px; height: 34px; background: linear-gradient(90deg, rgba(8, 145, 178, 0.16), rgba(8, 145, 178, 0.34) 50%, rgba(8, 145, 178, 0.16)); box-shadow: inset 0 0 0 1.5px rgba(11, 95, 115, 0.45); }
+.m-corchete { position: absolute; top: 28px; height: 62px; width: 0; border-left: 1.5px solid var(--mar); animation: aparece 400ms var(--ease-enter) calc(var(--bd, 0ms) + 800ms) both; }
+.m-valor { position: absolute; top: 3px; font-size: 0.875rem; font-weight: 700; color: var(--mar); transform: translateX(-50%); white-space: nowrap; animation: aparece 400ms var(--ease-enter) calc(var(--bd, 0ms) + 800ms) both; }
+.m-estimado { position: absolute; top: 48px; width: 28px; height: 28px; margin-left: -14px; border-radius: 50%; background: var(--tinta); border: 5px solid #fff; box-shadow: 0 0 0 2px var(--mar); animation: cae 700ms var(--ease-enter) calc(var(--bd, 0ms) + 800ms) both; }
+.m-pista {
+  position: absolute; top: 2px; transform: translate(-50%, -100%) translateY(4px); background: var(--tinta); color: #fff;
+  font-size: 0.8125rem; font-weight: 600; padding: 8px 12px; border-radius: 8px; white-space: nowrap; opacity: 0; pointer-events: none; z-index: 5;
+  transition: opacity 120ms var(--ease), transform 120ms var(--ease);
+}
+.m-pista::after { content: ''; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px; background: var(--tinta); transform: translateX(-50%) rotate(45deg); }
+.medidor:hover .m-pista, .medidor:focus-visible .m-pista { opacity: 1; transform: translate(-50%, -100%); }
+
+/* Simulation: the band glides to its new width instead of opening again. */
+.medidor.desliza .m-banda, .medidor.desliza .m-corchete, .medidor.desliza .m-valor, .medidor.desliza .m-pista {
+  animation: none; opacity: 1; transform: none;
+  transition: left 650ms var(--ease-enter), width 650ms var(--ease-enter);
+}
+.medidor.desliza .m-valor { transform: translateX(-50%); }
+.medidor.desliza .m-pista { opacity: 0; transform: translate(-50%, -100%) translateY(4px); transition: left 650ms var(--ease-enter), opacity 120ms var(--ease), transform 120ms var(--ease); }
+.medidor.desliza:hover .m-pista, .medidor.desliza:focus-visible .m-pista { opacity: 1; transform: translate(-50%, -100%); }
+
+@keyframes abre { from { transform: scaleX(0); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cae { from { transform: scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }
