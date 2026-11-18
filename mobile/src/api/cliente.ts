@@ -1,0 +1,121 @@
+import * as SecureStore from 'expo-secure-store'
+import type { EnvioItem } from '../domain/ldp'
+import { contactosDemo, cuestionariosDemo } from './demo'
+import type { Contacto, Cuestionario } from './tipos'
+
+export class ErrorApi extends Error {
+  readonly estado: number
+  constructor(estado: number, mensaje: string) {
+    super(mensaje)
+    this.estado = estado
+  }
+}
+
+export const MODO_DEMO = process.env.EXPO_PUBLIC_DEMO === '1'
+// On a real phone "localhost" is the phone itself: set EXPO_PUBLIC_API_URL to your computer's address.
+const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080'
+const CLAVE_REFRESH = 'kala.refresh'
+
+let accessToken: string | null = null
+
+interface Sesion {
+  accessToken: string
+  refreshToken: string
+}
+
+async function pedir<T>(ruta: string, init: RequestInit = {}, conAuth = true): Promise<T> {
+  const cabeceras: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (conAuth && accessToken) cabeceras.Authorization = `Bearer ${accessToken}`
+  let respuesta: Response
+  try {
+    respuesta = await fetch(`${BASE}${ruta}`, { ...init, headers: cabeceras })
+  } catch {
+    throw new ErrorApi(0, 'No hay conexión. Inténtalo de nuevo en un momento.')
+  }
+  if (!respuesta.ok) throw new ErrorApi(respuesta.status, mensajePara(respuesta.status))
+  return respuesta.status === 204 || respuesta.status === 202 ? (undefined as T) : ((await respuesta.json()) as T)
+}
+
+function mensajePara(estado: number): string {
+  if (estado === 401) return 'Tu sesión terminó. Inicia sesión de nuevo.'
+  if (estado === 403) return 'Tu cuenta no puede hacer esto.'
+  if (estado === 409) return 'Ya respondiste esta pregunta.'
+  if (estado === 422) return 'Este cuestionario cambió. Vuelve a abrirlo para continuar.'
+  if (estado === 429) return 'Demasiados intentos. Espera unos minutos.'
+  return 'Algo salió mal de nuestro lado. Inténtalo de nuevo.'
+}
+
+async function guardar(sesion: Sesion | null) {
+  accessToken = sesion?.accessToken ?? null
+  if (sesion) await SecureStore.setItemAsync(CLAVE_REFRESH, sesion.refreshToken)
+  else await SecureStore.deleteItemAsync(CLAVE_REFRESH)
+}
+
+// One refresh at a time: the backend rotates the token and treats reuse as theft.
+let refrescando: Promise<boolean> | null = null
+
+async function refrescar(): Promise<boolean> {
+  const refreshToken = await SecureStore.getItemAsync(CLAVE_REFRESH)
+  if (!refreshToken) return false
+  refrescando ??= pedir<Sesion>('/api/auth/refresh', { method: 'POST', body: JSON.stringify({ refreshToken }) }, false)
+    .then(async (s) => {
+      await guardar(s)
+      return true
+    })
+    .catch(async () => {
+      await guardar(null)
+      return false
+    })
+    .finally(() => {
+      refrescando = null
+    })
+  return refrescando
+}
+
+async function conRenovacion<T>(ruta: string, init?: RequestInit): Promise<T> {
+  try {
+    return await pedir<T>(ruta, init)
+  } catch (e) {
+    if (e instanceof ErrorApi && e.estado === 401 && (await refrescar())) return pedir<T>(ruta, init)
+    throw e
+  }
+}
+
+export const api = {
+  async iniciarSesion(username: string, password: string): Promise<void> {
+    if (MODO_DEMO) return
+    const sesion = await pedir<Sesion>('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }, false)
+    const perfil = await (async () => {
+      accessToken = sesion.accessToken
+      return pedir<{ roles: string[] }>('/api/auth/me')
+    })()
+    if (!perfil.roles.includes('EMPLEADO')) {
+      accessToken = null
+      throw new ErrorApi(403, 'Esta app es para empleados. Usa el panel web de RRHH.')
+    }
+    await guardar(sesion)
+  },
+  async restaurarSesion(): Promise<boolean> {
+    return MODO_DEMO ? true : refrescar()
+  },
+  async cerrarSesion(): Promise<void> {
+    const refreshToken = await SecureStore.getItemAsync(CLAVE_REFRESH)
+    await guardar(null)
+    if (MODO_DEMO || !refreshToken) return
+    try {
+      await pedir<void>('/api/auth/logout', { method: 'POST', body: JSON.stringify({ refreshToken }) }, false)
+    } catch {
+      /* the local session is gone; the server expires its own */
+    }
+  },
+  pendientes(): Promise<Cuestionario[]> {
+    return MODO_DEMO ? Promise.resolve(cuestionariosDemo) : conRenovacion<Cuestionario[]>('/api/cuestionarios/pendientes')
+  },
+  async enviar(envio: EnvioItem): Promise<void> {
+    if (MODO_DEMO) return
+    await conRenovacion<void>('/api/checkin', { method: 'POST', body: JSON.stringify(envio) })
+  },
+  contactos(): Promise<Contacto[]> {
+    return MODO_DEMO ? Promise.resolve(contactosDemo) : conRenovacion<Contacto[]>('/api/ayuda/contactos')
+  },
+}
