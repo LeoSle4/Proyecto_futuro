@@ -1,0 +1,16 @@
+.flujo-lienzo { display: block; width: 100%; aspect-ratio: 5 / 1; }
+.flujo { border-top: 1px solid rgba(207, 230, 236, 0.22); border-bottom: 1px solid rgba(207, 230, 236, 0.22); padding: 18px 0 14px; }
+.flujo-pie { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; font-size: 0.8125rem; font-weight: 600; color: #a9d3de; letter-spacing: 0.02em; margin-top: 12px; }
+.flujo-pie span:last-child { text-align: right; }
+.flujo-pie em { font-style: normal; display: flex; align-items: center; gap: 10px; color: #e6f3f6; }
+.flujo-pie em::before, .flujo-pie em::after { content: ''; width: 28px; height: 1px; background: rgba(207, 230, 236, 0.5); }
+.flujo-total { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; margin-top: 8px; font-size: 0.8125rem; font-weight: 700; color: #e6f3f6; }
+.flujo-total span:last-child { text-align: right; }
+.flujo-total em { font-style: normal; color: #7fd0e3; font-weight: 600; }
+.flujo-leyenda { display: flex; gap: 20px; font-size: 0.8125rem; font-weight: 600; color: #a9d3de; margin-top: 10px; }
+.flujo-leyenda span { display: flex; align-items: center; gap: 8px; }
+.flujo-leyenda i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+.flujo-leyenda .si { background: #cfe6ec; }
+.flujo-leyenda .no { border: 2px solid #cfe6ec; }
+.flujo-corrige { margin: 10px 0 0; font-size: 0.8125rem; font-weight: 600; color: #a9d3de; }
+.flujo-corrige em { font-style: normal; color: #e6f3f6; font-weight: 700; }

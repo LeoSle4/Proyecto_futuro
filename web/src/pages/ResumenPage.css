@@ -1,28 +1,23 @@
-.resumen { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; }
-.resumen-equipos { display: grid; gap: 12px; }
-.resumen-lateral-titulo { font-size: 1.125rem; font-weight: 800; margin-bottom: 4px; }
-.resumen-centro { display: grid; gap: 20px; }
-.resumen-cabecera { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: end; }
-.resumen-cabecera h1 { font-size: 2.25rem; font-weight: 800; }
-.resumen-sub { color: var(--tinta-suave); margin-top: 6px; max-width: 65ch; }
-.resumen-semana { display: flex; align-items: center; gap: 10px; }
-.resumen-semana-texto { min-width: 11ch; text-align: center; font-weight: 600; }
-.resumen-semana .boton { min-width: 44px; padding: 0; }
-.resumen-semana .boton:disabled { opacity: 0.45; cursor: not-allowed; }
-.resumen-indicadores { display: grid; gap: 20px; }
-.resumen-aviso, .resumen-aviso-demo { color: var(--tinta-suave); }
-.resumen-aviso-demo { font-weight: 600; }
+.resumen { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; align-items: start; }
+.rotulo { font-family: var(--sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--tinta-3); margin: 4px 0 14px; }
+.resumen-cabecera h1 { font-family: var(--serif); font-size: 3.25rem; line-height: 1.05; font-weight: 600; letter-spacing: -0.025em; }
+.resumen-intro { font-size: 1.125rem; color: var(--tinta-2); margin: 12px 0 22px; max-width: 60ch; }
+.semana { display: inline-flex; align-items: center; background: #fff; border: 1.5px solid var(--linea); border-radius: var(--r-s); margin-bottom: 22px; font-weight: 600; font-size: 0.9375rem; }
+.semana button { width: 44px; height: 44px; background: transparent; border: 0; color: var(--mar); border-radius: var(--r-s); cursor: pointer; font-size: 1rem; transition: background var(--m-in) var(--ease); }
+.semana button:hover:not(:disabled) { background: var(--salvia); }
+.semana button:disabled { opacity: 0.35; cursor: not-allowed; }
+.semana span { padding: 0 14px; border-left: 1.5px solid var(--linea); border-right: 1.5px solid var(--linea); height: 44px; display: flex; align-items: center; }
+.resumen-contenido { animation: aparece 260ms var(--ease) both; }
+.resumen-pares { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
+.resumen-aviso, .resumen-demo { color: var(--tinta-2); }
+.resumen-demo { font-weight: 600; margin-bottom: 14px; }
+.resumen-notas { margin-top: 22px; font-size: 0.875rem; line-height: 1.6; color: var(--tinta-2); border-top: 1px solid var(--linea); padding-top: 14px; }
+.resumen-notas b { color: var(--tinta); }
 .resumen-vacio { display: grid; gap: 8px; padding-top: 24px; max-width: 65ch; }
-.resumen-vacio h1 { font-size: 2.25rem; font-weight: 800; }
-.resumen-saber {
-  display: grid; gap: 6px; background: var(--superficie); border: 1px solid var(--borde);
-  border-radius: var(--radio-chico); padding: 18px 24px; color: var(--tinta-suave);
-}
-.resumen-saber strong { color: var(--tinta); }
-@media (max-width: 900px) {
-  .resumen { grid-template-columns: 1fr; }
-  .resumen-equipos { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-  .resumen-lateral-titulo { grid-column: 1 / -1; }
-  .resumen-cabecera h1 { font-size: 1.75rem; }
-  .indicador-cifra-grande { font-size: 3.25rem; }
+.resumen-vacio h1 { font-family: var(--serif); font-size: 2.25rem; font-weight: 600; }
+@keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 1000px) {
+  .resumen { grid-template-columns: 1fr; gap: 24px; }
+  .resumen-pares { grid-template-columns: 1fr; }
+  .resumen-cabecera h1 { font-size: 2.25rem; }
 }

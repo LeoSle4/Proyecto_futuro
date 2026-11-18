@@ -1,77 +1,99 @@
-/* Garúa limeña: fog-grey surfaces, one teal voice, one warm sun reserved for the estimate. */
+/* Kala · Orgánico. Flat bone ground, deep teal as the one voice, Lora for headlines, Raleway for text.
+   Numerals: never use the `font:` shorthand, it resets font-variant-numeric and the figures go old-style. */
 :root {
-  --niebla-alta: #f0f3f5;
-  --niebla-baja: #dde5ea;
-  --tinta: #25343f;
-  --tinta-suave: #4a5c68;
-  --tinta-tenue: #566873;
-  --borde: #cdd8de;
-  --mar: #1d6a73;
-  --mar-oscuro: #14535b;
-  --mar-velo: rgb(29 106 115 / 0.33);
-  --sol: #f0b44c;
-  --superficie: rgb(255 255 255 / 0.85);
-  --superficie-solida: #ffffff;
-  --velo-a: rgb(255 255 255 / 0.8);
-  --velo-b: #e9eff2;
+  --hueso: #f6f6f1;
+  --hueso-2: #ecece5;
+  --tinta: #0f172a;
+  --tinta-2: #475569;
+  --tinta-3: #566272;
+  --linea: #dcddd4;
+  --turquesa: #0891b2;
+  --mar: #0b5f73;
+  --noche: #03222c;
+  --bruma: #cfe6ec;
+  --salvia: #e7e9e2;
   --error: #8a3b12;
-  --radio: 24px;
-  --radio-chico: 16px;
-  --fuente: 'Albert Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --serif: 'Lora', Georgia, serif;
+  --sans: 'Raleway', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --r-s: 10px;
+  --r-m: 18px;
+  --r-l: 26px;
+  --m-in: 150ms;
+  --m-out: 120ms;
+  --m-press: 90ms;
+  --m-card: 180ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
   color-scheme: light;
 }
 
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  :root {
-    --superficie: #ffffff;
-    --velo-a: #ffffff;
-  }
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
 }
-
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: var(--fuente);
+  font-family: var(--sans);
   font-size: 1rem;
   line-height: 1.5;
   color: var(--tinta);
-  background: linear-gradient(180deg, var(--niebla-alta) 0%, var(--niebla-baja) 100%) fixed;
-  font-variant-numeric: tabular-nums;
+  background: var(--hueso);
 }
 
-h1, h2, h3, p { margin: 0; }
-h1, h2, h3 { text-wrap: balance; line-height: 1.15; }
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3 { text-wrap: balance; }
 
-/* Browser surfaces themed from the palette */
 ::selection { background: var(--mar); color: #fff; }
-input, button, select { font: inherit; color: inherit; }
-:focus-visible { outline: 3px solid var(--mar); outline-offset: 3px; border-radius: 6px; }
-a { color: var(--mar-oscuro); text-underline-offset: 0.2em; }
-input { caret-color: var(--mar); }
-* { scrollbar-color: var(--borde) transparent; }
+button, input { font-family: inherit; font-size: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--turquesa); outline-offset: 2px; border-radius: 6px; }
+a { color: var(--mar); text-underline-offset: 0.2em; }
+input { caret-color: var(--turquesa); }
+* { scrollbar-color: var(--linea) transparent; }
 
 .solo-lectores {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-
-.saltar {
-  position: absolute; left: 12px; top: -80px; z-index: 10;
-  background: var(--tinta); color: #fff; padding: 12px 18px; border-radius: 12px;
-}
+.saltar { position: absolute; left: 12px; top: -80px; z-index: 20; background: var(--tinta); color: #fff; padding: 12px 18px; border-radius: var(--r-s); }
 .saltar:focus { top: 12px; }
 
+/* Entrance: runs once when the element mounts, transform and opacity only. */
+.sube { animation: sube 520ms var(--ease-enter) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.asienta { animation: asienta 900ms var(--ease-enter) 200ms both; }
+.mascara { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.mascara > span { display: block; animation: linea 700ms var(--ease-enter) both; animation-delay: calc(var(--l, 0) * 80ms); }
+@keyframes sube { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes asienta { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes linea { from { transform: translateY(112%); } to { transform: none; } }
+
+/* Hover layer: fine pointer only. Cards lift 2px, buttons step 1px and sink on press. */
+.boton {
+  display: inline-grid; place-items: center; min-height: 44px; padding: 0 20px; border-radius: var(--r-s);
+  border: 1.5px solid var(--linea); background: #fff; color: var(--tinta); font-weight: 700; cursor: pointer; text-decoration: none;
+  transition: background var(--m-in) var(--ease), transform var(--m-in) var(--ease), border-color var(--m-in) var(--ease);
+}
+.boton-primario { background: var(--mar); border-color: var(--mar); color: #fff; min-height: 56px; font-size: 1.0625rem; }
+.boton-primario:disabled { opacity: 0.6; cursor: progress; }
+.boton-contorno { border-color: var(--turquesa); color: var(--mar); }
+.boton:active { transform: translateY(1px) scale(0.985); transition-duration: var(--m-press); }
+.eleva { transition: transform var(--m-out) var(--ease), border-color var(--m-out) var(--ease), box-shadow var(--m-out) var(--ease); }
+@media (hover: hover) and (pointer: fine) {
+  .boton-primario:hover:not(:disabled) { background: color-mix(in srgb, var(--mar) 86%, var(--tinta)); transform: translateY(-1px); }
+  .boton-contorno:hover { background: var(--salvia); }
+  .eleva:hover { transform: translateY(-2px); border-color: #9fa79e; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08); transition-duration: var(--m-card); }
+}
+
+.hatch {
+  background: repeating-linear-gradient(135deg, transparent 0 8px, #dcdcd3 8px 9px), var(--hueso);
+  border: 1.5px dashed #bfc2b8;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

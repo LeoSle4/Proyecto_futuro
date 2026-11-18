@@ -4,11 +4,11 @@ import { MODO_DEMO } from '../api/cliente'
 import './Shell.css'
 
 const SECCIONES = [
-  { ruta: '/', texto: 'Resumen semanal', fin: true },
+  { ruta: '/', texto: 'Resumen', fin: true },
   { ruta: '/equipos', texto: 'Equipos' },
   { ruta: '/empleados', texto: 'Empleados' },
   { ruta: '/cuestionarios', texto: 'Cuestionarios' },
-  { ruta: '/solicitudes', texto: 'Solicitudes de ayuda' },
+  { ruta: '/solicitudes', texto: 'Solicitudes' },
 ]
 
 const ROL_TEXTO: Record<string, string> = {
@@ -24,22 +24,18 @@ export function Shell() {
     <div className="shell">
       <a className="saltar" href="#contenido">Saltar al contenido</a>
       <header className="shell-cabecera">
-        <span className="shell-marca">Kala</span>
-        <nav className="shell-nav" aria-label="Secciones del panel">
+        <span className="shell-marca sube" style={{ '--i': 0 } as React.CSSProperties}>Kala</span>
+        <nav className="shell-tabs sube" style={{ '--i': 1 } as React.CSSProperties} aria-label="Secciones del panel">
           {SECCIONES.map((s) => (
-            <NavLink key={s.ruta} to={s.ruta} end={s.fin} className="shell-enlace">
-              {s.texto}
-            </NavLink>
+            <NavLink key={s.ruta} to={s.ruta} end={s.fin}>{s.texto}</NavLink>
           ))}
         </nav>
-        <div className="shell-cuenta">
+        <div className="shell-cuenta sube" style={{ '--i': 2 } as React.CSSProperties}>
           {MODO_DEMO && <span className="shell-etiqueta">Datos sintéticos</span>}
-          <span className="shell-rol">{rol}</span>
-          <button type="button" className="boton boton-suave" onClick={() => void cerrar()}>
-            Salir
-          </button>
+          <span>{rol}</span>
+          <button type="button" className="shell-salir" onClick={() => void cerrar()}>Salir</button>
           {/* Help always sits in the same corner, last in the header (WCAG 3.2.6). */}
-          <NavLink to="/ayuda" className="boton boton-ayuda">Ayuda</NavLink>
+          <NavLink to="/ayuda" className="boton boton-contorno">Ayuda</NavLink>
         </div>
       </header>
       <main id="contenido" className="shell-contenido" tabIndex={-1}>
