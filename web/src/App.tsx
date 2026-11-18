@@ -6,7 +6,7 @@ import { CuestionariosPage } from './pages/CuestionariosPage'
 import { EmpleadosPage } from './pages/EmpleadosPage'
 import { EquiposPage } from './pages/EquiposPage'
 import { LoginPage } from './pages/LoginPage'
-import { Pendiente } from './pages/Pendiente'
+import { SolicitudesPage } from './pages/SolicitudesPage'
 import { ResumenPage } from './pages/ResumenPage'
 
 function Protegido() {
@@ -24,7 +24,7 @@ export default function App() {
         <Route path="equipos" element={<EquiposPage />} />
         <Route path="empleados" element={<EmpleadosPage />} />
         <Route path="cuestionarios" element={<CuestionariosPage />} />
-        <Route path="solicitudes" element={<Pendiente titulo="Solicitudes de ayuda" descripcion="Solicitudes que las personas dejan para hablar con alguien." />} />
+        <Route path="solicitudes" element={<SolicitudesPage />} />
         <Route path="ayuda" element={<AyudaPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
