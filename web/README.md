@@ -1,12 +1,12 @@
 # Kala · Panel web de RRHH
 
-React + TypeScript + Vite. Dirección visual "Garúa limeña": la incertidumbre se dibuja como neblina y un grupo sin resultado es un velo.
+React + TypeScript + Vite. Dirección visual "Orgánico": fondo hueso plano, Lora y Raleway, un solo verde profundo; la incertidumbre se dibuja como una banda simétrica y un grupo sin resultado es un velo rayado.
 
 ```bash
 npm install
-VITE_DEMO=1 npm run dev   # datos sintéticos, sin backend
-npm run dev               # contra el backend en localhost:8080 (proxy /api)
-npx tsc -b && npm run lint && npm run build
+VITE_DEMO=1 npm run dev   # datos sintéticos, sin backend (VITE_DEMO_ROL=ADMIN para ver la vista de administración)
+npm run dev               # contra el backend en localhost:8090 (proxy /api; KALA_API_URL lo cambia)
+npx tsc -b && npm run lint && npm test && npm run build
 ```
 
 - Tokens y base: `src/index.css`. Componentes: `src/components/`. API: `src/api/cliente.ts`.

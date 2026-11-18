@@ -1,0 +1,4 @@
+.aviso-zona { position: fixed; right: 24px; bottom: 24px; z-index: 30; max-width: min(440px, calc(100vw - 48px)); }
+.aviso { margin: 0; display: flex; align-items: center; gap: 16px; background: var(--tinta); color: #fff; border-radius: var(--r-s); padding: 14px 16px; font-size: 0.9375rem; font-weight: 600; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2); animation: sube 360ms var(--ease-enter) both; }
+.aviso button { flex: none; background: transparent; border: 0; color: var(--bruma); font-weight: 700; font-size: 0.875rem; cursor: pointer; min-height: 44px; padding: 0 4px; }
+.aviso button:hover { color: #fff; }

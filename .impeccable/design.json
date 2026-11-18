@@ -1,41 +1,52 @@
 {
  "schemaVersion": 2,
- "generatedAt": "2026-11-17T22:11:08.616157+00:00",
+ "generatedAt": "2026-11-18T02:19:24.224562+00:00",
  "title": "Design System: Kala",
  "extensions": {
   "colorMeta": {
    "mar": {
     "role": "primary",
     "displayName": "Verde Mar",
-    "canonical": "#1d6a73"
+    "canonical": "#0b5f73"
    },
-   "sol": {
+   "turquesa": {
     "role": "secondary",
-    "displayName": "Sol de Garúa",
-    "canonical": "#f0b44c"
+    "displayName": "Turquesa",
+    "canonical": "#0891b2"
    },
-   "niebla-alta": {
+   "hueso": {
     "role": "neutral",
-    "displayName": "Niebla Alta",
-    "canonical": "#f0f3f5"
+    "displayName": "Hueso",
+    "canonical": "#f6f6f1"
    }
   },
   "shadows": [
    {
-    "name": "punto-solar",
-    "value": "0 3px 8px rgb(37 52 63 / 0.25)",
-    "purpose": "Despega el punto de la estimación."
+    "name": "levanta",
+    "value": "0 10px 24px rgba(15,23,42,0.08)",
+    "purpose": "Solo al pasar el mouse sobre una tarjeta."
    }
   ],
-  "motion": [],
+  "motion": [
+   {
+    "name": "ease",
+    "value": "cubic-bezier(0.2,0.8,0.2,1)",
+    "purpose": "Pasos de interfaz."
+   },
+   {
+    "name": "ease-enter",
+    "value": "cubic-bezier(0.22,1,0.36,1)",
+    "purpose": "Entradas y odómetro."
+   }
+  ],
   "breakpoints": [
    {
     "name": "apilado",
-    "value": "900px"
+    "value": "1000px"
    },
    {
     "name": "movil",
-    "value": "720px"
+    "value": "900px"
    }
   ]
  },
@@ -46,51 +57,39 @@
    "refersTo": "button-primary",
    "description": "Acción principal.",
    "html": "<button class=\"ds-btn\">Entrar</button>",
-   "css": ".ds-btn{background:#1d6a73;color:#fff;min-height:44px;padding:0 20px;border:1px solid #1d6a73;border-radius:12px;font-weight:600;cursor:pointer}.ds-btn:hover{background:#14535b}.ds-btn:focus-visible{outline:3px solid #1d6a73;outline-offset:3px}"
-  },
-  {
-   "name": "Team Card Active",
-   "kind": "card",
-   "refersTo": "card-equipo-activo",
-   "description": "Equipo elegido.",
-   "html": "<button class=\"ds-team\"><b>Operaciones Lima</b><span>38 respuestas · con resultado</span></button>",
-   "css": ".ds-team{display:grid;gap:2px;text-align:left;width:280px;padding:16px 18px;background:#1d6a73;color:#fff;border:1px solid #1d6a73;border-radius:16px}.ds-team span{font-size:.9375rem;color:#e4f1f2}"
-  },
-  {
-   "name": "Veil Card",
-   "kind": "card",
-   "refersTo": "card-indicador",
-   "description": "Grupo sin resultado.",
-   "html": "<div class=\"ds-veil\"><b>Sin resultado</b><p>19 de 30 respuestas.</p></div>",
-   "css": ".ds-veil{padding:26px 32px;border:1px solid #cdd8de;border-radius:24px;color:#4a5c68;background:repeating-linear-gradient(135deg,rgb(255 255 255/.8),rgb(255 255 255/.8) 10px,#e9eff2 10px,#e9eff2 20px)}"
+   "css": ".ds-btn{background:#0b5f73;color:#fff;min-height:56px;padding:0 20px;border:1.5px solid #0b5f73;border-radius:10px;font-weight:700;cursor:pointer}.ds-btn:hover{transform:translateY(-1px)}.ds-btn:focus-visible{outline:2px solid #0891b2;outline-offset:2px}"
   }
  ],
  "narrative": {
-  "northStar": "La Garúa",
-  "overview": "Kala se lee como la luz difusa de Lima: niebla perlada, un solo verde mar y un único destello de sol. La incertidumbre se dibuja; un grupo pequeño es un velo, no un hueco.",
+  "northStar": "El Cuaderno de Campo",
+  "overview": "Fondo hueso plano, serif con carácter, un solo verde profundo y líneas finas en lugar de cajas. La incertidumbre se dibuja con su banda; un grupo pequeño es un velo rayado.",
   "keyCharacteristics": [
-   "Fondo de niebla fría, nunca crema.",
-   "El sol marca solo la estimación.",
-   "Un velo rayado marca lo que no se puede afirmar."
+   "Fondo plano casi sin sombras.",
+   "Un solo medidor para todos los indicadores.",
+   "El movimiento cuenta algo."
   ],
   "rules": [
    {
-    "name": "The One Sun Rule",
-    "body": "El amarillo sol marca la estimación y nada más.",
+    "name": "The One Voice Rule",
+    "body": "El verde mar es la única voz de color.",
     "section": "colors"
    },
    {
     "name": "The No Alarm Rule",
-    "body": "Ningún resultado bajo se pinta de rojo ni de color de alarma.",
+    "body": "Ningún resultado bajo se pinta de rojo.",
     "section": "colors"
+   },
+   {
+    "name": "The Lining Figures Rule",
+    "body": "Cifras alineadas siempre; no usar el atajo font.",
+    "section": "typography"
    }
   ],
   "dos": [
-   "Do mostrar siempre el margen de cada estimación junto a la cifra."
+   "Do mostrar siempre el margen junto a cada estimación."
   ],
   "donts": [
-   "Don't usar rojo ni colores de alarma para resultados bajos.",
-   "Don't mostrar nunca información de una persona individual."
+   "Don't usar rojo ni colores de alarma para resultados bajos."
   ]
  }
 }

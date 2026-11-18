@@ -1,0 +1,8 @@
+.tarjeta { background: #fff; border: 1.5px solid var(--linea); border-radius: var(--r-m); padding: 26px 28px 22px; display: flex; flex-direction: column; }
+.tarjeta.hatch { border: 1.5px dashed #bfc2b8; }
+.tarjeta h2 { font-size: 1rem; font-weight: 600; line-height: 1.35; color: var(--tinta-2); min-height: 22px; }
+.t-valor { font-family: var(--serif); font-size: 3.125rem; line-height: 1.1; font-weight: 600; letter-spacing: -0.03em; color: var(--mar); margin: 8px 0 0; white-space: nowrap; }
+.t-valor small { font-family: var(--sans); font-size: 1.1875rem; font-weight: 500; letter-spacing: 0; color: var(--tinta); }
+.t-valor.apagado { color: var(--tinta-2); }
+.t-nota { font-size: 0.90625rem; color: var(--tinta-2); margin-top: auto; }
+.tarjeta .medidor { margin-top: 6px; }

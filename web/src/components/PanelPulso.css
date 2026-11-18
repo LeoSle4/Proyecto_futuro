@@ -1,0 +1,37 @@
+.panelcard { background: #fff; border: 1.5px solid var(--linea); border-radius: var(--r-l); padding: 34px 40px 30px; }
+.pc-cabeza { display: grid; grid-template-columns: 1fr 300px; gap: 48px; align-items: stretch; }
+.pc-pregunta { font-size: 1.0625rem; font-weight: 600; color: var(--tinta-2); }
+.pc-cifra { display: flex; align-items: baseline; gap: 14px; margin: 8px 0 6px; }
+.pc-cifra b { font-family: var(--serif); font-size: clamp(3.75rem, 6.2vw, 6rem); line-height: 1; font-weight: 600; letter-spacing: -0.04em; color: var(--mar); white-space: nowrap; min-height: 1em; }
+.pc-cifra b.apagada { color: var(--tinta-3); font-size: 3.5rem; }
+.pc-cifra > span { font-family: var(--sans); font-size: 1.5rem; font-weight: 500; color: var(--tinta); }
+.pc-pie { font-size: 1rem; color: var(--tinta-2); }
+.libro { align-self: center; margin: 0; border-top: 1px solid var(--linea); }
+.libro div { display: flex; justify-content: space-between; align-items: baseline; padding: 13px 0; border-bottom: 1px solid var(--linea); font-size: 0.90625rem; color: var(--tinta-2); }
+.libro dt { margin: 0; }
+.libro dd { margin: 0; font-size: 1.1875rem; font-weight: 700; color: var(--tinta); }
+.pc-simulado { display: none; margin-left: 10px; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 5px; background: var(--salvia); color: var(--tinta); vertical-align: middle; }
+.simulando .pc-simulado { display: inline-block; }
+.pc-sim { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--linea); font-size: 0.875rem; color: var(--tinta-2); }
+.pc-sim b { color: var(--tinta); font-weight: 700; }
+.chips { display: flex; gap: 8px; }
+.chip {
+  font-weight: 600; font-size: 0.875rem; border: 1.5px solid var(--linea); background: #fff; color: var(--tinta-2); border-radius: var(--r-s);
+  padding: 8px 14px; min-height: 44px; cursor: pointer; transition: background var(--m-in) var(--ease), border-color var(--m-in) var(--ease), color var(--m-in) var(--ease);
+}
+.chip:hover { border-color: #9fa79e; }
+.chip[aria-pressed='true'] { background: var(--tinta); border-color: var(--tinta); color: #fff; }
+/* Below ~1280px the figure and the ledger no longer fit side by side: the ledger drops under the figure as three columns. */
+@media (max-width: 1280px) {
+  .pc-cabeza { grid-template-columns: 1fr; gap: 22px; }
+  .libro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 20px; border-top: 0; align-self: stretch; }
+  .libro div { flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0; border-top: 1px solid var(--linea); }
+}
+@media (max-width: 900px) {
+  .libro { grid-template-columns: 1fr; }
+  .libro div { flex-direction: row; align-items: baseline; justify-content: space-between; }
+  .pc-cabeza { grid-template-columns: 1fr; gap: 24px; }
+  .panelcard { padding: 26px 22px 22px; }
+  .pc-cifra b { font-size: 4.5rem; }
+  .pc-sim { flex-direction: column; align-items: flex-start; }
+}

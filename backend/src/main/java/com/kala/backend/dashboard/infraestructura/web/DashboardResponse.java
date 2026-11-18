@@ -19,7 +19,10 @@ public record DashboardResponse(
             String tema,
             Double proporcionEstimada,
             Double margenError95,
-            Double mediaEstimada
+            Double mediaEstimada,
+            Integer valorMin,
+            Integer valorMax,
+            Long respuestas
     ) {
     }
 }

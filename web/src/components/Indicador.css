@@ -1,9 +1,0 @@
-.indicador:not(.velo) {
-  background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 26px 32px;
-}
-.indicador-titulo { font-size: 1.125rem; font-weight: 600; color: var(--tinta-suave); }
-.indicador-cifra { font-size: 2.25rem; font-weight: 800; color: var(--mar); line-height: 1.1; margin-top: 8px; }
-.indicador-cifra-grande { font-size: 4.5rem; }
-.indicador-cifra-apagada { color: var(--tinta-suave); font-size: 1.75rem; }
-.indicador-unidad { font-size: 1.5rem; font-weight: 600; color: var(--tinta); }
-.indicador-nota { font-size: 0.9375rem; color: var(--tinta-suave); margin-top: 8px; max-width: 65ch; }

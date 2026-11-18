@@ -1,0 +1,3 @@
+.seg { position: absolute; left: 0; right: 0; top: 45px; height: 34px; display: grid; grid-template-columns: repeat(30, 1fr); gap: 3px; }
+.seg i { border-radius: 3px; background: repeating-linear-gradient(135deg, transparent 0 3px, #cfd1c8 3px 4px); }
+.seg i.lleno { background: var(--tinta-3); }

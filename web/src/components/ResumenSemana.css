@@ -1,0 +1,7 @@
+.semana-resumen { margin-top: 18px; border: 1.5px solid var(--linea); border-radius: var(--r-m); padding: 16px 18px 6px; background: #fff; }
+.semana-resumen h2 { font-family: var(--sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tinta-3); margin: 0 0 4px; }
+.semana-resumen dl { margin: 0; }
+.semana-resumen div { display: flex; justify-content: space-between; align-items: baseline; padding: 11px 0; border-top: 1px solid var(--linea); font-size: 0.90625rem; color: var(--tinta-2); }
+.semana-resumen div:first-child { border-top: 0; }
+.semana-resumen dt { margin: 0; }
+.semana-resumen dd { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--tinta); }

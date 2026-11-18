@@ -1,0 +1,44 @@
+.so-pagina h1 { font-family: var(--serif); font-size: 3.25rem; line-height: 1.05; font-weight: 600; letter-spacing: -0.025em; }
+.so-intro { font-size: 1.125rem; color: var(--tinta-2); margin: 12px 0 26px; max-width: 66ch; }
+.so-nota { color: var(--tinta-2); margin: 16px 0; }
+.so-error { color: var(--error); font-weight: 600; margin: 0 0 16px; }
+.so-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; align-items: start; }
+.so-filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.so-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.so-item { background: #fff; border: 1.5px solid var(--linea); border-radius: var(--r-m); padding: 20px 24px; }
+.so-item.estado-cerrada { background: repeating-linear-gradient(135deg, transparent 0 8px, #e4e5dd 8px 9px), var(--hueso); border-style: dashed; }
+.so-cabeza { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.so-cabeza b { font-family: var(--serif); font-size: 1.1875rem; font-weight: 600; }
+.so-estado { font-size: 0.8125rem; font-weight: 700; color: var(--mar); }
+.estado-cerrada .so-estado { color: var(--tinta-3); }
+.so-cuando { font-size: 0.875rem; color: var(--tinta-2); margin: 4px 0 12px; }
+.so-mensaje { margin: 0; padding: 12px 16px; background: var(--hueso); border-radius: var(--r-s); font-size: 1rem; line-height: 1.55; color: var(--tinta); }
+.so-sin { font-size: 0.9375rem; color: var(--tinta-3); margin: 0; }
+.so-acciones { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.so-derivar { flex: 1 1 220px; min-width: 0; }
+.so-acciones .boton, .so-alta .boton { min-height: 48px; font-size: 0.9375rem; }
+.so-confirma { flex: 1 1 260px; font-size: 0.9375rem; margin: 0; }
+.so-vacio { border-radius: var(--r-m); padding: 28px 30px; }
+.so-vacio h2, .so-privado h2 { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; margin-bottom: 6px; }
+.so-vacio p, .so-privado p { color: var(--tinta-2); max-width: 60ch; }
+.so-privado { background: var(--salvia); border-radius: var(--r-m); padding: 28px 30px; }
+.so-contactos { border: 1.5px solid var(--linea); border-radius: var(--r-m); padding: 20px 22px; background: #fff; }
+.so-contactos h2 { font-family: var(--sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tinta-3); margin: 0 0 6px; }
+.so-explica { font-size: 0.875rem; color: var(--tinta-2); margin-bottom: 8px; }
+.so-cont-lista { list-style: none; margin: 0 0 6px; padding: 0; border-top: 1px solid var(--linea); }
+.so-cont-lista li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--linea); }
+.so-cont-lista li.inactivo { background: repeating-linear-gradient(135deg, transparent 0 8px, #e4e5dd 8px 9px); }
+.so-cont-lista b { display: block; font-family: var(--serif); font-size: 1.0625rem; font-weight: 600; }
+.so-cont-lista span { display: block; font-size: 0.8125rem; color: var(--tinta-2); overflow-wrap: anywhere; }
+.so-cont-lista a { color: var(--mar); font-weight: 600; }
+.so-quitar { min-height: 44px; font-size: 0.8125rem; padding: 0 12px; }
+.so-mini { display: flex; gap: 6px; }
+.so-mini .boton { min-height: 44px; padding: 0 12px; font-size: 0.8125rem; }
+.so-alta { margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--linea); display: grid; gap: 12px; }
+.so-alta h3 { font-family: var(--serif); font-size: 1.1875rem; font-weight: 600; margin: 0; }
+.so-campo label { display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; }
+.so-campo input { width: 100%; height: 46px; border-radius: var(--r-s); background: #fff; border: 1.5px solid var(--linea); padding: 0 12px; font-size: 0.9375rem; color: var(--tinta); transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease); }
+.so-campo input:focus { outline: none; border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18); }
+.so-campo [aria-invalid='true'] { border-color: var(--error); border-width: 2px; }
+.so-err { color: var(--error); font-size: 0.8125rem; font-weight: 600; margin-top: 5px; }
+@media (max-width: 1000px) { .so-cuerpo { grid-template-columns: 1fr; gap: 24px; } .so-pagina h1 { font-size: 2.25rem; } }

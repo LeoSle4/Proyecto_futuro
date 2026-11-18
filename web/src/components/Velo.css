@@ -1,4 +1,0 @@
-.velo {
-  background: repeating-linear-gradient(135deg, var(--velo-a), var(--velo-a) 10px, var(--velo-b) 10px, var(--velo-b) 20px);
-  border: 1px solid var(--borde); border-radius: var(--radio); padding: 26px 32px;
-}
