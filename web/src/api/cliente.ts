@@ -1,4 +1,4 @@
-import type { Cuestionario, Dashboard, Empleado, Empresa, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Sesion } from './tipos'
+import type { ContactoAyuda, Cuestionario, Dashboard, Empleado, Empresa, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Sesion, Solicitud } from './tipos'
 import { demo } from './demo'
 
 export class ErrorApi extends Error {
@@ -176,6 +176,34 @@ export const api = {
       if (e instanceof ErrorApi && e.estado === 422) throw new ErrorApi(422, 'Ese máximo es menor que lo que ya usan los cuestionarios activos. Desactiva alguno o elige un valor más alto.')
       throw e
     }
+  },
+  contactosAyuda(): Promise<ContactoAyuda[]> {
+    return USAR_DEMO ? Promise.resolve(demo.contactos()) : conRenovacion<ContactoAyuda[]>('/api/ayuda/contactos')
+  },
+  async crearContactoAyuda(d: { nombre: string; tipo: string; telefono: string; email: string }): Promise<void> {
+    const cuerpo = { nombre: d.nombre.trim(), tipo: d.tipo, telefono: d.telefono.trim() || null, email: d.email.trim() || null }
+    if (USAR_DEMO) return demo.crearContacto(cuerpo)
+    await conRenovacion<unknown>('/api/ayuda/contactos', { method: 'POST', body: JSON.stringify(cuerpo) })
+  },
+  async desactivarContactoAyuda(id: number): Promise<void> {
+    if (USAR_DEMO) return demo.desactivarContacto(id)
+    await conRenovacion<void>(`/api/ayuda/contactos/${id}/desactivar`, { method: 'PATCH' })
+  },
+  solicitudesAyuda(): Promise<Solicitud[]> {
+    return USAR_DEMO ? Promise.resolve(demo.solicitudes()) : conRenovacion<Solicitud[]>('/api/ayuda/solicitudes')
+  },
+  async atenderSolicitud(id: number, contactoId: number | null): Promise<void> {
+    if (USAR_DEMO) return demo.atender(id, contactoId)
+    try {
+      await conRenovacion<unknown>(`/api/ayuda/solicitudes/${id}/atender`, { method: 'PATCH', body: JSON.stringify({ contactoId }) })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 409) throw new ErrorApi(409, 'Esta solicitud ya cambió de estado. Se actualizó la lista para que veas cómo está ahora.')
+      throw e
+    }
+  },
+  async cerrarSolicitud(id: number): Promise<void> {
+    if (USAR_DEMO) return demo.cerrar(id)
+    await conRenovacion<unknown>(`/api/ayuda/solicitudes/${id}/cerrar`, { method: 'PATCH' })
   },
   dashboard(equipoId: number, semana: string): Promise<Dashboard> {
     return USAR_DEMO ? Promise.resolve(demo.dashboard(equipoId, semana)) : conRenovacion<Dashboard>(`/api/dashboard/${equipoId}?semana=${semana}`)
