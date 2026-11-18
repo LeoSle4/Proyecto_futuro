@@ -122,8 +122,10 @@ export const api = {
       /* the local session is already gone; the server expires it on its own */
     }
   },
-  equipos(): Promise<Equipo[]> {
-    return USAR_DEMO ? Promise.resolve([...demo.equipos]) : conRenovacion<Equipo[]>('/api/equipos')
+  equipos(empresaId?: number): Promise<Equipo[]> {
+    if (USAR_DEMO) return Promise.resolve([...demo.equipos].filter((equipo) => empresaId === undefined || equipo.empresaId === empresaId))
+    const consulta = empresaId === undefined ? '' : `?empresaId=${empresaId}`
+    return conRenovacion<Equipo[]>(`/api/equipos${consulta}`)
   },
   async crearEquipo(nombre: string, empresaId: number): Promise<Equipo> {
     if (USAR_DEMO) return demo.crearEquipo(nombre, empresaId)

@@ -35,6 +35,14 @@ async function conSesion() {
 }
 
 describe('equipos', () => {
+  it('filtra los equipos por empresa cuando se indica en la consulta', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: [] }))
+    await api.equipos(4)
+    expect(llamadas[0].metodo).toBe('GET')
+    expect(llamadas[0].ruta).toBe('/api/equipos?empresaId=4')
+  })
+
   it('crea un equipo con su nombre y la empresa del token por POST', async () => {
     await conSesion()
     const llamadas = simular(() => ({ status: 201, cuerpo: { id: 9, nombre: 'Soporte', empresaId: 4 } }))
