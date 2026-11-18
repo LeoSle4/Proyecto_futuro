@@ -31,8 +31,9 @@ export function Indicador({ item, respuestas, principal = false }: Props) {
   }
 
   const margen = item.margenError95 as number
-  const minimo = esProporcion ? 0 : Math.min(0, estimado - margen)
-  const maximo = esProporcion ? 1 : Math.max(estimado + margen, 1)
+  // The scale range comes from the server; without it (older backend) the axis is approximated around the estimate.
+  const minimo = esProporcion ? 0 : (item.valorMin ?? Math.min(0, estimado - margen))
+  const maximo = esProporcion ? 1 : (item.valorMax ?? Math.max(estimado + margen, 1))
   const formato = esProporcion ? porcentaje : decimal
 
   return (

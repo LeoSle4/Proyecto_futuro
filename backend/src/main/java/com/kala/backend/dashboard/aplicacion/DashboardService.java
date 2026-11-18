@@ -23,11 +23,17 @@ public class DashboardService {
 
     // Estimación de un ítem. Randomized Response llena proporcionEstimada (0 a 1); Laplace llena mediaEstimada
     // (en la escala del ítem). El estimado y el margen son nulos si el ítem no alcanza el n mínimo.
+    // valorMin y valorMax son el rango de la escala del ítem: el panel los usa para dibujar el eje de una media.
     public record ItemEstimado(Long itemId, String tema, Double proporcionEstimada, Double margenError95,
-                               Double mediaEstimada) {
+                               Double mediaEstimada, Integer valorMin, Integer valorMax) {
 
         public ItemEstimado(Long itemId, String tema, Double proporcionEstimada, Double margenError95) {
-            this(itemId, tema, proporcionEstimada, margenError95, null);
+            this(itemId, tema, proporcionEstimada, margenError95, null, null, null);
+        }
+
+        public ItemEstimado(Long itemId, String tema, Double proporcionEstimada, Double margenError95,
+                            Double mediaEstimada) {
+            this(itemId, tema, proporcionEstimada, margenError95, mediaEstimada, null, null);
         }
     }
 
@@ -74,13 +80,14 @@ public class DashboardService {
 
     private ItemEstimado estimar(FilaItem fila) {
         if (fila.n() < nMinimo) {
-            return new ItemEstimado(fila.itemId(), fila.tema(), null, null);
+            return new ItemEstimado(fila.itemId(), fila.tema(), null, null, null, fila.valorMin(), fila.valorMax());
         }
         ParametrosLdp parametros = new ParametrosLdp(fila.probabilidadVerdad(), fila.epsilon());
         return MecanismosLdp.buscar(fila.mecanismo())
                 .flatMap(m -> m.estimar(parametros, fila.valorMin(), fila.valorMax(), fila.suma(), fila.n()))
                 .map(e -> new ItemEstimado(fila.itemId(), fila.tema(), e.proporcionEstimada(), e.margenError95(),
-                        e.mediaEstimada()))
-                .orElseGet(() -> new ItemEstimado(fila.itemId(), fila.tema(), null, null));
+                        e.mediaEstimada(), fila.valorMin(), fila.valorMax()))
+                .orElseGet(() -> new ItemEstimado(fila.itemId(), fila.tema(), null, null, null,
+                        fila.valorMin(), fila.valorMax()));
     }
 }
