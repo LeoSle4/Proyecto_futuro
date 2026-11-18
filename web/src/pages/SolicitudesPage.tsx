@@ -4,6 +4,7 @@ import type { ContactoAyuda, Solicitud } from '../api/tipos'
 import { Aviso } from '../components/Aviso'
 import { useSesion } from '../auth/SesionContext'
 import { etiquetaEstado, fechaCorta, ordenarSolicitudes, TIPOS_CONTACTO, textoEspera, validarContacto, type ErroresContacto } from '../lib/ayuda'
+import { Selector } from '../components/Selector'
 import './SolicitudesPage.css'
 
 const retraso = (i: number) => ({ '--i': i }) as React.CSSProperties
@@ -143,10 +144,7 @@ export function SolicitudesPage() {
                     {s.estado === 'PENDIENTE' && (
                       <div className="so-acciones">
                         <label className="solo-lectores" htmlFor={`der-${s.id}`}>Derivar la solicitud {s.id} a</label>
-                        <select id={`der-${s.id}`} value={derivar[s.id] ?? ''} onChange={(e) => setDerivar({ ...derivar, [s.id]: e.target.value })}>
-                          <option value="">Atender yo, sin derivar</option>
-                          {activos.map((c) => <option key={c.id} value={c.id}>Derivar a {c.nombre}</option>)}
-                        </select>
+                        <div className="so-derivar"><Selector id={`der-${s.id}`} etiqueta="Derivar a" valor={derivar[s.id] ?? ''} opciones={[{ valor: '', texto: 'Atender yo, sin derivar' }, ...activos.map((c) => ({ valor: String(c.id), texto: `Derivar a ${c.nombre}` }))]} alCambiar={(v) => setDerivar({ ...derivar, [s.id]: v })} /></div>
                         <button type="button" className="boton boton-primario" disabled={ocupado} onClick={() => void ejecutar(() => api.atenderSolicitud(s.id, derivar[s.id] ? Number(derivar[s.id]) : null), `Solicitud de la persona n.º ${s.usuarioId} en atención.`)}>Atender</button>
                       </div>
                     )}
@@ -213,10 +211,7 @@ export function SolicitudesPage() {
             </div>
             <div className="so-campo">
               <label htmlFor="co-tipo">Tipo</label>
-              <select id="co-tipo" {...campo('tipo')}>
-                <option value="">Elige un tipo</option>
-                {TIPOS_CONTACTO.map((t) => <option key={t.valor} value={t.valor}>{t.texto}</option>)}
-              </select>
+              <Selector id="co-tipo" etiqueta="Tipos de contacto" marcador="Elige un tipo" valor={form.tipo} opciones={TIPOS_CONTACTO.map((t) => ({ valor: t.valor, texto: t.texto }))} alCambiar={(v) => setForm({ ...form, tipo: v })} invalido={Boolean(errores.tipo)} descritoPor={errores.tipo ? 'err-tipo' : undefined} />
               {errores.tipo && <p id="err-tipo" role="alert" className="so-err">{errores.tipo}</p>}
             </div>
             <div className="so-campo">

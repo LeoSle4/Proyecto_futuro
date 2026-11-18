@@ -4,6 +4,7 @@ import type { Cuestionario, Empresa, Presupuesto } from '../api/tipos'
 import { useSesion } from '../auth/SesionContext'
 import { usoDelPresupuesto, validarMaximo } from '../lib/presupuesto'
 import { Aviso } from '../components/Aviso'
+import { Selector } from '../components/Selector'
 import './CuestionariosPage.css'
 
 const retraso = (i: number) => ({ '--i': i }) as React.CSSProperties
@@ -110,9 +111,7 @@ export function CuestionariosPage() {
       {esAdmin && perfil?.empresaId === undefined && (
         <div className="cu-empresa sube" style={retraso(3)}>
           <label htmlFor="cu-empresa">Empresa</label>
-          <select id="cu-empresa" value={elegida ?? ''} onChange={(e) => { setLista(null); setPresu(null); setElegida(Number(e.target.value)) }}>
-            {empresas.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-          </select>
+          <Selector id="cu-empresa" etiqueta="Empresas" valor={elegida === null ? '' : String(elegida)} opciones={empresas.map((e) => ({ valor: String(e.id), texto: e.nombre }))} alCambiar={(v) => { setLista(null); setPresu(null); setElegida(Number(v)) }} />
         </div>
       )}
 

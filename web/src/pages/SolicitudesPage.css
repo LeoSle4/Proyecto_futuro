@@ -15,7 +15,7 @@
 .so-mensaje { margin: 0; padding: 12px 16px; background: var(--hueso); border-radius: var(--r-s); font-size: 1rem; line-height: 1.55; color: var(--tinta); }
 .so-sin { font-size: 0.9375rem; color: var(--tinta-3); margin: 0; }
 .so-acciones { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
-.so-acciones select { flex: 1 1 220px; min-width: 0; height: 48px; border-radius: var(--r-s); border: 1.5px solid var(--linea); background: #fff; padding: 0 12px; font-size: 0.9375rem; color: var(--tinta); }
+.so-derivar { flex: 1 1 220px; min-width: 0; }
 .so-acciones .boton, .so-alta .boton { min-height: 48px; font-size: 0.9375rem; }
 .so-confirma { flex: 1 1 260px; font-size: 0.9375rem; margin: 0; }
 .so-vacio { border-radius: var(--r-m); padding: 28px 30px; }
@@ -37,8 +37,8 @@
 .so-alta { margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--linea); display: grid; gap: 12px; }
 .so-alta h3 { font-family: var(--serif); font-size: 1.1875rem; font-weight: 600; margin: 0; }
 .so-campo label { display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; }
-.so-campo input, .so-campo select { width: 100%; height: 46px; border-radius: var(--r-s); background: #fff; border: 1.5px solid var(--linea); padding: 0 12px; font-size: 0.9375rem; color: var(--tinta); transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease); }
-.so-campo input:focus, .so-campo select:focus, .so-acciones select:focus { outline: none; border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18); }
+.so-campo input { width: 100%; height: 46px; border-radius: var(--r-s); background: #fff; border: 1.5px solid var(--linea); padding: 0 12px; font-size: 0.9375rem; color: var(--tinta); transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease); }
+.so-campo input:focus { outline: none; border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18); }
 .so-campo [aria-invalid='true'] { border-color: var(--error); border-width: 2px; }
 .so-err { color: var(--error); font-size: 0.8125rem; font-weight: 600; margin-top: 5px; }
 @media (max-width: 1000px) { .so-cuerpo { grid-template-columns: 1fr; gap: 24px; } .so-pagina h1 { font-size: 2.25rem; } }
