@@ -105,3 +105,62 @@ describe('envío del check-in', () => {
     await expect(api.enviar({ itemId: 1, configuracionLdpId: 2, valorRuidoso: 3.2 })).resolves.toBeUndefined()
   })
 })
+
+describe('cambio de clave', () => {
+  it('manda la clave actual y la nueva y un 204 no rompe', async () => {
+    let cuerpo = ''
+    let metodo = ''
+    simular((ruta, init) => {
+      if (ruta === '/api/usuarios/me/clave') {
+        cuerpo = String(init.body)
+        metodo = String(init.method)
+      }
+      return { status: 204 }
+    })
+    await expect(api.cambiarClave('clave-actual-1', 'clave-nueva-larga')).resolves.toBeUndefined()
+    expect(metodo).toBe('PUT')
+    expect(JSON.parse(cuerpo)).toEqual({ claveActual: 'clave-actual-1', claveNueva: 'clave-nueva-larga' })
+  })
+
+  it('una clave actual incorrecta (401) llega como ErrorApi 401 aunque la sesión sea válida', async () => {
+    mockAlmacen.set('kala.refresh', 'refresh-1')
+    simular((ruta) => (ruta === '/api/auth/refresh' ? { status: 200, cuerpo: sesion(2) } : { status: 401 }))
+    await expect(api.cambiarClave('mala', 'clave-nueva-larga')).rejects.toMatchObject({ estado: 401 })
+  })
+
+  it('un 400 (clave débil) se propaga como ErrorApi 400', async () => {
+    simular(() => ({ status: 400 }))
+    await expect(api.cambiarClave('actual', 'corta')).rejects.toMatchObject({ estado: 400 })
+  })
+})
+
+describe('pedir ayuda', () => {
+  it('manda solo el mensaje por POST y devuelve la solicitud creada', async () => {
+    let cuerpo = ''
+    let metodo = ''
+    simular((_ruta, init) => {
+      cuerpo = String(init.body)
+      metodo = String(init.method)
+      return { status: 201, cuerpo: { id: 7, estado: 'PENDIENTE', mensaje: 'hola' } }
+    })
+    const creada = await api.pedirAyuda('hola')
+    expect(metodo).toBe('POST')
+    expect(JSON.parse(cuerpo)).toEqual({ mensaje: 'hola' })
+    expect(creada).toMatchObject({ id: 7, estado: 'PENDIENTE' })
+  })
+
+  it('permite pedir ayuda sin mensaje', async () => {
+    let cuerpo = ''
+    simular((_ruta, init) => {
+      cuerpo = String(init.body)
+      return { status: 201, cuerpo: { id: 8, estado: 'PENDIENTE', mensaje: null } }
+    })
+    await api.pedirAyuda('')
+    expect(JSON.parse(cuerpo)).toEqual({ mensaje: null })
+  })
+
+  it('lista mis solicitudes', async () => {
+    simular(() => ({ status: 200, cuerpo: [{ id: 7, estado: 'EN_ATENCION' }] }))
+    await expect(api.misSolicitudes()).resolves.toEqual([{ id: 7, estado: 'EN_ATENCION' }])
+  })
+})
