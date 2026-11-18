@@ -1,13 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, ErrorApi, MODO_DEMO } from '../api/cliente'
 import type { Dashboard, Equipo } from '../api/tipos'
+import { N_MINIMO } from '../api/tipos'
 import { useSesion } from '../auth/SesionContext'
-import { Indicador } from '../components/Indicador'
-import { TarjetaEquipo } from '../components/TarjetaEquipo'
+import { PanelPulso } from '../components/PanelPulso'
+import { ResumenSemana } from '../components/ResumenSemana'
+import { SelectorEquipos } from '../components/SelectorEquipos'
+import { TarjetaIndicador } from '../components/TarjetaIndicador'
 import { etiquetaSemana, lunesActual, moverSemanas } from '../lib/semana'
 import './ResumenPage.css'
 
-type Resumen = Dashboard | 'error'
+type Resumen = Dashboard | 'error' | undefined
+
+function textoIntroductorio(r: Dashboard, esActual: boolean): string {
+  const cuando = esActual ? 'esta semana' : 'esa semana'
+  if (r.resultado === 'OK') return `${r.totalRespuestas} respuestas ${cuando}: hay resultado. El margen marca lo que todavía no podemos afirmar.`
+  const faltan = N_MINIMO - r.totalRespuestas
+  return faltan <= 3
+    ? `${r.totalRespuestas} respuestas ${cuando}: faltan ${faltan} para llegar al mínimo de ${N_MINIMO}.`
+    : `${r.totalRespuestas} respuestas ${cuando}: todavía no alcanza el mínimo de ${N_MINIMO}. No se muestra nada para proteger al grupo.`
+}
 
 export function ResumenPage() {
   const { cerrar } = useSesion()
@@ -53,6 +65,10 @@ export function ResumenPage() {
   const equipo = useMemo(() => equipos?.find((e) => e.id === elegido) ?? null, [equipos, elegido])
   const resumen = elegido !== null ? resumenes[`${semana}:${elegido}`] : undefined
   const esActual = semana === lunesActual()
+  const filas = (equipos ?? []).map((e) => {
+    const r = resumenes[`${semana}:${e.id}`]
+    return r && r !== 'error' ? r : null
+  })
 
   if (falloEquipos) return <p role="alert" className="resumen-aviso">{falloEquipos}</p>
   if (equipos && equipos.length === 0) {
@@ -64,60 +80,55 @@ export function ResumenPage() {
     )
   }
 
+  const datos = resumen && resumen !== 'error' ? resumen : null
   return (
     <div className="resumen">
-      <aside className="resumen-equipos" aria-label="Equipos">
-        <h2 className="resumen-lateral-titulo">Equipos</h2>
-        {equipos?.map((e) => (
-          <TarjetaEquipo
-            key={e.id}
-            equipo={e}
-            resumen={resumenes[`${semana}:${e.id}`] ?? null}
-            activo={e.id === elegido}
-            alElegir={() => setElegido(e.id)}
-          />
-        ))}
+      <aside className="resumen-lateral" aria-label="Equipos">
+        <h2 className="rotulo">EQUIPOS</h2>
+        {equipos && <SelectorEquipos equipos={equipos} resumenes={resumenes} semana={semana} activo={elegido} alElegir={setElegido} />}
+        <ResumenSemana rotulo={`Semana ${etiquetaSemana(semana)}`} filas={filas} />
       </aside>
 
       <div className="resumen-centro">
         <header className="resumen-cabecera">
-          <div>
-            <h1>{equipo?.nombre ?? 'Cargando…'}</h1>
-            <p className="resumen-sub">
-              {resumen && resumen !== 'error' && resumen.resultado === 'OK'
-                ? 'Esta semana hay resultado. La neblina marca lo que todavía no podemos afirmar.'
-                : 'Mira cuánto sabemos, y cuánto todavía no.'}
-            </p>
-          </div>
-          <div className="resumen-semana" role="group" aria-label="Semana">
-            <button type="button" className="boton" onClick={() => setSemana(moverSemanas(semana, -1))} aria-label="Semana anterior">←</button>
-            <span className="resumen-semana-texto">{etiquetaSemana(semana)}</span>
-            <button type="button" className="boton" onClick={() => setSemana(moverSemanas(semana, 1))} disabled={esActual} aria-label="Semana siguiente">→</button>
+          <h1 key={equipo?.nombre ?? 'cargando'}>
+            <span className="mascara"><span>{equipo?.nombre ?? 'Cargando…'}</span></span>
+          </h1>
+          <p className="resumen-intro sube" style={{ '--i': 3 } as React.CSSProperties} key={`${semana}:${elegido}:i`}>
+            {datos ? textoIntroductorio(datos, esActual) : 'Mira cuánto sabemos, y cuánto todavía no.'}
+          </p>
+          <div className="semana sube" style={{ '--i': 4 } as React.CSSProperties} role="group" aria-label="Semana">
+            <button type="button" onClick={() => setSemana(moverSemanas(semana, -1))} aria-label="Semana anterior">←</button>
+            <span>{etiquetaSemana(semana)}</span>
+            <button type="button" onClick={() => setSemana(moverSemanas(semana, 1))} disabled={esActual} aria-label="Semana siguiente">→</button>
           </div>
         </header>
 
-        {MODO_DEMO && <p className="resumen-aviso-demo">Empresa demo: todos los datos son sintéticos.</p>}
+        {MODO_DEMO && <p className="resumen-demo">Empresa demo: todos los datos son sintéticos.</p>}
 
-        <div aria-live="polite">
+        <div aria-live="polite" key={`${semana}:${elegido}`} className="resumen-contenido">
           {resumen === undefined && <p className="resumen-aviso">Cargando la semana…</p>}
           {resumen === 'error' && <p role="alert" className="resumen-aviso">No pudimos cargar esta semana. Inténtalo de nuevo en un momento.</p>}
-          {resumen && resumen !== 'error' && (
-            resumen.items.length === 0 ? (
-              <p className="resumen-aviso">Este equipo no tiene cuestionarios activos esta semana.</p>
-            ) : (
-              <div className="resumen-indicadores">
-                {resumen.items.map((item, i) => (
-                  <Indicador key={item.itemId} item={item} respuestas={resumen.totalRespuestas} principal={i === 0} />
-                ))}
-              </div>
-            )
-          )}
+          {datos && (datos.items.length === 0 ? (
+            <p className="resumen-aviso">Este equipo no tiene cuestionarios activos esta semana.</p>
+          ) : (
+            <>
+              <PanelPulso item={datos.items[0]} total={datos.totalRespuestas} />
+              {datos.items.length > 1 && (
+                <div className="resumen-pares">
+                  {datos.items.slice(1).map((item, i) => (
+                    <TarjetaIndicador key={item.itemId} item={item} total={datos.totalRespuestas} retardo={900 + i * 100} />
+                  ))}
+                </div>
+              )}
+            </>
+          ))}
         </div>
 
-        <section className="resumen-saber" aria-label="Qué sabemos y qué no">
-          <p><strong>Qué sabemos.</strong> Una estimación del equipo y su margen.</p>
-          <p><strong>Qué no sabemos.</strong> Qué respondió cada persona, ni quién respondió: cada respuesta se mezcla con ruido en el teléfono antes de salir.</p>
-        </section>
+        <p className="resumen-notas sube" style={{ '--i': 8 } as React.CSSProperties}>
+          <b>Cómo leer esto.</b> Cada cifra es una estimación del equipo con su margen: la respuesta de cada persona se mezcla con ruido
+          en su teléfono antes de salir, y el panel no puede deshacerlo.
+        </p>
       </div>
     </div>
   )
