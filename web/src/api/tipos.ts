@@ -25,6 +25,9 @@ export interface ItemDashboard {
   proporcionEstimada: number | null
   margenError95: number | null
   mediaEstimada: number | null
+  // Range of the item's answer scale; the axis of a mean is drawn from it.
+  valorMin?: number | null
+  valorMax?: number | null
 }
 
 export interface Dashboard {

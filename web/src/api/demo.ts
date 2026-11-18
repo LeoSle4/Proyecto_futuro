@@ -20,7 +20,7 @@ function dashboard(equipoId: number, semana: string): Dashboard {
     totalRespuestas: n,
     items: [
       { itemId: 1, tema: '¿Hoy te sentiste bien?', proporcionEstimada: suficiente ? 0.65 : null, margenError95: suficiente ? 0.31 : null, mediaEstimada: null },
-      { itemId: 2, tema: 'Me he sentido tranquilo(a) y relajado(a)', proporcionEstimada: null, margenError95: suficiente ? 2.2 : null, mediaEstimada: suficiente ? 3.2 : null },
+      { itemId: 2, tema: 'Me he sentido tranquilo(a) y relajado(a)', proporcionEstimada: null, margenError95: suficiente ? 2.2 : null, mediaEstimada: suficiente ? 3.2 : null, valorMin: 0, valorMax: 5 },
       { itemId: 3, tema: 'Poco interés o placer en hacer cosas', proporcionEstimada: null, margenError95: null, mediaEstimada: null },
     ],
   }
