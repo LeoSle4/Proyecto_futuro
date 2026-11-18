@@ -78,6 +78,30 @@ class IdentidadRepositoryTest {
     }
 
     @Test
+    void deEmpresa_devuelveSoloLosEmpleadosDeLosEquiposDeESaEmpresaConSuEstado() {
+        Long empresaA = FilasPadre.empresa(jdbc);
+        Long empresaB = FilasPadre.empresa(jdbc);
+        Long equipoA = FilasPadre.equipo(jdbc, empresaA);
+        Long equipoB = FilasPadre.equipo(jdbc, empresaB);
+        Usuario enA = usuarios.saveAndFlush(nuevoUsuario());
+        Usuario sinActivar = nuevoUsuario();
+        sinActivar.setActivo(false);
+        Usuario inactivo = usuarios.saveAndFlush(sinActivar);
+        Usuario enB = usuarios.saveAndFlush(nuevoUsuario());
+        empleados.saveAndFlush(new EmpleadoEquipo(enA.getId(), equipoA));
+        empleados.saveAndFlush(new EmpleadoEquipo(inactivo.getId(), equipoA));
+        empleados.saveAndFlush(new EmpleadoEquipo(enB.getId(), equipoB));
+
+        var lista = empleados.deEmpresa(empresaA);
+
+        assertThat(lista).extracting(e -> e.usuarioId()).containsExactlyInAnyOrder(enA.getId(), inactivo.getId());
+        assertThat(lista).allSatisfy(e -> assertThat(e.equipoId()).isEqualTo(equipoA));
+        assertThat(lista).filteredOn(e -> e.usuarioId().equals(inactivo.getId()))
+                .singleElement().satisfies(e -> assertThat(e.activo()).isFalse());
+        assertThat(empleados.deEmpresa(empresaB)).extracting(e -> e.usuarioId()).containsExactly(enB.getId());
+    }
+
+    @Test
     void guardarPersonalEmpresa_conRolValido_seRecupera() {
         Long usuarioId = usuarios.saveAndFlush(nuevoUsuario()).getId();
 

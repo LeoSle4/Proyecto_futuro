@@ -93,6 +93,7 @@ persona salen siempre del token; un recurso de otra empresa responde 404.
 | `PUT /api/usuarios/me/clave` | autenticado | Cambia la propia clave (exige la actual) |
 | `POST /api/admin/empresas/{id}/personal` | ADMIN | Crea RRHH o coordinador en una empresa |
 | `POST /api/empleados` | RRHH, coordinador | Crea un empleado en un equipo de su empresa |
+| `GET /api/empleados` | RRHH, coordinador | Lista los empleados de su empresa: nombre, correo, equipo y si la cuenta está activa |
 | `PATCH /api/usuarios/{id}/desactivar` · `…/activar` | ADMIN (cualquiera menos él), RRHH y coordinador (empleados de su empresa) | Desactiva o reactiva una cuenta |
 | `GET /api/admin/reporte` | ADMIN | Fecha del servidor y total de usuarios por tipo |
 | `GET/POST /api/empresas` · `GET /api/empresas/buscar` · `POST /api/empresas/con-equipos` | ADMIN (RRHH y coordinador solo leen la suya) | Empresas |

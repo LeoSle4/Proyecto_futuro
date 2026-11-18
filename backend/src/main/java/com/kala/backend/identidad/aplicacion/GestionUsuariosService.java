@@ -1,5 +1,6 @@
 package com.kala.backend.identidad.aplicacion;
 
+import com.kala.backend.identidad.aplicacion.puerto.EmpleadoResumen;
 import com.kala.backend.identidad.aplicacion.puerto.Empleados;
 import com.kala.backend.identidad.aplicacion.puerto.HasherDeClaves;
 import com.kala.backend.identidad.aplicacion.puerto.PersonalDeEmpresa;
@@ -17,6 +18,7 @@ import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
 import com.kala.backend.organizacion.dominio.EquipoNoEncontradoException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +80,15 @@ public class GestionUsuariosService {
         Usuario usuario = nuevoUsuario(correo, nombreLimpio, clave);
         empleados.guardar(new EmpleadoEquipo(usuario.getId(), equipoId));
         return usuario;
+    }
+
+    // Los empleados de la empresa del token, sin ningún dato de acceso. Es solo lectura.
+    @Transactional(readOnly = true)
+    public List<EmpleadoResumen> listarEmpleados(Long empresaId) {
+        if (empresaId == null) {
+            throw new IllegalArgumentException("La empresa es obligatoria");
+        }
+        return empleados.deEmpresa(empresaId);
     }
 
     @Transactional
