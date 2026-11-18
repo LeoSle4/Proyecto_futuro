@@ -1,180 +1,176 @@
 ---
 name: Kala
-description: Panel de bienestar donde la incertidumbre se dibuja como neblina y un grupo pequeño es un velo, no un hueco.
+description: Panel y app de bienestar donde la incertidumbre se dibuja como una banda simétrica y un grupo pequeño es un velo rayado, no un hueco.
 colors:
-  niebla-alta: "#f0f3f5"
-  niebla-baja: "#dde5ea"
-  tinta: "#25343f"
-  tinta-suave: "#4a5c68"
-  tinta-tenue: "#566873"
-  borde: "#cdd8de"
-  mar: "#1d6a73"
-  mar-oscuro: "#14535b"
-  sol: "#f0b44c"
-  superficie-solida: "#ffffff"
-  velo-claro: "#e9eff2"
+  hueso: "#f6f6f1"
+  hueso-oscuro: "#ecece5"
+  tinta: "#0f172a"
+  tinta-suave: "#475569"
+  tinta-tenue: "#566272"
+  linea: "#dcddd4"
+  turquesa: "#0891b2"
+  mar: "#0b5f73"
+  noche: "#03222c"
+  bruma: "#cfe6ec"
+  salvia: "#e7e9e2"
   error: "#8a3b12"
 typography:
   display:
-    fontFamily: "Albert Sans, system-ui, sans-serif"
-    fontSize: "4.5rem"
-    fontWeight: 800
-    lineHeight: 1.1
+    fontFamily: "Lora, Georgia, serif"
+    fontSize: "6rem"
+    fontWeight: 600
+    lineHeight: 1
+    letterSpacing: "-0.04em"
   headline:
-    fontFamily: "Albert Sans, system-ui, sans-serif"
-    fontSize: "2.25rem"
-    fontWeight: 800
-    lineHeight: 1.15
+    fontFamily: "Lora, Georgia, serif"
+    fontSize: "3.25rem"
+    fontWeight: 600
+    lineHeight: 1.05
+    letterSpacing: "-0.025em"
   title:
-    fontFamily: "Albert Sans, system-ui, sans-serif"
+    fontFamily: "Lora, Georgia, serif"
     fontSize: "1.125rem"
     fontWeight: 600
-    lineHeight: 1.15
+    lineHeight: 1.2
   body:
-    fontFamily: "Albert Sans, system-ui, sans-serif"
+    fontFamily: "Raleway, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: "Albert Sans, system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: 1.5
+    fontFamily: "Raleway, system-ui, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 600
+    lineHeight: 1.4
 rounded:
-  sm: "12px"
-  md: "16px"
-  lg: "24px"
-  pill: "999px"
+  s: "10px"
+  m: "18px"
+  l: "26px"
 spacing:
-  sm: "8px"
-  md: "18px"
-  lg: "32px"
+  s: "8px"
+  m: "18px"
+  l: "40px"
 components:
   button-primary:
     backgroundColor: "{colors.mar}"
-    textColor: "{colors.superficie-solida}"
-    rounded: "{rounded.sm}"
+    textColor: "#ffffff"
+    rounded: "{rounded.s}"
+    height: "56px"
+    padding: "0 20px"
+  button-outline:
+    backgroundColor: "#ffffff"
+    textColor: "{colors.mar}"
+    rounded: "{rounded.s}"
     height: "44px"
     padding: "0 20px"
-  button-primary-hover:
-    backgroundColor: "{colors.mar-oscuro}"
-  button-secondary:
-    backgroundColor: "{colors.superficie-solida}"
+  card-panel:
+    backgroundColor: "#ffffff"
     textColor: "{colors.tinta}"
-    rounded: "{rounded.sm}"
-    height: "44px"
-    padding: "0 20px"
-  card-indicador:
-    backgroundColor: "{colors.superficie-solida}"
+    rounded: "{rounded.l}"
+    padding: "34px 40px"
+  card-indicator:
+    backgroundColor: "#ffffff"
     textColor: "{colors.tinta}"
-    rounded: "{rounded.lg}"
-    padding: "26px 32px"
-  card-equipo-activo:
-    backgroundColor: "{colors.mar}"
-    textColor: "{colors.superficie-solida}"
-    rounded: "{rounded.md}"
-    padding: "16px 18px"
+    rounded: "{rounded.m}"
+    padding: "26px 28px"
 ---
 
 # Design System: Kala
 
 ## Overview
 
-**Creative North Star: "La Garúa"**
+**Creative North Star: "El Cuaderno de Campo"**
 
-Kala se lee como la luz difusa de Lima: niebla perlada, un solo verde mar y un único destello de sol. La incertidumbre no se esconde, se dibuja: cada estimación lleva su neblina alrededor y un grupo con menos de 30 respuestas es un velo rayado que explica por qué no hay cifra. El tono es calmo y cálido, nunca clínico.
+Kala se lee como una hoja de campo bien hecha: fondo hueso plano, una tipografía serif con carácter para lo que importa, un solo verde profundo como voz y líneas finas en lugar de cajas. La incertidumbre nunca se esconde: cada estimación se dibuja con su banda, y un grupo que no llega al mínimo es un velo rayado que explica por qué no hay cifra.
 
-Es una herramienta de trabajo que se abre una vez por semana, así que prima la lectura tranquila sobre la expresión: una sola idea por tarjeta, cifras grandes y su margen siempre a la vista.
+La interfaz explica lo que hace. En el login, un diagrama de puntos muestra cómo la respuesta de cada persona se mezcla con ruido antes de salir; en el panel, un medidor y una simulación enseñan cómo el margen baja al sumar respuestas. El tono es calmo y cálido, nunca clínico.
 
 **Key Characteristics:**
-- Fondo de niebla fría en degradado vertical, nunca crema.
-- Superficies casi blancas con borde de 1px y esquinas generosas.
-- El sol aparece solo como el punto de la estimación.
-- Un velo rayado marca todo lo que todavía no se puede afirmar.
+- Fondo hueso plano y casi sin sombras; la profundidad viene de líneas de 1,5px y de un levantamiento de 2px al pasar el mouse.
+- Lora para títulos y cifras grandes, Raleway para texto; cifras siempre alineadas (lnum, tnum).
+- Un solo medidor para todos los indicadores: eje, banda simétrica, corchetes, estimación.
+- El movimiento cuenta algo (puntos que cambian, odómetro, banda que se abre), nunca decora.
 
 ## Colors
 
-Paleta de niebla fría con un verde mar como única voz y un acento cálido reservado.
+Un hueso cálido de base, tinta casi negra y un verde mar profundo como única voz.
 
 ### Primary
-- **Verde Mar** (#1d6a73): cifras, equipo activo, botón primario, enlaces. Contraste ≥ 4.5:1 sobre blanco.
-- **Verde Mar Profundo** (#14535b): hover del botón y enlaces.
-
-### Secondary
-- **Sol de Garúa** (#f0b44c): únicamente el punto de la estimación y la etiqueta "Datos sintéticos".
+- **Verde Mar** (#0b5f73): cifras clave, equipo activo, botón primario, enlaces. Contraste ≥ 6,6:1 sobre hueso.
+- **Turquesa** (#0891b2): bandas de incertidumbre, foco y brillos; nunca texto pequeño.
 
 ### Neutral
-- **Niebla Alta / Baja** (#f0f3f5 → #dde5ea): fondo en degradado vertical.
-- **Tinta** (#25343f), **Tinta Suave** (#4a5c68), **Tinta Tenue** (#566873): texto principal, secundario y notas.
-- **Borde de Bruma** (#cdd8de): bordes de 1px de superficies.
-- **Marrón Quemado** (#8a3b12): solo errores de formulario; nunca para resultados bajos.
+- **Hueso** (#f6f6f1) y **Hueso oscuro** (#ecece5): fondo y tarjetas de equipo.
+- **Tinta** (#0f172a), **Tinta suave** (#475569), **Tinta tenue** (#566272): texto principal, secundario y notas (≥ 4,5:1).
+- **Línea** (#dcddd4): bordes y separadores de 1,5px.
+- **Noche** (#03222c) y **Bruma** (#cfe6ec): el campo de marca del login y su texto.
+- **Marrón quemado** (#8a3b12): solo errores de formulario; nunca resultados bajos.
 
 ### Named Rules
-**The One Sun Rule.** El amarillo sol marca la estimación y nada más. Su rareza es el punto.
+**The One Voice Rule.** El verde mar es la única voz de color; el turquesa solo aparece en lo que mide la incertidumbre.
 **The No Alarm Rule.** Ningún resultado bajo, incompleto o ausente se pinta de rojo ni de color de alarma.
 
 ## Typography
 
-**Display, Headline y Body:** Albert Sans (con system-ui como respaldo).
+**Display, Headline y Title:** Lora (serif). **Body y Label:** Raleway.
 
-**Character:** humanista y abierta, de peso 800 en cifras y títulos y 400 en texto corrido, con numerales tabulares.
+**Character:** una serif cálida para lo importante y una sans geométrica y abierta para leer.
 
 ### Hierarchy
-- **Display** (800, 4.5rem, 1.1): la cifra principal de una semana.
-- **Headline** (800, 2.25rem, 1.15): nombre de equipo y de pantalla.
-- **Title** (600, 1.125rem): nombre de un indicador.
-- **Body** (400, 1rem, 1.5): texto, con medida máxima de 65ch.
-- **Label** (400, 0.875rem): ejes, notas y etiquetas.
+- **Display** (600, 6rem, 1): la cifra de la semana, con odómetro.
+- **Headline** (600, 3.25rem, 1.05): nombre del equipo y títulos de pantalla.
+- **Title** (600, 1.125rem): nombres de equipo y de indicador.
+- **Body** (400, 1rem, 1.5): texto, con medida máxima de 60ch.
+- **Label** (600, 0.8125rem): ejes, notas y rótulos.
 
 ### Named Rules
-**The Tabular Rule.** Toda cifra usa numerales tabulares para que las semanas se comparen sin trampas.
+**The Lining Figures Rule.** Toda cifra usa numerales alineados y de ancho fijo. En CSS no se usa el atajo `font:`, porque borra esa petición y el 4 baja de la línea.
 
 ## Layout
 
-Cabecera horizontal con marca, navegación y cuenta; la ayuda es siempre el último elemento, en la misma esquina. Debajo, columna lateral de 300px con los equipos y centro fluido (máximo 1280px). Bajo 900px se apila y los equipos pasan a una rejilla. Espaciado en pasos de 8, 18 y 32px. Todo objetivo interactivo mide al menos 44px.
+Cabecera horizontal con marca, pestañas subrayadas y cuenta; la ayuda es siempre el último elemento, en la misma esquina. Debajo, columna lateral de 300px (equipos y ficha de la semana) y centro fluido hasta 1440px. El login reparte dos columnas sobre tres filas compartidas (arriba, medio, abajo), así logo y Ayuda, titular y formulario, datos y nota quedan alineados. Bajo 900–1000px todo se apila. Objetivos táctiles de al menos 44px.
 
 ## Elevation & Depth
 
-Casi plano. La profundidad viene de superficies blancas translúcidas sobre la niebla y bordes de 1px. La única sombra es la del punto solar (`0 3px 8px rgb(37 52 63 / 0.25)`). Con "reducir transparencia" las superficies pasan a blanco sólido y la bruma pierde el desenfoque.
+Plano por defecto. Las tarjetas se separan por borde y no por sombra; solo al pasar el mouse suben 2px con borde más oscuro y una sombra suave (blur 24px, 8% de tinta). El campo de marca del login usa un resplandor en una esquina de cinco pasos y una capa de grano estático por debajo del texto.
 
 ### Named Rules
-**The Flat-By-Default Rule.** Las tarjetas no llevan sombra; solo el punto de la estimación se despega.
+**The Flat-By-Default Rule.** Sin sombras en reposo; la profundidad se gana al interactuar.
 
 ## Shapes
 
-Esquinas generosas: 24px en tarjetas de contenido, 16px en tarjetas de equipo, 12px en botones y campos, y píldora en etiquetas. La neblina es una franja redondeada y difuminada; el velo, un rayado diagonal a 135° de 10px.
+Tres radios con función: 10px en botones y campos, 18px en tarjetas, 26px en la tarjeta principal. Las bandas son cápsulas completas. El velo es un rayado diagonal a 135° con borde discontinuo.
 
 ## Components
 
 ### Buttons
-- **Shape:** esquina de 12px, 44px de alto.
-- **Primary:** verde mar con texto blanco; hover a verde mar profundo.
-- **Secondary:** blanco con borde de bruma; el borde pasa a verde mar al hover.
-- **Ayuda:** borde verde mar, siempre en la misma esquina de la cabecera.
+- **Primary:** verde mar, 56px; sube 1px al pasar el mouse y se hunde 1px al pulsar. **Outline:** borde turquesa para Ayuda.
 
-### Cards / Containers
-- **Indicador:** blanco translúcido, borde de 1px, 24px de esquina, relleno 26×32px; la cifra, la neblina y una nota de una línea.
-- **Velo:** mismo contenedor con rayado diagonal; dice "Sin resultado" y cuántas respuestas faltan.
+### Medidor (signature component)
+Eje con marcas cada paso, una banda simétrica centrada en el intervalo al 95 %, un halo más ancho, corchetes con sus valores y el punto de la estimación. Se abre desde el centro al cargar; al pasar el mouse o enfocarlo, explica que el valor real puede estar en cualquier punto de la banda. En la simulación, la banda se desliza a su nuevo ancho.
 
-### Inputs / Fields
-- Alto 48px, borde de 1px en tinta tenue, foco con anillo verde mar de 3px, error con borde marrón de 2px y mensaje con `role="alert"`.
+### Odómetro
+Cada dígito rueda en una cinta 0–9 triplicada: la unidad da dos vueltas y la decena una (1,2 s, sin rebote).
 
-### Navigation
-- Enlaces de 44px; el activo es una píldora blanca con borde y texto verde mar profundo.
+### Flujo de ruido
+Diagrama del login: puntos (llenos = sí, vacíos = no) que viajan, se frenan en la puerta del ruido y a 1 de cada 4 se les cambia el valor, con un anillo que se desvanece. Debajo, los valores esperados: el real, el que se observa en promedio y el que recupera el panel.
 
-### Neblina (signature component)
-Un riel tenue de escala completa, una bruma verde mar difuminada que cubre el intervalo al 95 %, un hilo central y el punto solar con aro de tinta. Debajo, el rango escrito: "puede estar entre X y Y".
+### Selector de equipos
+Lista con un único indicador verde que se desliza al equipo elegido (solo transform). Los equipos sin resultado van rayados.
+
+### Check-in móvil
+Una pregunta por pantalla, botones de 56px y un momento de privacidad antes de enviar: "Tu respuesta" (se queda en el teléfono) y "Lo que se envía" (ya con ruido). La ayuda va siempre arriba a la derecha.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** mostrar siempre el margen de cada estimación junto a la cifra.
-- **Do** usar el velo rayado y explicar por qué no hay resultado, con el conteo "12 de 30".
-- **Do** dejar cada estado con texto además del color.
-- **Do** respetar "reducir movimiento" y "reducir transparencia".
+- **Do** mostrar siempre el margen junto a cada estimación, con el mismo medidor.
+- **Do** rayar y explicar un grupo sin resultado; nunca dejar un hueco.
+- **Do** decir lo que no se sabe: no inventar un conteo que el servidor no envía.
+- **Do** respetar "reducir movimiento": todo queda en su estado final y quieto.
 
 ### Don't:
 - **Don't** usar rojo ni colores de alarma para resultados bajos.
-- **Don't** usar tono clínico o médico ni gamificación (puntos, rachas, insignias).
+- **Don't** usar tono clínico, gamificación ni celebraciones con confeti, racha o puntos.
 - **Don't** mostrar nunca información de una persona individual.
-- **Don't** dar un hueco vacío a un grupo sin resultado.
+- **Don't** animar con el scroll ni dar movimiento sin propósito.
