@@ -1,0 +1,13 @@
+.cta-pagina h1 { font-family: var(--serif); font-size: 3.25rem; line-height: 1.05; font-weight: 600; letter-spacing: -0.025em; }
+.cta-intro { font-size: 1.125rem; color: var(--tinta-2); margin: 12px 0 26px; max-width: 60ch; }
+.cta-form { max-width: 520px; background: #fff; border: 1.5px solid var(--linea); border-radius: var(--r-m); padding: 26px 28px; display: grid; gap: 16px; }
+.cta-form h2 { font-family: var(--serif); font-size: 1.375rem; font-weight: 600; }
+.cu-campo label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 7px; }
+.cu-campo input { width: 100%; height: 48px; border-radius: var(--r-s); background: #fff; border: 1.5px solid var(--linea); padding: 0 14px; font-size: 1rem; color: var(--tinta); transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease); }
+.cu-campo input:focus { outline: none; border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18); }
+.cu-campo input[aria-invalid='true'] { border-color: var(--error); border-width: 2px; }
+.cu-err { color: var(--error); font-size: 0.875rem; font-weight: 600; margin-top: 6px; }
+.cta-pista { color: var(--tinta-3); font-size: 0.8125rem; margin: -8px 0 0; }
+.cta-ver { justify-self: start; background: transparent; border: 0; color: var(--mar); font-weight: 700; font-size: 0.875rem; cursor: pointer; min-height: 44px; padding: 0; }
+.cta-guardar { min-height: 52px; }
+@media (max-width: 1000px) { .cta-pagina h1 { font-size: 2.25rem; } }

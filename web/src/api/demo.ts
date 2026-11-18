@@ -1,4 +1,4 @@
-import type { ContactoAyuda, Cuestionario, Dashboard, Empleado, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Solicitud } from './tipos'
+import type { ContactoAyuda, Cuestionario, Dashboard, Empleado, Empresa, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Solicitud } from './tipos'
 
 // Synthetic data for working without the backend (VITE_DEMO=1). The UI labels it as synthetic.
 // Mutable on purpose: the demo lets you create, rename and delete teams in memory.
@@ -132,4 +132,31 @@ function cerrar(id: number): void {
   if (s) s.estado = 'CERRADA'
 }
 
-export const demo = { contactos, solicitudes, crearContacto, desactivarContacto, atender, cerrar, cuestionarios, presupuesto, cambiarCuestionario, fijarPresupuesto, empleados, crearEmpleado, cambiarEstadoEmpleado, equipos, dashboard, perfil, crearEquipo, editarEquipo, eliminarEquipo }
+const empresasDemo: Empresa[] = [
+  { id: 1, ruc: '20123456789', nombre: 'Empresa demo', rubro: 'Servicios' },
+  { id: 2, ruc: '20987654321', nombre: 'Textiles del Sur', rubro: 'Manufactura' },
+]
+
+const empresas = (): Empresa[] => empresasDemo.map((e) => ({ ...e }))
+
+function crearEmpresa(d: { ruc: string; nombre: string; rubro: string }): void {
+  if (empresasDemo.some((e) => e.ruc === d.ruc)) throw Object.assign(new Error('Ya existe una empresa con ese RUC.'), { estado: 409 })
+  empresasDemo.push({ id: Math.max(0, ...empresasDemo.map((e) => e.id)) + 1, ...d })
+}
+
+function editarEmpresa(id: number, d: { ruc: string; nombre: string; rubro: string }): void {
+  const e = empresasDemo.find((x) => x.id === id)
+  if (e) Object.assign(e, d)
+}
+
+function eliminarEmpresa(id: number): void {
+  if (id === 1) throw Object.assign(new Error('Esta empresa todavía tiene equipos.'), { estado: 409 })
+  const i = empresasDemo.findIndex((x) => x.id === id)
+  if (i >= 0) empresasDemo.splice(i, 1)
+}
+
+function crearPersonal(_empresaId: number, d: { email: string; nombre: string; clave: string; rol: string }): void {
+  void d
+}
+
+export const demo = { empresas, crearEmpresa, editarEmpresa, eliminarEmpresa, crearPersonal, contactos, solicitudes, crearContacto, desactivarContacto, atender, cerrar, cuestionarios, presupuesto, cambiarCuestionario, fijarPresupuesto, empleados, crearEmpleado, cambiarEstadoEmpleado, equipos, dashboard, perfil, crearEquipo, editarEquipo, eliminarEquipo }
