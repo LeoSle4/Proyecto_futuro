@@ -105,35 +105,154 @@ function ContactosAyudaPage() {
           <h1>Contactos de ayuda</h1>
           <p>Encuentra apoyo y orientación disponible en tu empresa.</p>
         </div>
-        {puedeGestionar && <button className="boton boton-primario" type="button" onClick={() => { setFormularioAbierto((abierto) => !abierto); setError('') }}>
-          {formularioAbierto ? 'Cerrar formulario' : 'Registrar contacto'}
-        </button>}
+        {puedeGestionar && (
+          <button
+            className="boton boton-primario"
+            type="button"
+            onClick={() => {
+              setFormularioAbierto(true)
+              setError('')
+            }}
+          >
+            Agregar contacto
+          </button>
+        )}
       </header>
 
       {MODO_DEMO && <p className="contactos-demo">Datos sintéticos de demostración</p>}
       {error && <p className="contactos-mensaje contactos-error" role="alert">{error}</p>}
       {exito && <p className="contactos-mensaje contactos-exito" role="status">{exito}</p>}
 
-      {formularioAbierto && puedeGestionar && <form className="contactos-formulario" onSubmit={(evento) => void registrar(evento)}>
-        <h2>Nuevo contacto</h2>
-        <label>Nombre <span aria-hidden="true">*</span>
-          <input required maxLength={150} value={nombre} onChange={(evento) => setNombre(evento.target.value)} autoComplete="name" />
-        </label>
-        <label>Tipo <span aria-hidden="true">*</span>
-          <select required value={tipo} onChange={(evento) => setTipo(evento.target.value as TipoContactoAyuda | '')}>
-            <option value="">Selecciona un tipo</option>
-            {TIPOS.map((opcion) => <option key={opcion.valor} value={opcion.valor}>{opcion.etiqueta}</option>)}
-          </select>
-        </label>
-        <label>Teléfono
-          <input maxLength={20} value={telefono} onChange={(evento) => setTelefono(evento.target.value)} type="tel" autoComplete="tel" />
-        </label>
-        <label>Correo electrónico
-          <input maxLength={150} value={email} onChange={(evento) => setEmail(evento.target.value)} type="email" autoComplete="email" />
-        </label>
-        <p className="contactos-ayuda-form">Agrega al menos un teléfono o correo electrónico.</p>
-        <button className="boton boton-primario" type="submit" disabled={enviando}>{enviando ? 'Guardando…' : 'Guardar contacto'}</button>
-      </form>}
+
+      {formularioAbierto && puedeGestionar && (
+        <div
+          className="modal-overlay"
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget && !enviando) {
+              setFormularioAbierto(false)
+              setError('')
+            }
+          }}
+        >
+          <section
+            className="modal-contactos"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-contactos-titulo"
+          >
+            <header className="modal-cabecera">
+              <div>
+                <h2 id="modal-contactos-titulo">Agregar contacto</h2>
+                <p>Registra un nuevo contacto de ayuda para tu empresa.</p>
+              </div>
+
+              <button
+                type="button"
+                className="modal-cerrar"
+                aria-label="Cerrar modal"
+                disabled={enviando}
+                onClick={() => {
+                  setFormularioAbierto(false)
+                  setError('')
+                }}
+              >
+                ×
+              </button>
+            </header>
+
+            <form
+              className="contactos-formulario"
+              onSubmit={(evento) => void registrar(evento)}
+            >
+              <label>
+                Nombre <span aria-hidden="true">*</span>
+                <input
+                  required
+                  maxLength={150}
+                  value={nombre}
+                  onChange={(evento) => setNombre(evento.target.value)}
+                  autoComplete="name"
+                  placeholder="Nombre del contacto"
+                />
+              </label>
+
+              <label>
+                Tipo <span aria-hidden="true">*</span>
+                <select
+                  required
+                  value={tipo}
+                  onChange={(evento) =>
+                    setTipo(evento.target.value as TipoContactoAyuda | '')
+                  }
+                >
+                  <option value="">Selecciona un tipo</option>
+                  {TIPOS.map((opcion) => (
+                    <option key={opcion.valor} value={opcion.valor}>
+                      {opcion.etiqueta}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Teléfono
+                <input
+                  maxLength={20}
+                  value={telefono}
+                  onChange={(evento) => setTelefono(evento.target.value)}
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="Número de teléfono"
+                />
+              </label>
+
+              <label>
+                Correo electrónico
+                <input
+                  maxLength={150}
+                  value={email}
+                  onChange={(evento) => setEmail(evento.target.value)}
+                  type="email"
+                  autoComplete="email"
+                  placeholder="correo@empresa.com"
+                />
+              </label>
+
+              <p className="contactos-ayuda-form">
+                Agrega al menos un teléfono o correo electrónico.
+              </p>
+
+              {error && (
+                <p className="contactos-mensaje contactos-error" role="alert">
+                  {error}
+                </p>
+              )}
+
+              <div className="modal-acciones">
+                <button
+                  className="boton boton-suave"
+                  type="button"
+                  disabled={enviando}
+                  onClick={() => {
+                    setFormularioAbierto(false)
+                    setError('')
+                  }}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  className="boton boton-primario"
+                  type="submit"
+                  disabled={enviando}
+                >
+                  {enviando ? 'Guardando…' : 'Guardar contacto'}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
 
       {cargando ? <p className="contactos-estado" role="status">Cargando contactos…</p> : contactos.length === 0 ? (
         <p className="contactos-vacio">Aún no hay contactos de ayuda activos registrados.</p>
