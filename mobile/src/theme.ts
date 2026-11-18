@@ -1,24 +1,24 @@
-// Garúa limeña tokens, mirrored from the web panel (DESIGN.md).
+// Orgánico tokens, mirrored from the web panel (DESIGN.md): flat bone ground, deep teal, Lora and Raleway.
 export const color = {
-  nieblaAlta: '#f0f3f5',
-  nieblaBaja: '#dde5ea',
-  tinta: '#25343f',
-  tintaSuave: '#4a5c68',
-  tintaTenue: '#566873',
-  borde: '#cdd8de',
-  mar: '#1d6a73',
-  marOscuro: '#14535b',
-  sol: '#f0b44c',
+  nieblaAlta: '#f6f6f1',
+  nieblaBaja: '#f6f6f1',
+  tinta: '#0f172a',
+  tintaSuave: '#475569',
+  tintaTenue: '#566272',
+  borde: '#dcddd4',
+  mar: '#0b5f73',
+  marOscuro: '#073f4d',
+  turquesa: '#0891b2',
   blanco: '#ffffff',
-  superficie: 'rgba(255,255,255,0.88)',
+  superficie: '#ffffff',
   error: '#8a3b12',
 }
 
 export const fuente = {
-  regular: 'AlbertSans_400Regular',
-  semi: 'AlbertSans_600SemiBold',
-  negrita: 'AlbertSans_800ExtraBold',
+  regular: 'Raleway_400Regular',
+  semi: 'Raleway_600SemiBold',
+  negrita: 'Lora_600SemiBold',
 }
 
-export const radio = { boton: 16, tarjeta: 24 }
+export const radio = { boton: 10, tarjeta: 18 }
 export const alturaTactil = 56
