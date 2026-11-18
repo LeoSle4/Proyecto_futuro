@@ -1,4 +1,4 @@
-import type { Dashboard, Empleado, Equipo, NuevoEmpleadoSolicitud, Perfil } from './tipos'
+import type { Cuestionario, Dashboard, Empleado, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto } from './tipos'
 
 // Synthetic data for working without the backend (VITE_DEMO=1). The UI labels it as synthetic.
 // Mutable on purpose: the demo lets you create, rename and delete teams in memory.
@@ -27,7 +27,9 @@ function dashboard(equipoId: number, semana: string): Dashboard {
   }
 }
 
-const perfil: Perfil = { username: 'rrhh@demo.kala', uid: 1, roles: ['RRHH'], empresaId: 1 }
+// VITE_DEMO_ROL=ADMIN (or COORDINADOR_BIENESTAR) shows the panel as that role; an admin has no company of their own.
+const rolDemo = (import.meta.env.VITE_DEMO_ROL ?? 'RRHH') as Perfil['roles'][number]
+const perfil: Perfil = rolDemo === 'ADMIN' ? { username: 'admin@demo.kala', uid: 1, roles: ['ADMIN'] } : { username: 'rrhh@demo.kala', uid: 1, roles: [rolDemo], empresaId: 1 }
 
 function crearEquipo(nombre: string, empresaId: number): Equipo {
   const creado = { id: Math.max(0, ...equipos.map((e) => e.id)) + 1, nombre, empresaId }
@@ -66,4 +68,31 @@ function cambiarEstadoEmpleado(id: number, activo: boolean): void {
   if (p) p.activo = activo
 }
 
-export const demo = { empleados, crearEmpleado, cambiarEstadoEmpleado, equipos, dashboard, perfil, crearEquipo, editarEquipo, eliminarEquipo }
+// Epsilon each questionnaire adds to the monthly spend (illustrative demo values).
+const GASTO: Record<number, number> = { 1: 1.1, 2: 5, 3: 6, 4: 7 }
+const catalogo: Cuestionario[] = [
+  { id: 1, codigo: 'PULSO', nombre: 'Pulso semanal', cadenciaDias: 7, itemsPorEnvio: null, activo: true },
+  { id: 2, codigo: 'WHO5', nombre: 'Bienestar (WHO-5)', cadenciaDias: 14, itemsPorEnvio: 5, activo: true },
+  { id: 3, codigo: 'PHQ8', nombre: 'Ánimo (PHQ-8)', cadenciaDias: 14, itemsPorEnvio: 8, activo: false },
+  { id: 4, codigo: 'GAD7', nombre: 'Ansiedad (GAD-7)', cadenciaDias: 14, itemsPorEnvio: 7, activo: false },
+]
+let maximo = 20
+
+const cuestionarios = (): Cuestionario[] => catalogo.map((c) => ({ ...c }))
+const usado = () => catalogo.filter((c) => c.activo).reduce((s, c) => s + GASTO[c.id], 0)
+const presupuesto = (): Presupuesto => ({ empresaId: 1, periodo: '2026-11', epsilonMaximo: maximo, epsilonMensual: Math.round(usado() * 100) / 100 })
+
+function cambiarCuestionario(id: number, activo: boolean): void {
+  const c = catalogo.find((x) => x.id === id)
+  if (!c) return
+  if (activo && !c.activo && usado() + GASTO[id] > maximo) throw Object.assign(new Error('Activarlo superaría el presupuesto de privacidad de la empresa.'), { estado: 422 })
+  c.activo = activo
+}
+
+function fijarPresupuesto(valor: number): Presupuesto {
+  if (valor < usado()) throw Object.assign(new Error('Ese máximo es menor que lo que ya usan los cuestionarios activos.'), { estado: 422 })
+  maximo = valor
+  return presupuesto()
+}
+
+export const demo = { cuestionarios, presupuesto, cambiarCuestionario, fijarPresupuesto, empleados, crearEmpleado, cambiarEstadoEmpleado, equipos, dashboard, perfil, crearEquipo, editarEquipo, eliminarEquipo }
