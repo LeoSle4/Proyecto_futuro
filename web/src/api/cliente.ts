@@ -147,7 +147,51 @@ export const api = {
     await conRenovacion<void>(`/api/usuarios/${id}/${activo ? 'activar' : 'desactivar'}`, { method: 'PATCH' })
   },
   empresas(): Promise<Empresa[]> {
-    return USAR_DEMO ? Promise.resolve([{ id: 1, nombre: 'Empresa demo' }]) : conRenovacion<Empresa[]>('/api/empresas')
+    return USAR_DEMO ? Promise.resolve(demo.empresas()) : conRenovacion<Empresa[]>('/api/empresas')
+  },
+  async crearEmpresa(d: { ruc: string; nombre: string; rubro: string }): Promise<void> {
+    const cuerpo = { ruc: d.ruc.trim(), nombre: d.nombre.trim(), rubro: d.rubro.trim() }
+    if (USAR_DEMO) return demo.crearEmpresa(cuerpo)
+    try {
+      await conRenovacion<unknown>('/api/empresas', { method: 'POST', body: JSON.stringify(cuerpo) })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 409) throw new ErrorApi(409, 'Ya existe una empresa con esos datos. Revisa el RUC.')
+      throw e
+    }
+  },
+  async editarEmpresa(id: number, d: { ruc: string; nombre: string; rubro: string }): Promise<void> {
+    const cuerpo = { ruc: d.ruc.trim(), nombre: d.nombre.trim(), rubro: d.rubro.trim() }
+    if (USAR_DEMO) return demo.editarEmpresa(id, cuerpo)
+    await conRenovacion<unknown>(`/api/empresas/${id}`, { method: 'PUT', body: JSON.stringify(cuerpo) })
+  },
+  async eliminarEmpresa(id: number): Promise<void> {
+    if (USAR_DEMO) return demo.eliminarEmpresa(id)
+    try {
+      await conRenovacion<void>(`/api/empresas/${id}`, { method: 'DELETE' })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 409) throw new ErrorApi(409, 'Esta empresa todavía tiene equipos. Elimina primero sus equipos y vuelve a intentarlo.')
+      throw e
+    }
+  },
+  async crearPersonal(empresaId: number, d: { email: string; nombre: string; clave: string; rol: string }): Promise<void> {
+    const cuerpo = { email: d.email.trim(), nombre: d.nombre.trim(), clave: d.clave, rol: d.rol }
+    if (USAR_DEMO) return demo.crearPersonal(empresaId, cuerpo)
+    try {
+      await conRenovacion<unknown>(`/api/admin/empresas/${empresaId}/personal`, { method: 'POST', body: JSON.stringify(cuerpo) })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 409) throw new ErrorApi(409, 'Ese correo ya tiene una cuenta. Usa otro.')
+      throw e
+    }
+  },
+  // The server revokes every session when the password changes, so the caller must sign out afterwards.
+  async cambiarClave(claveActual: string, claveNueva: string): Promise<void> {
+    if (USAR_DEMO) return
+    try {
+      await conRenovacion<void>('/api/usuarios/me/clave', { method: 'PUT', body: JSON.stringify({ claveActual, claveNueva }) })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 401) throw new ErrorApi(401, 'La contraseña actual no coincide.')
+      throw e
+    }
   },
   cuestionarios(empresaId: number): Promise<Cuestionario[]> {
     return USAR_DEMO ? Promise.resolve(demo.cuestionarios()) : conRenovacion<Cuestionario[]>(`/api/empresas/${empresaId}/cuestionarios?incluirInactivos=true`)

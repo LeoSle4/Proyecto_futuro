@@ -54,6 +54,8 @@ export interface Presupuesto {
 export interface Empresa {
   id: number
   nombre: string
+  ruc?: string
+  rubro?: string
 }
 
 export interface ContactoAyuda {

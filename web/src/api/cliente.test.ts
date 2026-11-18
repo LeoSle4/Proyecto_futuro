@@ -225,3 +225,62 @@ describe('ayuda', () => {
     await expect(api.atenderSolicitud(7, null)).rejects.toMatchObject({ estado: 409, message: expect.stringContaining('ya') })
   })
 })
+
+describe('administración: empresas y personal', () => {
+  const empresa = { id: 4, ruc: '20123456789', nombre: 'Empresa Demo', rubro: 'Servicios' }
+
+  it('lista las empresas', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: [empresa] }))
+    await expect(api.empresas()).resolves.toEqual([empresa])
+    expect(llamadas[0].ruta).toBe('/api/empresas')
+  })
+
+  it('crea una empresa por POST con RUC, nombre y rubro recortados', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 201, cuerpo: empresa }))
+    await api.crearEmpresa({ ruc: ' 20123456789 ', nombre: ' Empresa Demo ', rubro: ' Servicios ' })
+    expect(llamadas[0].metodo).toBe('POST')
+    expect(llamadas[0].ruta).toBe('/api/empresas')
+    expect(JSON.parse(llamadas[0].cuerpo ?? '{}')).toEqual({ ruc: '20123456789', nombre: 'Empresa Demo', rubro: 'Servicios' })
+  })
+
+  it('edita por PUT y elimina por DELETE', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: empresa }))
+    await api.editarEmpresa(4, { ruc: '20123456789', nombre: 'Otra', rubro: 'Servicios' })
+    simular(() => ({ status: 204 }))
+    await api.eliminarEmpresa(4)
+    expect(`${llamadas[0].metodo} ${llamadas[0].ruta}`).toBe('PUT /api/empresas/4')
+  })
+
+  it('explica el 409 de eliminar como una empresa que todavía tiene equipos', async () => {
+    await conSesion()
+    simular(() => ({ status: 409 }))
+    await expect(api.eliminarEmpresa(4)).rejects.toMatchObject({ estado: 409, message: expect.stringContaining('equipos') })
+  })
+
+  it('da de alta a una persona de RRHH o coordinación en una empresa', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 201, cuerpo: { id: 9, email: 'ana@empresa.pe', nombre: 'Ana' } }))
+    await api.crearPersonal(4, { email: 'ana@empresa.pe', nombre: 'Ana', clave: 'una-clave-larga-1', rol: 'RRHH' })
+    expect(llamadas[0].metodo).toBe('POST')
+    expect(llamadas[0].ruta).toBe('/api/admin/empresas/4/personal')
+    expect(JSON.parse(llamadas[0].cuerpo ?? '{}')).toEqual({ email: 'ana@empresa.pe', nombre: 'Ana', clave: 'una-clave-larga-1', rol: 'RRHH' })
+  })
+
+  it('explica el 409 del alta de personal como un correo repetido', async () => {
+    await conSesion()
+    simular(() => ({ status: 409 }))
+    await expect(api.crearPersonal(4, { email: 'ana@empresa.pe', nombre: 'Ana', clave: 'una-clave-larga-1', rol: 'RRHH' })).rejects.toMatchObject({ message: expect.stringContaining('correo') })
+  })
+
+  it('cambia la propia clave con la actual y la nueva, y no manda nada más', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 204 }))
+    await api.cambiarClave('actual-larga-123', 'nueva-larga-12345')
+    expect(llamadas[0].metodo).toBe('PUT')
+    expect(llamadas[0].ruta).toBe('/api/usuarios/me/clave')
+    expect(JSON.parse(llamadas[0].cuerpo ?? '{}')).toEqual({ claveActual: 'actual-larga-123', claveNueva: 'nueva-larga-12345' })
+  })
+})
