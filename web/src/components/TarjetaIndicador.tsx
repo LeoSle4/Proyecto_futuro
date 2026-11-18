@@ -25,7 +25,7 @@ export function TarjetaIndicador({ item, total, retardo }: Props) {
     const hi = redondea(Math.min(max, item.mediaEstimada + margen))
     return (
       <article className="tarjeta eleva sube">
-        <h3>{item.tema}</h3>
+        <h2>{item.tema}</h2>
         <p className="t-valor">{dec(item.mediaEstimada)} <small>de {max}</small></p>
         <Medidor escala={{ min, max }} paso={1} intervalo={{ estimate: item.mediaEstimada, lo, hi }} formato={dec} retardo={retardo} />
         <p className="t-nota">Entre {dec(lo)} y {dec(hi)} con {total} respuestas. Más respuestas, menos margen.</p>
@@ -36,7 +36,7 @@ export function TarjetaIndicador({ item, total, retardo }: Props) {
     const est = item.proporcionEstimada * 100
     return (
       <article className="tarjeta eleva sube">
-        <h3>{item.tema}</h3>
+        <h2>{item.tema}</h2>
         <p className="t-valor">{pct(est)} <small>dijo que sí</small></p>
         <Medidor
           escala={{ min: 0, max: 100 }} paso={10} formato={pct} retardo={retardo}
@@ -51,7 +51,7 @@ export function TarjetaIndicador({ item, total, retardo }: Props) {
   const propias = item.respuestas ?? (total < N_MINIMO ? total : null)
   return (
     <article className="tarjeta hatch sube">
-      <h3>{item.tema}</h3>
+      <h2>{item.tema}</h2>
       <p className="t-valor apagado">Sin resultado</p>
       {propias !== null && <MedidorSegmentos tengo={propias} minimo={N_MINIMO} />}
       <p className="t-nota">
