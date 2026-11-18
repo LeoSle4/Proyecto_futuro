@@ -1,4 +1,4 @@
-import type { Dashboard, Equipo, Perfil, Sesion } from './tipos'
+import type { Dashboard, Empleado, Equipo, NuevoEmpleadoSolicitud, Perfil, Sesion } from './tipos'
 import { demo } from './demo'
 
 export class ErrorApi extends Error {
@@ -56,7 +56,9 @@ async function pedir<T>(ruta: string, init: RequestInit = {}, conAuth = true): P
 function mensajePara(estado: number): string {
   if (estado === 401) return 'Tu sesión terminó. Inicia sesión de nuevo.'
   if (estado === 403) return 'Tu cuenta no tiene permiso para ver esto.'
+  if (estado === 400) return 'Revisa los datos e inténtalo de nuevo.'
   if (estado === 404) return 'No encontramos ese equipo en tu empresa.'
+  if (estado === 409) return 'Ese cambio choca con datos que ya existen (por ejemplo, un equipo que todavía tiene empleados).'
   if (estado === 429) return 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.'
   return 'Algo salió mal de nuestro lado. Inténtalo de nuevo en un momento.'
 }
@@ -82,11 +84,11 @@ async function refrescar(): Promise<boolean> {
   return refrescando
 }
 
-async function conRenovacion<T>(ruta: string): Promise<T> {
+async function conRenovacion<T>(ruta: string, init?: RequestInit): Promise<T> {
   try {
-    return await pedir<T>(ruta)
+    return await pedir<T>(ruta, init)
   } catch (e) {
-    if (e instanceof ErrorApi && e.estado === 401 && (await refrescar())) return pedir<T>(ruta)
+    if (e instanceof ErrorApi && e.estado === 401 && (await refrescar())) return pedir<T>(ruta, init)
     throw e
   }
 }
@@ -114,7 +116,35 @@ export const api = {
     }
   },
   equipos(): Promise<Equipo[]> {
-    return USAR_DEMO ? Promise.resolve(demo.equipos) : conRenovacion<Equipo[]>('/api/equipos')
+    return USAR_DEMO ? Promise.resolve([...demo.equipos]) : conRenovacion<Equipo[]>('/api/equipos')
+  },
+  async crearEquipo(nombre: string, empresaId: number): Promise<Equipo> {
+    if (USAR_DEMO) return demo.crearEquipo(nombre, empresaId)
+    return conRenovacion<Equipo>('/api/equipos', { method: 'POST', body: JSON.stringify({ nombre, empresaId }) })
+  },
+  async editarEquipo(id: number, nombre: string, empresaId: number): Promise<Equipo> {
+    if (USAR_DEMO) return demo.editarEquipo(id, nombre)
+    return conRenovacion<Equipo>(`/api/equipos/${id}`, { method: 'PUT', body: JSON.stringify({ nombre, empresaId }) })
+  },
+  async eliminarEquipo(id: number): Promise<void> {
+    if (USAR_DEMO) return demo.eliminarEquipo(id)
+    await conRenovacion<void>(`/api/equipos/${id}`, { method: 'DELETE' })
+  },
+  empleados(): Promise<Empleado[]> {
+    return USAR_DEMO ? Promise.resolve(demo.empleados()) : conRenovacion<Empleado[]>('/api/empleados')
+  },
+  async crearEmpleado(d: NuevoEmpleadoSolicitud): Promise<void> {
+    if (USAR_DEMO) return demo.crearEmpleado(d)
+    try {
+      await conRenovacion<unknown>('/api/empleados', { method: 'POST', body: JSON.stringify(d) })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 409) throw new ErrorApi(409, 'Ese correo ya tiene una cuenta. Usa otro o pídele a esa persona que entre con la suya.')
+      throw e
+    }
+  },
+  async cambiarEstadoEmpleado(id: number, activo: boolean): Promise<void> {
+    if (USAR_DEMO) return demo.cambiarEstadoEmpleado(id, activo)
+    await conRenovacion<void>(`/api/usuarios/${id}/${activo ? 'activar' : 'desactivar'}`, { method: 'PATCH' })
   },
   dashboard(equipoId: number, semana: string): Promise<Dashboard> {
     return USAR_DEMO ? Promise.resolve(demo.dashboard(equipoId, semana)) : conRenovacion<Dashboard>(`/api/dashboard/${equipoId}?semana=${semana}`)
