@@ -48,7 +48,14 @@ async function pedir<T>(ruta: string, init: RequestInit = {}, conAuth = true): P
     throw new ErrorApi(0, 'No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.')
   }
   if (!respuesta.ok) {
-    throw new ErrorApi(respuesta.status, mensajePara(respuesta.status))
+    let detalle: string | null = null
+    try {
+      const cuerpo = await respuesta.json() as { mensaje?: unknown }
+      if (typeof cuerpo.mensaje === 'string' && cuerpo.mensaje.trim()) detalle = cuerpo.mensaje
+    } catch {
+      /* Some responses have no JSON body. */
+    }
+    throw new ErrorApi(respuesta.status, detalle ?? mensajePara(respuesta.status))
   }
   return respuesta.status === 204 ? (undefined as T) : ((await respuesta.json()) as T)
 }
