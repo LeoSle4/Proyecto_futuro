@@ -44,7 +44,7 @@ public class DashboardController {
                 r.totalRespuestas(),
                 r.items().stream()
                         .map(i -> new ItemDashboard(i.itemId(), i.tema(), i.proporcionEstimada(), i.margenError95(), i.mediaEstimada(),
-                                i.valorMin(), i.valorMax()))
+                                i.valorMin(), i.valorMax(), i.respuestas()))
                         .toList());
     }
 

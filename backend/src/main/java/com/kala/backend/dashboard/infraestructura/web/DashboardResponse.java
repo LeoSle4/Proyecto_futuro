@@ -21,7 +21,8 @@ public record DashboardResponse(
             Double margenError95,
             Double mediaEstimada,
             Integer valorMin,
-            Integer valorMax
+            Integer valorMax,
+            Long respuestas
     ) {
     }
 }

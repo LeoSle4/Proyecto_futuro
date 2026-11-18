@@ -16,7 +16,7 @@ interface Props {
 
 // The headline indicator of the week. Mount it with a key per team and week so its state starts fresh.
 export function PanelPulso({ item, total }: Props) {
-  if (!item || item.proporcionEstimada === null || item.margenError95 === null) return <SinResultado tema={item?.tema} total={total} />
+  if (!item || item.proporcionEstimada === null || item.margenError95 === null) return <SinResultado tema={item?.tema} total={total} propias={item?.respuestas ?? null} />
   return <ConResultado tema={item.tema} total={total} estimado={Math.round(item.proporcionEstimada * 100)} mitad={item.margenError95 * 100} />
 }
 
@@ -61,9 +61,9 @@ function ConResultado({ tema, total, estimado, mitad }: { tema: string; total: n
   )
 }
 
-function SinResultado({ tema, total }: { tema: string | undefined; total: number }) {
-  // The server sends the team's total, not this item's own count (see TarjetaIndicador).
-  const equipoBajo = total < N_MINIMO
+function SinResultado({ tema, total, propias }: { tema: string | undefined; total: number; propias: number | null }) {
+  // This item's own count when the server sends it; else the team total, fair only when the whole team is short.
+  const n = propias ?? (total < N_MINIMO ? total : null)
   return (
     <section className="panelcard asienta">
       <div className="pc-cabeza">
@@ -71,20 +71,20 @@ function SinResultado({ tema, total }: { tema: string | undefined; total: number
           <div className="pc-pregunta">Pulso{tema ? ` · ${tema}` : ''}</div>
           <div className="pc-cifra"><b className="apagada">Sin resultado</b></div>
           <p className="pc-pie">
-            {equipoBajo
+            {n !== null
               ? `Con menos de ${N_MINIMO} respuestas no se publica nada, para proteger al grupo.`
               : `Este indicador todavía no llegó al mínimo de ${N_MINIMO} respuestas.`}
           </p>
         </div>
         <dl className="libro">
-          <div><dt>Respuestas del equipo</dt><dd>{total}</dd></div>
+          <div><dt>{n !== null && propias !== null ? 'Respuestas del indicador' : 'Respuestas del equipo'}</dt><dd>{n ?? total}</dd></div>
           <div><dt>Mínimo para publicar</dt><dd>{N_MINIMO}</dd></div>
-          {equipoBajo
-            ? <div><dt>Faltan</dt><dd>{N_MINIMO - total}</dd></div>
+          {n !== null
+            ? <div><dt>Faltan</dt><dd>{Math.max(0, N_MINIMO - n)}</dd></div>
             : <div><dt>Este indicador</dt><dd>bajo el mínimo</dd></div>}
         </dl>
       </div>
-      {equipoBajo && <MedidorSegmentos tengo={total} minimo={N_MINIMO} />}
+      {n !== null && <MedidorSegmentos tengo={n} minimo={N_MINIMO} />}
     </section>
   )
 }

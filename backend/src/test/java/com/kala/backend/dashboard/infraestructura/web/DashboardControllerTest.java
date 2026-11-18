@@ -86,6 +86,17 @@ class DashboardControllerTest {
     }
 
     @Test
+    void elItemIncluyeCuantasRespuestasTuvoParaPoderDecirCuantasFaltan() throws Exception {
+        when(service.consultar(5L, 1L, 10L, LUNES)).thenReturn(new ResultadoDashboard(
+                10L, LUNES, "OK", 38L, List.of(new ItemEstimado(5L, "Interes", null, null, null, 0, 3, 19L))));
+
+        mockMvc.perform(get("/api/dashboard/10").param("semana", "2026-03-09")
+                        .with(jwtDe("ROLE_RRHH", 1L)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].respuestas").value(19));
+    }
+
+    @Test
     void rrhhConDatosSuficientes_devuelve200ConLaEstimacion() throws Exception {
         when(service.consultar(5L, 1L, 10L, LUNES)).thenReturn(new ResultadoDashboard(
                 10L, LUNES, "OK", 40L, List.of(new ItemEstimado(3L, "Pulso", 0.62, 0.05))));
