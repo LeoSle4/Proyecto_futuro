@@ -13,7 +13,8 @@ export class ErrorApi extends Error {
 
 export const MODO_DEMO = process.env.EXPO_PUBLIC_DEMO === '1'
 // On a real phone "localhost" is the phone itself: set EXPO_PUBLIC_API_URL to your computer's address.
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080'
+// The backend listens on 8090 (server.port in application.properties).
+const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8090'
 const CLAVE_REFRESH = 'kala.refresh'
 
 let accessToken: string | null = null
