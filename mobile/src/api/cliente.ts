@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store'
 import type { EnvioItem } from '../domain/ldp'
 import { contactosDemo, cuestionariosDemo } from './demo'
-import type { Contacto, Cuestionario } from './tipos'
+import type { Contacto, Cuestionario, Solicitud } from './tipos'
 
 export class ErrorApi extends Error {
   readonly estado: number
@@ -37,6 +37,7 @@ async function pedir<T>(ruta: string, init: RequestInit = {}, conAuth = true): P
 }
 
 function mensajePara(estado: number): string {
+  if (estado === 400) return 'Revisa los datos e inténtalo de nuevo.'
   if (estado === 401) return 'Tu sesión terminó. Inicia sesión de nuevo.'
   if (estado === 403) return 'Tu cuenta no puede hacer esto.'
   if (estado === 409) return 'Ya respondiste esta pregunta.'
@@ -114,6 +115,20 @@ export const api = {
   async enviar(envio: EnvioItem): Promise<void> {
     if (MODO_DEMO) return
     await conRenovacion<void>('/api/checkin', { method: 'POST', body: JSON.stringify(envio) })
+  },
+  // The server revokes every session on success, so the caller must sign out afterwards.
+  async cambiarClave(claveActual: string, claveNueva: string): Promise<void> {
+    if (MODO_DEMO) return
+    await conRenovacion<void>('/api/usuarios/me/clave', { method: 'PUT', body: JSON.stringify({ claveActual, claveNueva }) })
+  },
+  // Unlike a check-in, this message is deliberate and reaches the wellbeing coordinator with the person's identity.
+  async pedirAyuda(mensaje: string): Promise<Solicitud> {
+    if (MODO_DEMO) return { id: 1, estado: 'PENDIENTE', mensaje: mensaje.trim() || null }
+    const texto = mensaje.trim()
+    return conRenovacion<Solicitud>('/api/ayuda/solicitudes', { method: 'POST', body: JSON.stringify({ mensaje: texto === '' ? null : texto }) })
+  },
+  misSolicitudes(): Promise<Solicitud[]> {
+    return MODO_DEMO ? Promise.resolve([]) : conRenovacion<Solicitud[]>('/api/ayuda/solicitudes/mias')
   },
   contactos(): Promise<Contacto[]> {
     return MODO_DEMO ? Promise.resolve(contactosDemo) : conRenovacion<Contacto[]>('/api/ayuda/contactos')

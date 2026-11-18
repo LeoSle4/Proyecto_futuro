@@ -27,3 +27,9 @@ export interface Contacto {
   telefono?: string | null
   email?: string | null
 }
+
+export interface Solicitud {
+  id: number
+  estado: 'PENDIENTE' | 'EN_ATENCION' | 'CERRADA' | string
+  mensaje?: string | null
+}
