@@ -8,10 +8,16 @@ public record CuestionarioResponse(
         String codigo,
         String nombre,
         int cadenciaDias,
-        Integer itemsPorEnvio
+        Integer itemsPorEnvio,
+        boolean activo
 ) {
+    // Los que lista la empresa por defecto son todos activos.
     public static CuestionarioResponse de(Cuestionario c) {
+        return de(c, true);
+    }
+
+    public static CuestionarioResponse de(Cuestionario c, boolean activo) {
         return new CuestionarioResponse(c.getId(), c.getCodigo(), c.getNombre(), c.getCadenciaDias(),
-                c.getItemsPorEnvio() == null ? null : c.getItemsPorEnvio().intValue());
+                c.getItemsPorEnvio() == null ? null : c.getItemsPorEnvio().intValue(), activo);
     }
 }

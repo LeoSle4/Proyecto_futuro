@@ -10,4 +10,7 @@ public interface Cuestionarios {
     Optional<Cuestionario> porId(Long id);
 
     List<Cuestionario> activosDeEmpresa(Long empresaId);
+
+    // El catálogo completo, ordenado por código, para que se pueda elegir cuál activar.
+    List<Cuestionario> todos();
 }
