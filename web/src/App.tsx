@@ -10,6 +10,7 @@ import { EquiposPage } from './pages/EquiposPage'
 import { LoginPage } from './pages/LoginPage'
 import { SolicitudesPage } from './pages/SolicitudesPage'
 import { ResumenPage } from './pages/ResumenPage'
+import { PresupuestoPage } from './pages/PresupuestoPage'
 
 // The administration has no company of its own, so its home is the list of companies.
 function Inicio() {
@@ -18,7 +19,7 @@ function Inicio() {
 }
 
 function Protegido() {
-  const { perfil, cargando } = useSesion()
+  const { perfil, cargando } = useSesion()/*  */
   if (cargando) return <p className="cargando-sesion" role="status">Cargando…</p>
   return perfil ? <Shell /> : <Navigate to="/entrar" replace />
 }
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="equipos" element={<EquiposPage />} />
         <Route path="empleados" element={<EmpleadosPage />} />
         <Route path="cuestionarios" element={<CuestionariosPage />} />
+        <Route path="presupuesto" element={<PresupuestoPage />} />
         <Route path="solicitudes" element={<SolicitudesPage />} />
         <Route path="ayuda" element={<AyudaPage />} />
       </Route>
