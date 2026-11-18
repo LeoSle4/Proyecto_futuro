@@ -2,6 +2,7 @@ package com.kala.backend.identidad.infraestructura.web;
 
 import com.kala.backend.identidad.aplicacion.GestionUsuariosService;
 import com.kala.backend.identidad.infraestructura.web.UsuarioDtos.CambioClaveRequest;
+import com.kala.backend.identidad.infraestructura.web.UsuarioDtos.EmpleadoResponse;
 import com.kala.backend.identidad.infraestructura.web.UsuarioDtos.NuevoEmpleadoRequest;
 import com.kala.backend.identidad.infraestructura.web.UsuarioDtos.NuevoPersonalRequest;
 import com.kala.backend.identidad.infraestructura.web.UsuarioDtos.UsuarioCreadoResponse;
@@ -12,6 +13,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +50,13 @@ public class UsuarioController {
                                                @Valid @RequestBody NuevoEmpleadoRequest request) {
         return UsuarioCreadoResponse.de(service.crearEmpleado(
                 claim(jwt, "empresaId"), request.equipoId(), request.email(), request.nombre(), request.clave()));
+    }
+
+    // 200 con los empleados de la empresa del token (nombre, correo, equipo y si la cuenta está activa).
+    @GetMapping("/api/empleados")
+    @PreAuthorize("hasAnyRole('RRHH','COORDINADOR_BIENESTAR')")
+    public List<EmpleadoResponse> listarEmpleados(@AuthenticationPrincipal Jwt jwt) {
+        return service.listarEmpleados(claim(jwt, "empresaId")).stream().map(EmpleadoResponse::de).toList();
     }
 
     // 204; 401 si la clave actual no coincide; 400 si la nueva no cumple las reglas. Los tokens ya emitidos

@@ -331,4 +331,20 @@ class GestionUsuariosServiceTest {
     private Empresa empresaDePrueba() {
         return new Empresa("20123456789", "ACME", "TI");
     }
+
+    // ---- listado de empleados de la empresa ----
+
+    @Test
+    void listarEmpleados_devuelveLosDeLaEmpresaDelToken() {
+        var ana = new com.kala.backend.identidad.aplicacion.puerto.EmpleadoResumen(5L, "ana@kala.test", "Ana", true, 9L, "Ventas");
+        when(empleados.deEmpresa(4L)).thenReturn(java.util.List.of(ana));
+
+        assertThat(service.listarEmpleados(4L)).containsExactly(ana);
+    }
+
+    @Test
+    void listarEmpleados_sinEmpresaFalla() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.listarEmpleados(null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

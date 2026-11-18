@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -236,5 +237,38 @@ class UsuarioControllerTest {
                                 .authorities(new SimpleGrantedAuthority("ROLE_RRHH")))
                         .with(csrf()))
                 .andExpect(status().isForbidden());
+    }
+
+    // ---- listado de empleados ----
+
+    @Test
+    void rrhhYCoordinadorListanLosEmpleadosDeSuEmpresaSinDatosSensibles() throws Exception {
+        when(service.listarEmpleados(4L)).thenReturn(List.of(
+                new com.kala.backend.identidad.aplicacion.puerto.EmpleadoResumen(5L, "ana@kala.test", "Ana", true, 9L, "Ventas")));
+
+        for (String rol : List.of("RRHH", "COORDINADOR_BIENESTAR")) {
+            mockMvc.perform(get("/api/empleados").with(como(rol)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value(5))
+                    .andExpect(jsonPath("$[0].email").value("ana@kala.test"))
+                    .andExpect(jsonPath("$[0].nombre").value("Ana"))
+                    .andExpect(jsonPath("$[0].activo").value(true))
+                    .andExpect(jsonPath("$[0].equipoId").value(9))
+                    .andExpect(jsonPath("$[0].equipoNombre").value("Ventas"))
+                    .andExpect(jsonPath("$[0].passwordHash").doesNotExist());
+        }
+    }
+
+    @Test
+    void elListadoDeEmpleadosEstaProhibidoParaAdminYEmpleado() throws Exception {
+        for (String rol : List.of("ADMIN", "EMPLEADO")) {
+            mockMvc.perform(get("/api/empleados").with(como(rol))).andExpect(status().isForbidden());
+        }
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void elListadoDeEmpleadosSinTokenDevuelve401() throws Exception {
+        mockMvc.perform(get("/api/empleados")).andExpect(status().isUnauthorized());
     }
 }

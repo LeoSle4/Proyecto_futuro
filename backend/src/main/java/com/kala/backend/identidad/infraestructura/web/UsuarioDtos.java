@@ -53,4 +53,13 @@ public final class UsuarioDtos {
             return new UsuarioCreadoResponse(usuario.getId(), usuario.getEmail(), usuario.getNombre());
         }
     }
+
+    public record EmpleadoResponse(Long id, String email, String nombre, boolean activo, Long equipoId,
+                                   String equipoNombre) {
+
+        public static EmpleadoResponse de(com.kala.backend.identidad.aplicacion.puerto.EmpleadoResumen e) {
+            return new EmpleadoResponse(e.usuarioId(), e.email(), e.nombre(), e.activo(), e.equipoId(),
+                    e.equipoNombre());
+        }
+    }
 }
