@@ -26,3 +26,17 @@ export function validarNuevoEmpleado(d: NuevoEmpleado): ErroresEmpleado {
   else if (new TextEncoder().encode(d.clave).length > CLAVE_MAXIMA_BYTES) errores.clave = `La clave inicial es demasiado larga (máximo ${CLAVE_MAXIMA_BYTES} bytes).`
   return errores
 }
+
+export function erroresEmpleadoDelServidor(estado: number, mensaje: string): ErroresEmpleado {
+  if (estado === 409) return { email: 'Ese correo ya tiene una cuenta. Usa otro correo.' }
+  if (estado === 404) return { equipoId: 'El equipo ya no está disponible en tu empresa. Elige uno de la lista.' }
+  if (estado !== 400) return {}
+
+  const detalle = mensaje.toLowerCase()
+  const errores: ErroresEmpleado = {}
+  if (/\b(email|correo)\b/.test(detalle)) errores.email = 'Revisa el correo e inténtalo de nuevo.'
+  if (/\bnombre\b/.test(detalle)) errores.nombre = 'Revisa el nombre e inténtalo de nuevo.'
+  if (/\bclave\b/.test(detalle)) errores.clave = `La clave inicial debe tener entre ${CLAVE_MINIMA} caracteres y ${CLAVE_MAXIMA_BYTES} bytes.`
+  if (/\b(equipoid|equipo)\b/.test(detalle)) errores.equipoId = 'Elige un equipo válido de tu empresa.'
+  return errores
+}

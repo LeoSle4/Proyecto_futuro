@@ -1,11 +1,32 @@
 import { describe, expect, it } from 'vitest'
-import { validarNuevoEmpleado } from './empleado'
+import { erroresEmpleadoDelServidor, validarNuevoEmpleado } from './empleado'
 
 const valido = { nombre: 'Ana Ríos', email: 'ana@empresa.pe', clave: 'una-clave-larga-1', equipoId: 3 }
 
 describe('validarNuevoEmpleado', () => {
   it('acepta un empleado completo y no devuelve errores', () => {
     expect(validarNuevoEmpleado(valido)).toEqual({})
+  })
+
+  describe('erroresEmpleadoDelServidor', () => {
+    it('asocia los conflictos de correo y equipo al campo correspondiente', () => {
+      expect(erroresEmpleadoDelServidor(409, 'correo duplicado').email).toContain('correo')
+      expect(erroresEmpleadoDelServidor(404, 'equipo no encontrado').equipoId).toContain('equipo')
+    })
+
+    it('traduce los campos rechazados por validación del servidor', () => {
+      const errores = erroresEmpleadoDelServidor(400, 'email: invalid; nombre: blank; clave: too short; equipoId: null')
+      expect(errores).toMatchObject({
+        email: expect.any(String),
+        nombre: expect.any(String),
+        clave: expect.any(String),
+        equipoId: expect.any(String),
+      })
+    })
+
+    it('no convierte errores generales del servidor en errores de campo', () => {
+      expect(erroresEmpleadoDelServidor(500, 'Servicio no disponible')).toEqual({})
+    })
   })
   it('exige nombre, correo y equipo', () => {
     const e = validarNuevoEmpleado({ nombre: '  ', email: '', clave: valido.clave, equipoId: null })

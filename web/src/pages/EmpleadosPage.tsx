@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { api, ErrorApi } from '../api/cliente'
 import type { Empleado, Equipo } from '../api/tipos'
 import { useSesion } from '../auth/SesionContext'
-import { validarNuevoEmpleado, type ErroresEmpleado } from '../lib/empleado'
+import { erroresEmpleadoDelServidor, validarNuevoEmpleado, type ErroresEmpleado } from '../lib/empleado'
 import { Aviso } from '../components/Aviso'
 import { Selector } from '../components/Selector'
 import './EmpleadosPage.css'
@@ -49,17 +49,22 @@ export function EmpleadosPage() {
     }
   }, [permitido, cerrar])
 
-  async function ejecutar(accion: () => Promise<unknown>, mensaje: string): Promise<boolean> {
+  async function ejecutar(accion: () => Promise<unknown>, mensaje: string, alFallar?: (e: unknown) => boolean): Promise<boolean> {
     setError(null)
     setOcupado(true)
     try {
       await accion()
-      await recargar()
       setAviso(mensaje)
+      try {
+        await recargar()
+      } catch (e) {
+        if (e instanceof ErrorApi && e.estado === 401) void cerrar()
+        else setError('El cambio se guardó, pero no pudimos actualizar la lista. Inténtalo de nuevo.')
+      }
       return true
     } catch (e) {
       if (e instanceof ErrorApi && e.estado === 401) void cerrar()
-      else setError(e instanceof Error ? e.message : 'No pudimos completar el cambio.')
+      else if (!alFallar || !alFallar(e)) setError(e instanceof Error ? e.message : 'No pudimos completar el cambio.')
       return false
     } finally {
       setOcupado(false)
@@ -75,7 +80,14 @@ export function EmpleadosPage() {
     const nombre = form.nombre.trim()
     const ok = await ejecutar(
       () => api.crearEmpleado({ equipoId, email: form.email.trim(), nombre, clave: form.clave }),
-      `${nombre} ya tiene cuenta. Compártele su correo y la clave inicial: la clave no se vuelve a mostrar.`,
+      `Cuenta de ${nombre} creada. Comparte con esa persona la clave inicial que acabas de definir; no volverás a verla aquí.`,
+      (e) => {
+        if (!(e instanceof ErrorApi)) return false
+        const problemasServidor = erroresEmpleadoDelServidor(e.estado, e.message)
+        if (Object.keys(problemasServidor).length === 0) return false
+        setErrores((actuales) => ({ ...actuales, ...problemasServidor }))
+        return true
+      },
     )
     if (ok) {
       setForm(VACIO)
@@ -95,7 +107,10 @@ export function EmpleadosPage() {
     value: form[nombre],
     'aria-invalid': errores[nombre] ? true : undefined,
     'aria-describedby': errores[nombre] ? `err-${nombre}` : undefined,
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, [nombre]: e.target.value }),
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setForm((actual) => ({ ...actual, [nombre]: e.target.value }))
+      setErrores((actuales) => ({ ...actuales, [nombre]: undefined }))
+    },
   })
 
   if (!permitido) {
@@ -131,7 +146,7 @@ export function EmpleadosPage() {
               </div>
               <div className="emp-campo">
                 <label htmlFor="emp-equipo">Equipo</label>
-                <Selector id="emp-equipo" etiqueta="Equipos" marcador="Elige un equipo" valor={form.equipoId} opciones={equipos.map((e) => ({ valor: String(e.id), texto: e.nombre }))} alCambiar={(v) => setForm({ ...form, equipoId: v })} invalido={Boolean(errores.equipoId)} descritoPor={errores.equipoId ? 'err-equipoId' : undefined} />
+                <Selector id="emp-equipo" etiqueta="Equipos" marcador="Elige un equipo" valor={form.equipoId} opciones={equipos.map((e) => ({ valor: String(e.id), texto: e.nombre }))} alCambiar={(v) => { setForm((actual) => ({ ...actual, equipoId: v })); setErrores((actuales) => ({ ...actuales, equipoId: undefined })) }} invalido={Boolean(errores.equipoId)} descritoPor={errores.equipoId ? 'err-equipoId' : undefined} />
                 {errores.equipoId && <p id="err-equipoId" role="alert" className="emp-err">{errores.equipoId}</p>}
               </div>
               <div className="emp-campo">
