@@ -171,3 +171,57 @@ describe('cuestionarios y presupuesto', () => {
     expect(llamadas[0].ruta).toBe('/api/empresas')
   })
 })
+
+describe('ayuda', () => {
+  const contacto = { id: 3, nombre: 'Dra. Ríos', tipo: 'PSICOLOGO', telefono: '987654321', email: null, activo: true }
+  const solicitud = { id: 7, usuarioId: 12, contactoId: null, mensaje: 'Hola', estado: 'PENDIENTE', creadoEn: '2026-11-01T10:00:00', atendidoPor: null, atendidoEn: null }
+
+  it('lista los contactos de ayuda de la empresa', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: [contacto] }))
+    await expect(api.contactosAyuda()).resolves.toEqual([contacto])
+    expect(llamadas[0].ruta).toBe('/api/ayuda/contactos')
+  })
+
+  it('crea un contacto con teléfono y correo vacío como nulo', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 201, cuerpo: contacto }))
+    await api.crearContactoAyuda({ nombre: 'Dra. Ríos', tipo: 'PSICOLOGO', telefono: '987654321', email: '' })
+    expect(llamadas[0].metodo).toBe('POST')
+    expect(JSON.parse(llamadas[0].cuerpo ?? '{}')).toEqual({ nombre: 'Dra. Ríos', tipo: 'PSICOLOGO', telefono: '987654321', email: null })
+  })
+
+  it('desactiva un contacto por PATCH', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 204 }))
+    await api.desactivarContactoAyuda(3)
+    expect(`${llamadas[0].metodo} ${llamadas[0].ruta}`).toBe('PATCH /api/ayuda/contactos/3/desactivar')
+  })
+
+  it('lista las solicitudes de ayuda', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: [solicitud] }))
+    await expect(api.solicitudesAyuda()).resolves.toEqual([solicitud])
+    expect(llamadas[0].ruta).toBe('/api/ayuda/solicitudes')
+  })
+
+  it('atiende una solicitud derivándola a un contacto, o sin derivar', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: { ...solicitud, estado: 'EN_ATENCION' } }))
+    await api.atenderSolicitud(7, 3)
+    await api.atenderSolicitud(7, null)
+    expect(llamadas[0].metodo).toBe('PATCH')
+    expect(llamadas[0].ruta).toBe('/api/ayuda/solicitudes/7/atender')
+    expect(JSON.parse(llamadas[0].cuerpo ?? '{}')).toEqual({ contactoId: 3 })
+    expect(JSON.parse(llamadas[1].cuerpo ?? '{}')).toEqual({ contactoId: null })
+  })
+
+  it('cierra una solicitud y explica el 409 de una que ya no está pendiente', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: { ...solicitud, estado: 'CERRADA' } }))
+    await api.cerrarSolicitud(7)
+    expect(`${llamadas[0].metodo} ${llamadas[0].ruta}`).toBe('PATCH /api/ayuda/solicitudes/7/cerrar')
+    simular(() => ({ status: 409 }))
+    await expect(api.atenderSolicitud(7, null)).rejects.toMatchObject({ estado: 409, message: expect.stringContaining('ya') })
+  })
+})

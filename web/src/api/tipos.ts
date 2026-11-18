@@ -56,6 +56,26 @@ export interface Empresa {
   nombre: string
 }
 
+export interface ContactoAyuda {
+  id: number
+  nombre: string
+  tipo: string
+  telefono: string | null
+  email: string | null
+  activo: boolean
+}
+
+export interface Solicitud {
+  id: number
+  usuarioId: number
+  contactoId: number | null
+  mensaje: string | null
+  estado: 'PENDIENTE' | 'EN_ATENCION' | 'CERRADA' | string
+  creadoEn: string
+  atendidoPor: number | null
+  atendidoEn: string | null
+}
+
 export interface ItemDashboard {
   itemId: number
   tema: string

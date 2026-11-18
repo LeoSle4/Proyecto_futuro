@@ -1,4 +1,4 @@
-import type { Cuestionario, Dashboard, Empleado, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto } from './tipos'
+import type { ContactoAyuda, Cuestionario, Dashboard, Empleado, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Solicitud } from './tipos'
 
 // Synthetic data for working without the backend (VITE_DEMO=1). The UI labels it as synthetic.
 // Mutable on purpose: the demo lets you create, rename and delete teams in memory.
@@ -95,4 +95,41 @@ function fijarPresupuesto(valor: number): Presupuesto {
   return presupuesto()
 }
 
-export const demo = { cuestionarios, presupuesto, cambiarCuestionario, fijarPresupuesto, empleados, crearEmpleado, cambiarEstadoEmpleado, equipos, dashboard, perfil, crearEquipo, editarEquipo, eliminarEquipo }
+const contactosAyuda: ContactoAyuda[] = [
+  { id: 1, nombre: 'Dra. Lucía Paredes', tipo: 'PSICOLOGO', telefono: '987654321', email: 'lucia@bienestar.demo', activo: true },
+  { id: 2, nombre: 'Línea 113 salud', tipo: 'LINEA_CRISIS', telefono: '113', email: null, activo: true },
+  { id: 3, nombre: 'EPS de la empresa', tipo: 'EPS', telefono: null, email: 'eps@demo.kala', activo: false },
+]
+const solicitudesDemo: Solicitud[] = [
+  { id: 11, usuarioId: 204, contactoId: null, mensaje: 'Me gustaría que alguien me escriba esta semana.', estado: 'PENDIENTE', creadoEn: '2026-11-16T09:30:00', atendidoPor: null, atendidoEn: null },
+  { id: 12, usuarioId: 117, contactoId: null, mensaje: null, estado: 'PENDIENTE', creadoEn: '2026-11-17T14:10:00', atendidoPor: null, atendidoEn: null },
+  { id: 13, usuarioId: 150, contactoId: 1, mensaje: 'Gracias por la ayuda.', estado: 'EN_ATENCION', creadoEn: '2026-11-12T11:00:00', atendidoPor: 1, atendidoEn: '2026-11-13T08:00:00' },
+  { id: 14, usuarioId: 99, contactoId: 2, mensaje: null, estado: 'CERRADA', creadoEn: '2026-11-05T16:00:00', atendidoPor: 1, atendidoEn: '2026-11-06T09:00:00' },
+]
+
+const contactos = (): ContactoAyuda[] => contactosAyuda.map((c) => ({ ...c }))
+const solicitudes = (): Solicitud[] => solicitudesDemo.map((s) => ({ ...s }))
+
+function crearContacto(d: { nombre: string; tipo: string; telefono: string | null; email: string | null }): void {
+  contactosAyuda.push({ id: Math.max(0, ...contactosAyuda.map((c) => c.id)) + 1, activo: true, ...d })
+}
+
+function desactivarContacto(id: number): void {
+  const c = contactosAyuda.find((x) => x.id === id)
+  if (c) c.activo = false
+}
+
+function atender(id: number, contactoId: number | null): void {
+  const s = solicitudesDemo.find((x) => x.id === id)
+  if (!s || s.estado !== 'PENDIENTE') throw Object.assign(new Error('Esta solicitud ya cambió de estado.'), { estado: 409 })
+  s.estado = 'EN_ATENCION'
+  s.contactoId = contactoId
+  s.atendidoPor = 1
+}
+
+function cerrar(id: number): void {
+  const s = solicitudesDemo.find((x) => x.id === id)
+  if (s) s.estado = 'CERRADA'
+}
+
+export const demo = { contactos, solicitudes, crearContacto, desactivarContacto, atender, cerrar, cuestionarios, presupuesto, cambiarCuestionario, fijarPresupuesto, empleados, crearEmpleado, cambiarEstadoEmpleado, equipos, dashboard, perfil, crearEquipo, editarEquipo, eliminarEquipo }
