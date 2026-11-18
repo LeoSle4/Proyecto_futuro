@@ -2,7 +2,7 @@
 .pc-cabeza { display: grid; grid-template-columns: 1fr 300px; gap: 48px; align-items: stretch; }
 .pc-pregunta { font-size: 1.0625rem; font-weight: 600; color: var(--tinta-2); }
 .pc-cifra { display: flex; align-items: baseline; gap: 14px; margin: 8px 0 6px; }
-.pc-cifra b { font-family: var(--serif); font-size: 6rem; line-height: 1; font-weight: 600; letter-spacing: -0.04em; color: var(--mar); white-space: nowrap; min-height: 1em; }
+.pc-cifra b { font-family: var(--serif); font-size: clamp(3.75rem, 6.2vw, 6rem); line-height: 1; font-weight: 600; letter-spacing: -0.04em; color: var(--mar); white-space: nowrap; min-height: 1em; }
 .pc-cifra b.apagada { color: var(--tinta-3); font-size: 3.5rem; }
 .pc-cifra > span { font-family: var(--sans); font-size: 1.5rem; font-weight: 500; color: var(--tinta); }
 .pc-pie { font-size: 1rem; color: var(--tinta-2); }
@@ -21,7 +21,15 @@
 }
 .chip:hover { border-color: #9fa79e; }
 .chip[aria-pressed='true'] { background: var(--tinta); border-color: var(--tinta); color: #fff; }
+/* Below ~1280px the figure and the ledger no longer fit side by side: the ledger drops under the figure as three columns. */
+@media (max-width: 1280px) {
+  .pc-cabeza { grid-template-columns: 1fr; gap: 22px; }
+  .libro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 20px; border-top: 0; align-self: stretch; }
+  .libro div { flex-direction: column; align-items: flex-start; gap: 2px; border-bottom: 0; border-top: 1px solid var(--linea); }
+}
 @media (max-width: 900px) {
+  .libro { grid-template-columns: 1fr; }
+  .libro div { flex-direction: row; align-items: baseline; justify-content: space-between; }
   .pc-cabeza { grid-template-columns: 1fr; gap: 24px; }
   .panelcard { padding: 26px 22px 22px; }
   .pc-cifra b { font-size: 4.5rem; }

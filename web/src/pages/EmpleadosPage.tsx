@@ -4,6 +4,7 @@ import type { Empleado, Equipo } from '../api/tipos'
 import { useSesion } from '../auth/SesionContext'
 import { validarNuevoEmpleado, type ErroresEmpleado } from '../lib/empleado'
 import { Aviso } from '../components/Aviso'
+import { Selector } from '../components/Selector'
 import './EmpleadosPage.css'
 
 const retraso = (i: number) => ({ '--i': i }) as React.CSSProperties
@@ -130,10 +131,7 @@ export function EmpleadosPage() {
               </div>
               <div className="emp-campo">
                 <label htmlFor="emp-equipo">Equipo</label>
-                <select id="emp-equipo" {...campo('equipoId')}>
-                  <option value="">Elige un equipo</option>
-                  {equipos.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-                </select>
+                <Selector id="emp-equipo" etiqueta="Equipos" marcador="Elige un equipo" valor={form.equipoId} opciones={equipos.map((e) => ({ valor: String(e.id), texto: e.nombre }))} alCambiar={(v) => setForm({ ...form, equipoId: v })} invalido={Boolean(errores.equipoId)} descritoPor={errores.equipoId ? 'err-equipoId' : undefined} />
                 {errores.equipoId && <p id="err-equipoId" role="alert" className="emp-err">{errores.equipoId}</p>}
               </div>
               <div className="emp-campo">
@@ -158,10 +156,7 @@ export function EmpleadosPage() {
             </div>
             <div className="emp-campo">
               <label htmlFor="emp-filtro">Equipo</label>
-              <select id="emp-filtro" value={filtroEquipo} onChange={(e) => setFiltroEquipo(e.target.value)}>
-                <option value="">Todos los equipos</option>
-                {equipos.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-              </select>
+              <Selector id="emp-filtro" etiqueta="Filtrar por equipo" valor={filtroEquipo} opciones={[{ valor: '', texto: 'Todos los equipos' }, ...equipos.map((e) => ({ valor: String(e.id), texto: e.nombre }))]} alCambiar={setFiltroEquipo} />
             </div>
           </div>
 

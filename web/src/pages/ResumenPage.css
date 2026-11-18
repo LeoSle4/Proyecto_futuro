@@ -1,4 +1,6 @@
 .resumen { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; align-items: start; }
+/* The team list stays in view while the long column scrolls, so its empty lower half never reads as a gap. */
+.resumen-lateral { position: sticky; top: 24px; }
 .rotulo { font-family: var(--sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--tinta-3); margin: 4px 0 14px; }
 .resumen-cabecera h1 { font-family: var(--serif); font-size: 3.25rem; line-height: 1.05; font-weight: 600; letter-spacing: -0.025em; }
 .resumen-intro { font-size: 1.125rem; color: var(--tinta-2); margin: 12px 0 22px; max-width: 60ch; }
@@ -16,8 +18,10 @@
 .resumen-vacio { display: grid; gap: 8px; padding-top: 24px; max-width: 65ch; }
 .resumen-vacio h1 { font-family: var(--serif); font-size: 2.25rem; font-weight: 600; }
 @keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 1180px) { .resumen-pares { grid-template-columns: 1fr; } }
 @media (max-width: 1000px) {
   .resumen { grid-template-columns: 1fr; gap: 24px; }
+  .resumen-lateral { position: static; }
   .resumen-pares { grid-template-columns: 1fr; }
   .resumen-cabecera h1 { font-size: 2.25rem; }
 }

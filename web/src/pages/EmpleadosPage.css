@@ -6,11 +6,11 @@
 .emp-alta h2 { font-family: var(--serif); font-size: 1.375rem; font-weight: 600; margin-bottom: 18px; }
 .emp-rejilla { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; }
 .emp-campo label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 7px; }
-.emp-campo input, .emp-campo select {
+.emp-campo input {
   width: 100%; height: 48px; border-radius: var(--r-s); background: #fff; border: 1.5px solid var(--linea); padding: 0 14px; font-size: 1rem; color: var(--tinta);
   transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease);
 }
-.emp-campo input:focus, .emp-campo select:focus { outline: none; border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18); }
+.emp-campo input:focus { outline: none; border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18); }
 .emp-campo [aria-invalid='true'] { border-color: var(--error); border-width: 2px; }
 .emp-clave { display: flex; gap: 8px; }
 .emp-ver { min-height: 48px; padding: 0 14px; border-radius: var(--r-s); border: 1.5px solid var(--linea); background: #fff; font-weight: 600; font-size: 0.875rem; color: var(--mar); cursor: pointer; }
