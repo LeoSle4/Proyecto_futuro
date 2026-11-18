@@ -124,3 +124,50 @@ describe('empleados', () => {
     expect(llamadas.map((l) => `${l.metodo} ${l.ruta}`)).toEqual(['PATCH /api/usuarios/5/desactivar', 'PATCH /api/usuarios/5/activar'])
   })
 })
+
+describe('cuestionarios y presupuesto', () => {
+  it('pide el catálogo con sus estados', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: [{ id: 1, codigo: 'PULSO', nombre: 'Pulso', cadenciaDias: 7, itemsPorEnvio: null, activo: true }] }))
+    const lista = await api.cuestionarios(4)
+    expect(llamadas[0].ruta).toBe('/api/empresas/4/cuestionarios?incluirInactivos=true')
+    expect(lista[0]).toMatchObject({ codigo: 'PULSO', activo: true })
+  })
+
+  it('activa y desactiva por POST', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: { empresaId: 4, cuestionarioId: 2, epsilonMensual: 7, epsilonMaximo: 20 } }))
+    await api.activarCuestionario(4, 2)
+    await api.desactivarCuestionario(4, 2)
+    expect(llamadas.map((l) => `${l.metodo} ${l.ruta}`)).toEqual(['POST /api/empresas/4/cuestionarios/2/activar', 'POST /api/empresas/4/cuestionarios/2/desactivar'])
+  })
+
+  it('explica el 422 de activar como falta de presupuesto', async () => {
+    await conSesion()
+    simular(() => ({ status: 422 }))
+    await expect(api.activarCuestionario(4, 2)).rejects.toMatchObject({ estado: 422, message: expect.stringContaining('presupuesto') })
+  })
+
+  it('lee el presupuesto y lo fija por PUT con el campo del backend', async () => {
+    await conSesion()
+    const llamadas = simular((_r, init) => ({ status: 200, cuerpo: { empresaId: 4, periodo: '2026-11', epsilonMaximo: init.method === 'PUT' ? 30 : 20, epsilonMensual: 7 } }))
+    await expect(api.presupuesto(4)).resolves.toMatchObject({ epsilonMaximo: 20, epsilonMensual: 7 })
+    await api.fijarPresupuesto(4, 30)
+    expect(llamadas[1].metodo).toBe('PUT')
+    expect(llamadas[1].ruta).toBe('/api/empresas/4/presupuesto')
+    expect(JSON.parse(llamadas[1].cuerpo ?? '{}')).toEqual({ epsilonMaximoPersona: 30 })
+  })
+
+  it('explica el 422 de fijar el presupuesto como un máximo menor al uso actual', async () => {
+    await conSesion()
+    simular(() => ({ status: 422 }))
+    await expect(api.fijarPresupuesto(4, 1)).rejects.toMatchObject({ message: expect.stringContaining('usan') })
+  })
+
+  it('lista las empresas para que el administrador elija una', async () => {
+    await conSesion()
+    const llamadas = simular(() => ({ status: 200, cuerpo: [{ id: 4, nombre: 'Empresa Demo' }] }))
+    await expect(api.empresas()).resolves.toEqual([{ id: 4, nombre: 'Empresa Demo' }])
+    expect(llamadas[0].ruta).toBe('/api/empresas')
+  })
+})

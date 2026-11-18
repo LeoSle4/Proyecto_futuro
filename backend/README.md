@@ -99,7 +99,7 @@ persona salen siempre del token; un recurso de otra empresa responde 404.
 | `GET/POST /api/empresas` · `GET /api/empresas/buscar` · `POST /api/empresas/con-equipos` | ADMIN (RRHH y coordinador solo leen la suya) | Empresas |
 | `GET/PUT/DELETE /api/empresas/{id}` | ADMIN (RRHH y coordinador leen la suya) | Una empresa |
 | `GET/POST /api/equipos` · `GET/PUT/DELETE /api/equipos/{id}` | ADMIN y RRHH escriben; coordinador lee | Equipos |
-| `GET /api/empresas/{id}/cuestionarios` | ADMIN, RRHH, coordinador | Cuestionarios activos |
+| `GET /api/empresas/{id}/cuestionarios` | ADMIN, RRHH, coordinador | Cuestionarios activos; con `?incluirInactivos=true`, todo el catálogo con su campo `activo` |
 | `POST /api/empresas/{id}/cuestionarios/{cid}/activar` · `…/desactivar` | ADMIN | Activa (422 si excede el presupuesto) o apaga un cuestionario |
 | `GET/PUT /api/empresas/{id}/presupuesto` | GET: ADMIN, RRHH, coordinador; PUT: ADMIN | ε máximo por persona al mes (sigue vigente los meses siguientes) |
 | `GET /api/cuestionarios/pendientes` | EMPLEADO | Cuestionarios activos con ítems, escala y configuración LDP |

@@ -35,6 +35,27 @@ export interface NuevoEmpleadoSolicitud {
   clave: string
 }
 
+export interface Cuestionario {
+  id: number
+  codigo: string
+  nombre: string
+  cadenciaDias: number
+  itemsPorEnvio: number | null
+  activo: boolean
+}
+
+export interface Presupuesto {
+  empresaId: number
+  periodo: string
+  epsilonMaximo: number
+  epsilonMensual: number
+}
+
+export interface Empresa {
+  id: number
+  nombre: string
+}
+
 export interface ItemDashboard {
   itemId: number
   tema: string

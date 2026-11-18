@@ -15,6 +15,8 @@ import com.kala.backend.instrumentos.dominio.ItemCuestionario;
 import com.kala.backend.organizacion.aplicacion.puerto.Empresas;
 import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,17 @@ public class CuestionarioConsultaService {
         this.escalas = escalas;
         this.opciones = opciones;
         this.configuraciones = configuraciones;
+    }
+
+    // Un cuestionario del catálogo y si la empresa lo tiene activo.
+    public record CuestionarioConEstado(Cuestionario cuestionario, boolean activo) {
+    }
+
+    // Todo el catálogo, marcando cuáles tiene activos la empresa.
+    public List<CuestionarioConEstado> listarConEstado(Long empresaId) {
+        verificarEmpresa(empresaId);
+        Set<Long> activos = cuestionarios.activosDeEmpresa(empresaId).stream().map(Cuestionario::getId).collect(Collectors.toSet());
+        return cuestionarios.todos().stream().map(c -> new CuestionarioConEstado(c, activos.contains(c.getId()))).toList();
     }
 
     public List<Cuestionario> listarActivos(Long empresaId) {

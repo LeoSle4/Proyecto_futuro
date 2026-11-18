@@ -153,6 +153,41 @@ class CuestionarioControllerTest {
     }
 
     @Test
+    void conIncluirInactivosListaTodoElCatalogoConSuEstado() throws Exception {
+        Cuestionario activo = pulso();
+        Cuestionario libre = new Cuestionario("WHO5", "Bienestar", (short) 14, null);
+        when(consulta.listarConEstado(1L)).thenReturn(List.of(
+                new CuestionarioConsultaService.CuestionarioConEstado(activo, true),
+                new CuestionarioConsultaService.CuestionarioConEstado(libre, false)));
+
+        mockMvc.perform(get("/api/empresas/1/cuestionarios").param("incluirInactivos", "true")
+                        .with(jwtDe("ROLE_RRHH", 1L)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].codigo").value("PULSO"))
+                .andExpect(jsonPath("$[0].activo").value(true))
+                .andExpect(jsonPath("$[1].codigo").value("WHO5"))
+                .andExpect(jsonPath("$[1].activo").value(false));
+    }
+
+    @Test
+    void sinIncluirInactivosSigueListandoSoloLosActivosYLosMarcaActivos() throws Exception {
+        when(consulta.listarActivos(1L)).thenReturn(List.of(pulso()));
+
+        mockMvc.perform(get("/api/empresas/1/cuestionarios").with(jwtDe("ROLE_RRHH", 1L)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].activo").value(true));
+    }
+
+    @Test
+    void incluirInactivosDeOtraEmpresaSigueDandoNotFoundParaRrhh() throws Exception {
+        mockMvc.perform(get("/api/empresas/9/cuestionarios").param("incluirInactivos", "true")
+                        .with(jwtDe("ROLE_RRHH", 1L)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void pendientes_devuelveLosItemsConLaConfiguracionParaAleatorizar() throws Exception {
         when(consulta.pendientes(1L)).thenReturn(List.of(new CuestionarioPendienteResponse(
                 10L, "PULSO", "Pulso semanal", 7, null, List.of(new ItemPendiente(

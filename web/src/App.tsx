@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useSesion } from './auth/SesionContext'
 import { Shell } from './components/Shell'
 import { AyudaPage } from './pages/AyudaPage'
+import { CuestionariosPage } from './pages/CuestionariosPage'
 import { EmpleadosPage } from './pages/EmpleadosPage'
 import { EquiposPage } from './pages/EquiposPage'
 import { LoginPage } from './pages/LoginPage'
@@ -22,7 +23,7 @@ export default function App() {
         <Route index element={<ResumenPage />} />
         <Route path="equipos" element={<EquiposPage />} />
         <Route path="empleados" element={<EmpleadosPage />} />
-        <Route path="cuestionarios" element={<Pendiente titulo="Cuestionarios" descripcion="Activar y desactivar cuestionarios y ver el presupuesto de privacidad." />} />
+        <Route path="cuestionarios" element={<CuestionariosPage />} />
         <Route path="solicitudes" element={<Pendiente titulo="Solicitudes de ayuda" descripcion="Solicitudes que las personas dejan para hablar con alguien." />} />
         <Route path="ayuda" element={<AyudaPage />} />
       </Route>

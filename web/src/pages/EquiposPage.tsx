@@ -3,6 +3,7 @@ import { api, ErrorApi } from '../api/cliente'
 import type { Equipo } from '../api/tipos'
 import { N_MINIMO } from '../api/tipos'
 import { useSesion } from '../auth/SesionContext'
+import { Aviso } from '../components/Aviso'
 import './EquiposPage.css'
 
 const retraso = (i: number) => ({ '--i': i }) as React.CSSProperties
@@ -111,7 +112,7 @@ export function EquiposPage() {
       )}
 
       {error && <p role="alert" className="equipos-error">{error}</p>}
-      <p className="solo-lectores" role="status" aria-live="polite">{aviso}</p>
+      <Aviso mensaje={aviso} alCerrar={() => setAviso('')} />
 
       {equipos === null && !error && <p className="equipos-nota">Cargando equipos…</p>}
       {equipos?.length === 0 && (

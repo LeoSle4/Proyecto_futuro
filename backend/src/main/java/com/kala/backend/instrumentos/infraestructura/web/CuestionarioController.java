@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 // Traduce HTTP a llamadas de service. Quién puede hacer qué se decide con @PreAuthorize y con el claim empresaId.
@@ -74,9 +75,14 @@ public class CuestionarioController {
     // ADMIN ve cualquier empresa; RRHH y COORDINADOR_BIENESTAR solo la suya (otra empresa responde 404).
     @GetMapping("/api/empresas/{empresaId}/cuestionarios")
     @PreAuthorize("hasAnyRole('ADMIN', 'RRHH', 'COORDINADOR_BIENESTAR')")
-    public List<CuestionarioResponse> listar(@PathVariable Long empresaId, @AuthenticationPrincipal Jwt jwt) {
+    public List<CuestionarioResponse> listar(@PathVariable Long empresaId, @AuthenticationPrincipal Jwt jwt,
+                                             @RequestParam(defaultValue = "false") boolean incluirInactivos) {
         if (!esAdmin(jwt) && !empresaId.equals(empresaId(jwt))) {
             throw new EmpresaNoEncontradaException(empresaId);
+        }
+        if (incluirInactivos) {
+            return consulta.listarConEstado(empresaId).stream()
+                    .map(c -> CuestionarioResponse.de(c.cuestionario(), c.activo())).toList();
         }
         return consulta.listarActivos(empresaId).stream().map(CuestionarioResponse::de).toList();
     }

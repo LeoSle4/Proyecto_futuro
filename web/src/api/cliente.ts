@@ -1,4 +1,4 @@
-import type { Dashboard, Empleado, Equipo, NuevoEmpleadoSolicitud, Perfil, Sesion } from './tipos'
+import type { Cuestionario, Dashboard, Empleado, Empresa, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Sesion } from './tipos'
 import { demo } from './demo'
 
 export class ErrorApi extends Error {
@@ -145,6 +145,37 @@ export const api = {
   async cambiarEstadoEmpleado(id: number, activo: boolean): Promise<void> {
     if (USAR_DEMO) return demo.cambiarEstadoEmpleado(id, activo)
     await conRenovacion<void>(`/api/usuarios/${id}/${activo ? 'activar' : 'desactivar'}`, { method: 'PATCH' })
+  },
+  empresas(): Promise<Empresa[]> {
+    return USAR_DEMO ? Promise.resolve([{ id: 1, nombre: 'Empresa demo' }]) : conRenovacion<Empresa[]>('/api/empresas')
+  },
+  cuestionarios(empresaId: number): Promise<Cuestionario[]> {
+    return USAR_DEMO ? Promise.resolve(demo.cuestionarios()) : conRenovacion<Cuestionario[]>(`/api/empresas/${empresaId}/cuestionarios?incluirInactivos=true`)
+  },
+  async activarCuestionario(empresaId: number, id: number): Promise<void> {
+    if (USAR_DEMO) return demo.cambiarCuestionario(id, true)
+    try {
+      await conRenovacion<unknown>(`/api/empresas/${empresaId}/cuestionarios/${id}/activar`, { method: 'POST' })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 422) throw new ErrorApi(422, 'Activarlo superaría el presupuesto de privacidad de la empresa. Sube el máximo o desactiva otro cuestionario.')
+      throw e
+    }
+  },
+  async desactivarCuestionario(empresaId: number, id: number): Promise<void> {
+    if (USAR_DEMO) return demo.cambiarCuestionario(id, false)
+    await conRenovacion<unknown>(`/api/empresas/${empresaId}/cuestionarios/${id}/desactivar`, { method: 'POST' })
+  },
+  presupuesto(empresaId: number): Promise<Presupuesto> {
+    return USAR_DEMO ? Promise.resolve(demo.presupuesto()) : conRenovacion<Presupuesto>(`/api/empresas/${empresaId}/presupuesto`)
+  },
+  async fijarPresupuesto(empresaId: number, epsilonMaximoPersona: number): Promise<Presupuesto> {
+    if (USAR_DEMO) return demo.fijarPresupuesto(epsilonMaximoPersona)
+    try {
+      return await conRenovacion<Presupuesto>(`/api/empresas/${empresaId}/presupuesto`, { method: 'PUT', body: JSON.stringify({ epsilonMaximoPersona }) })
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 422) throw new ErrorApi(422, 'Ese máximo es menor que lo que ya usan los cuestionarios activos. Desactiva alguno o elige un valor más alto.')
+      throw e
+    }
   },
   dashboard(equipoId: number, semana: string): Promise<Dashboard> {
     return USAR_DEMO ? Promise.resolve(demo.dashboard(equipoId, semana)) : conRenovacion<Dashboard>(`/api/dashboard/${equipoId}?semana=${semana}`)
