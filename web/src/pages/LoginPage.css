@@ -1,15 +1,42 @@
-.login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
-.login-tarjeta {
-  width: min(440px, 100%); display: grid; gap: 8px; padding: 36px 36px 32px;
-  background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio);
+.login { min-height: 100vh; display: grid; grid-template-columns: 1.12fr 1fr; background: var(--hueso); }
+.login-marca, .login-lado { display: grid; grid-template-rows: 44px 1fr 24px; row-gap: 28px; padding: 48px 64px; position: relative; }
+.login-marca {
+  color: #f5f5f0; overflow: hidden;
+  background: radial-gradient(125% 120% at 6% 104%, rgba(8, 145, 178, 0.46) 0%, rgba(8, 145, 178, 0.33) 16%, rgba(8, 145, 178, 0.19) 38%, rgba(8, 145, 178, 0.07) 64%, rgba(8, 145, 178, 0) 100%), var(--noche);
 }
-.login-marca { font-size: 2rem; font-weight: 800; color: var(--mar); }
-.login-titulo { font-size: 1.5rem; font-weight: 800; margin-top: 8px; }
-.login-texto { color: var(--tinta-suave); margin-bottom: 12px; }
-.login-tarjeta label { font-weight: 600; margin-top: 8px; }
-.login-tarjeta input {
-  min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--tinta-tenue); background: #fff;
+.login-campo { position: absolute; inset: 0; width: 100%; height: 100%; }
+.login-marca > *:not(.login-campo) { position: relative; z-index: 2; }
+.login-logo { font-family: var(--serif); font-size: 2rem; line-height: 44px; font-weight: 700; }
+.login-medio { align-self: center; display: flex; flex-direction: column; gap: 30px; }
+.login-marca h1 { font-family: var(--serif); font-size: clamp(2.25rem, 3.6vw, 3.375rem); line-height: 1.08; font-weight: 600; letter-spacing: -0.02em; }
+.login-lead { font-size: 1.15rem; line-height: 1.55; color: var(--bruma); margin-top: 18px; max-width: 40ch; }
+.login-prueba { display: flex; gap: 28px; font-size: 0.875rem; color: #a9d3de; font-weight: 500; align-items: center; flex-wrap: wrap; }
+.login-prueba span { display: flex; align-items: center; gap: 10px; }
+.login-prueba i { width: 8px; height: 8px; border-radius: 50%; background: #7fd0e3; display: block; }
+
+.login-lado { background: var(--hueso); }
+.login-ayuda { justify-self: end; align-self: center; min-height: 40px; }
+.login-form { align-self: center; width: 100%; max-width: 430px; justify-self: center; }
+.login-form h2 { font-family: var(--serif); font-size: 2.5rem; font-weight: 600; letter-spacing: -0.02em; }
+.login-sub { color: var(--tinta-2); font-size: 1.0625rem; margin: 10px 0 30px; }
+.campo { margin-bottom: 18px; }
+.campo label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 8px; }
+.campo input {
+  width: 100%; height: 54px; border-radius: var(--r-s); background: #fff; border: 1.5px solid var(--linea); padding: 0 16px; font-size: 1rem; color: var(--tinta);
+  transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease);
 }
-.login-tarjeta input[aria-invalid='true'] { border-color: var(--error); border-width: 2px; }
-.login-error { color: var(--error); font-weight: 600; margin-top: 4px; }
-.login-tarjeta .boton { margin-top: 16px; }
+.campo input:focus { outline: none; border-color: var(--turquesa); box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18); }
+.campo input[aria-invalid='true'] { border-color: var(--error); border-width: 2px; }
+.login-error { color: var(--error); font-weight: 600; margin: 0 0 4px; }
+.login-form .boton-primario { width: 100%; margin-top: 24px; position: relative; overflow: hidden; }
+.login-barra { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: rgba(255, 255, 255, 0.75); }
+.login-barra.cargando { width: 100%; transition: width 900ms var(--ease); }
+.login-pie { align-self: end; justify-self: center; width: 100%; max-width: 430px; font-size: 0.90625rem; color: var(--tinta-2); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.login-pie a { color: var(--mar); font-weight: 700; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; text-decoration: none; transition: background-size var(--m-in) var(--ease); }
+.login-pie a:hover { background-size: 100% 1px; }
+
+@media (max-width: 900px) {
+  .login { grid-template-columns: 1fr; }
+  .login-marca, .login-lado { padding: 28px 22px; }
+  .login-marca { grid-template-rows: 44px auto auto; }
+}
