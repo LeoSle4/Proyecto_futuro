@@ -1,15 +1,15 @@
-import { LinearGradient } from 'expo-linear-gradient'
 import type { ReactNode } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { color } from '../theme'
 
+// A flat bone ground: no gradient, so the content carries the screen.
 export function Fondo({ children }: { children: ReactNode }) {
   return (
-    <LinearGradient colors={[color.nieblaAlta, color.nieblaBaja]} style={estilos.fondo}>
+    <View style={estilos.fondo}>
       <SafeAreaView style={estilos.seguro}>{children}</SafeAreaView>
-    </LinearGradient>
+    </View>
   )
 }
 
-const estilos = StyleSheet.create({ fondo: { flex: 1 }, seguro: { flex: 1 } })
+const estilos = StyleSheet.create({ fondo: { flex: 1, backgroundColor: color.nieblaAlta }, seguro: { flex: 1 } })

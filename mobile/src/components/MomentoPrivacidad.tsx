@@ -66,10 +66,10 @@ const estilos = StyleSheet.create({
   tarjeta: { backgroundColor: color.superficie, borderColor: color.borde, borderWidth: 1, borderRadius: radio.tarjeta, padding: 24, gap: 14 },
   bloque: { gap: 4 },
   titulo: { fontFamily: fuente.semi, fontSize: 16, color: color.tintaSuave },
-  valor: { fontFamily: fuente.negrita, fontSize: 30, color: color.tinta },
+  valor: { fontFamily: fuente.negrita, fontSize: 30, color: color.tinta, fontVariant: ['lining-nums', 'tabular-nums'] },
   nota: { fontFamily: fuente.regular, fontSize: 15, color: color.tintaSuave },
   separador: { height: 1, backgroundColor: color.borde },
   envio: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  punto: { width: 22, height: 22, borderRadius: 11, backgroundColor: color.sol, borderWidth: 3, borderColor: color.tinta },
+  punto: { width: 22, height: 22, borderRadius: 11, backgroundColor: color.turquesa, borderWidth: 3, borderColor: color.tinta },
   explicacion: { fontFamily: fuente.regular, fontSize: 16, lineHeight: 24, color: color.tintaSuave },
 })
