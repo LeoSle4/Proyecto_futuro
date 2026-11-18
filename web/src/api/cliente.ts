@@ -48,7 +48,14 @@ async function pedir<T>(ruta: string, init: RequestInit = {}, conAuth = true): P
     throw new ErrorApi(0, 'No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.')
   }
   if (!respuesta.ok) {
-    throw new ErrorApi(respuesta.status, mensajePara(respuesta.status))
+    let detalle: string | null = null
+    try {
+      const cuerpo = await respuesta.json() as { mensaje?: unknown }
+      if (typeof cuerpo.mensaje === 'string' && cuerpo.mensaje.trim()) detalle = cuerpo.mensaje
+    } catch {
+      /* Some responses have no JSON body. */
+    }
+    throw new ErrorApi(respuesta.status, detalle ?? mensajePara(respuesta.status))
   }
   return respuesta.status === 204 ? (undefined as T) : ((await respuesta.json()) as T)
 }
@@ -115,8 +122,10 @@ export const api = {
       /* the local session is already gone; the server expires it on its own */
     }
   },
-  equipos(): Promise<Equipo[]> {
-    return USAR_DEMO ? Promise.resolve([...demo.equipos]) : conRenovacion<Equipo[]>('/api/equipos')
+  equipos(empresaId?: number): Promise<Equipo[]> {
+    if (USAR_DEMO) return Promise.resolve([...demo.equipos].filter((equipo) => empresaId === undefined || equipo.empresaId === empresaId))
+    const consulta = empresaId === undefined ? '' : `?empresaId=${empresaId}`
+    return conRenovacion<Equipo[]>(`/api/equipos${consulta}`)
   },
   async crearEquipo(nombre: string, empresaId: number): Promise<Equipo> {
     if (USAR_DEMO) return demo.crearEquipo(nombre, empresaId)

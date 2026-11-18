@@ -3,8 +3,8 @@ import { useSesion } from '../auth/SesionContext'
 import { MODO_DEMO } from '../api/cliente'
 import './Shell.css'
 
-// What each role can actually use: the administration manages companies and questionnaires; HR and wellbeing
-// coordination work with their own company's teams, people and requests.
+// The administration manages companies, teams, and questionnaires; HR and wellbeing coordination work with their
+// own company's teams, people, and requests.
 interface Seccion {
   ruta: string
   texto: string
@@ -13,6 +13,7 @@ interface Seccion {
 
 const SECCIONES_ADMIN: Seccion[] = [
   { ruta: '/empresas', texto: 'Empresas' },
+  { ruta: '/equipos', texto: 'Equipos' },
   { ruta: '/cuestionarios', texto: 'Cuestionarios' },
 ]
 const SECCIONES_EMPRESA: Seccion[] = [
