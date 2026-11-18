@@ -1,0 +1,12 @@
+.equipos { position: relative; }
+.ind { position: absolute; left: 0; top: 0; width: 100%; border-radius: var(--r-m); background: var(--mar); pointer-events: none; z-index: 0; }
+.ind.listo { transition: transform 240ms var(--ease-io), height 240ms var(--ease-io); }
+.equipo {
+  position: relative; z-index: 1; display: block; width: 100%; text-align: left; padding: 15px 18px; margin-bottom: 10px;
+  border-radius: var(--r-m); background: var(--hueso-2); border: 1.5px solid transparent; cursor: pointer;
+  transition: color var(--m-in) var(--ease);
+}
+.equipo b { display: block; font-family: var(--serif); font-size: 1.125rem; font-weight: 600; }
+.equipo span { font-size: 0.875rem; color: var(--tinta-2); }
+.equipo.activo, .equipo.activo:hover { background: transparent; border-color: transparent; transform: none; box-shadow: none; color: #fff; }
+.equipo.activo span { color: var(--bruma); }
