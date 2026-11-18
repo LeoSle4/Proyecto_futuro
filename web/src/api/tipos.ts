@@ -19,6 +19,22 @@ export interface Equipo {
   empresaId: number
 }
 
+export interface Empleado {
+  id: number
+  email: string
+  nombre: string
+  activo: boolean
+  equipoId: number
+  equipoNombre: string
+}
+
+export interface NuevoEmpleadoSolicitud {
+  equipoId: number
+  email: string
+  nombre: string
+  clave: string
+}
+
 export interface ItemDashboard {
   itemId: number
   tema: string
@@ -28,6 +44,8 @@ export interface ItemDashboard {
   // Range of the item's answer scale; the axis of a mean is drawn from it.
   valorMin?: number | null
   valorMax?: number | null
+  // How many responses this item had in the window. Older servers do not send it.
+  respuestas?: number | null
 }
 
 export interface Dashboard {

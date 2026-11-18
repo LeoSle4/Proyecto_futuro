@@ -46,17 +46,17 @@ export function TarjetaIndicador({ item, total, retardo }: Props) {
       </article>
     )
   }
-  // The server sends the team's total, not this item's own count. Only when the whole team is under the minimum
-  // is the total a fair measure; otherwise we say the item fell short without inventing a number.
-  const equipoBajo = total < N_MINIMO
+  // The item's own count when the server sends it; otherwise the team total, which is only a fair measure when the
+  // whole team is under the minimum. Without either we say the item fell short and invent no number.
+  const propias = item.respuestas ?? (total < N_MINIMO ? total : null)
   return (
     <article className="tarjeta hatch sube">
       <h3>{item.tema}</h3>
       <p className="t-valor apagado">Sin resultado</p>
-      {equipoBajo && <MedidorSegmentos tengo={total} minimo={N_MINIMO} />}
+      {propias !== null && <MedidorSegmentos tengo={propias} minimo={N_MINIMO} />}
       <p className="t-nota">
-        {equipoBajo
-          ? `${Math.max(0, N_MINIMO - total)} respuestas para llegar al mínimo. Con menos de ${N_MINIMO} no se publica nada.`
+        {propias !== null
+          ? `${Math.max(0, N_MINIMO - propias)} respuestas para llegar al mínimo. Con menos de ${N_MINIMO} no se publica nada.`
           : `Este indicador todavía no llegó al mínimo de ${N_MINIMO} respuestas. Con menos no se publica nada.`}
       </p>
     </article>
