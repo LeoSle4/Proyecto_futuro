@@ -3,6 +3,7 @@ import { api, ErrorApi } from '../api/cliente'
 import type { Empleado, Equipo } from '../api/tipos'
 import { useSesion } from '../auth/SesionContext'
 import { validarNuevoEmpleado, type ErroresEmpleado } from '../lib/empleado'
+import { Aviso } from '../components/Aviso'
 import './EmpleadosPage.css'
 
 const retraso = (i: number) => ({ '--i': i }) as React.CSSProperties
@@ -148,8 +149,7 @@ export function EmpleadosPage() {
           </form>
 
           {error && <p role="alert" className="emp-error">{error}</p>}
-          <p className="solo-lectores" role="status" aria-live="polite">{aviso}</p>
-          {aviso && <p className="emp-exito" aria-hidden="true">{aviso}</p>}
+      <Aviso mensaje={aviso} alCerrar={() => setAviso('')} />
 
           <div className="emp-filtros sube" style={retraso(4)}>
             <div className="emp-campo">
