@@ -1,4 +1,4 @@
-import type { Dashboard, Equipo, Perfil } from './tipos'
+import type { ContactoAyuda, CrearContactoAyuda, Dashboard, Equipo, Perfil } from './tipos'
 
 // Synthetic data for working without the backend (VITE_DEMO=1). The UI labels it as synthetic.
 const equipos: Equipo[] = [
@@ -28,4 +28,23 @@ function dashboard(equipoId: number, semana: string): Dashboard {
 
 const perfil: Perfil = { username: 'rrhh@demo.kala', uid: 1, roles: ['RRHH'], empresaId: 1 }
 
-export const demo = { equipos, dashboard, perfil }
+let contactos: ContactoAyuda[] = [
+  { id: 1, nombre: 'Psicología Bienestar Demo', tipo: 'PSICOLOGO', telefono: '+51 999 111 222', email: 'bienestar@demo.kala', activo: true },
+  { id: 2, nombre: 'Línea de apoyo Demo', tipo: 'LINEA_CRISIS', telefono: '0800 12345', email: null, activo: true },
+]
+
+function listarContactos(): ContactoAyuda[] {
+  return contactos.map((contacto) => ({ ...contacto }))
+}
+
+function crearContacto(datos: CrearContactoAyuda): ContactoAyuda {
+  const contacto: ContactoAyuda = { ...datos, id: Math.max(0, ...contactos.map((item) => item.id)) + 1, activo: true }
+  contactos = [...contactos, contacto]
+  return { ...contacto }
+}
+
+function desactivarContacto(id: number): void {
+  contactos = contactos.map((contacto) => contacto.id === id ? { ...contacto, activo: false } : contacto)
+}
+
+export const demo = { equipos, dashboard, perfil, listarContactos, crearContacto, desactivarContacto }

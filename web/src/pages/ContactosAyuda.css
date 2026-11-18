@@ -1,0 +1,27 @@
+.contactos-ayuda { max-width: 900px; gap: 20px; }
+.contactos-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.contactos-cabecera > div { display: grid; gap: 8px; }
+.contactos-cabecera p { color: var(--tinta-suave); }
+.contactos-demo { justify-self: start; padding: 4px 10px; border-radius: 999px; background: var(--niebla-baja); color: var(--tinta-suave); font-size: .875rem; }
+.contactos-mensaje, .contactos-vacio, .contactos-estado { padding: 14px 16px; border: 1px solid var(--borde); border-radius: var(--radio-chico); background: var(--superficie); }
+.contactos-error { color: var(--error); border-color: var(--error); }
+.contactos-exito { color: var(--mar-oscuro); }
+.contactos-formulario { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 20px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie); }
+.contactos-formulario h2 { grid-column: 1 / -1; font-size: 1.25rem; }
+.contactos-formulario label { display: grid; gap: 6px; font-weight: 600; }
+.contactos-formulario input, .contactos-formulario select { width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 10px; background: var(--superficie-solida); }
+.contactos-ayuda-form { grid-column: 1 / -1; color: var(--tinta-suave); font-size: .9rem; }
+.contactos-formulario button { justify-self: start; }
+.contactos-lista { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.contacto-tarjeta { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie); }
+.contacto-detalle { display: grid; gap: 8px; min-width: 0; }
+.contacto-detalle h2 { font-size: 1.15rem; overflow-wrap: anywhere; }
+.contacto-tipo, .contacto-estado { color: var(--tinta-suave); font-size: .9rem; }
+.contacto-medios { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.contacto-medios a { overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .contactos-cabecera, .contacto-tarjeta { align-items: stretch; flex-direction: column; }
+  .contactos-formulario { grid-template-columns: 1fr; }
+  .contactos-formulario h2, .contactos-ayuda-form { grid-column: auto; }
+  .contactos-cabecera .boton, .contacto-tarjeta > .boton { align-self: flex-start; }
+}

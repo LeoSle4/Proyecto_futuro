@@ -1,4 +1,21 @@
 export type Rol = 'ADMIN' | 'RRHH' | 'COORDINADOR_BIENESTAR' | 'EMPLEADO'
+export type TipoContactoAyuda = 'PSICOLOGO' | 'LINEA_CRISIS' | 'EPS' | 'OTRO'
+
+export interface ContactoAyuda {
+  id: number
+  nombre: string
+  tipo: TipoContactoAyuda
+  telefono: string | null
+  email: string | null
+  activo: boolean
+}
+
+export interface CrearContactoAyuda {
+  nombre: string
+  tipo: TipoContactoAyuda
+  telefono: string | null
+  email: string | null
+}
 
 export interface Sesion {
   accessToken: string

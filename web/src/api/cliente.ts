@@ -1,4 +1,4 @@
-import type { Dashboard, Equipo, Perfil, Sesion } from './tipos'
+import type { ContactoAyuda, CrearContactoAyuda, Dashboard, Equipo, Perfil, Sesion } from './tipos'
 import { demo } from './demo'
 
 export class ErrorApi extends Error {
@@ -82,11 +82,11 @@ async function refrescar(): Promise<boolean> {
   return refrescando
 }
 
-async function conRenovacion<T>(ruta: string): Promise<T> {
+async function conRenovacion<T>(ruta: string, init: RequestInit = {}): Promise<T> {
   try {
-    return await pedir<T>(ruta)
+    return await pedir<T>(ruta, init)
   } catch (e) {
-    if (e instanceof ErrorApi && e.estado === 401 && (await refrescar())) return pedir<T>(ruta)
+    if (e instanceof ErrorApi && e.estado === 401 && (await refrescar())) return pedir<T>(ruta, init)
     throw e
   }
 }
@@ -118,6 +118,19 @@ export const api = {
   },
   dashboard(equipoId: number, semana: string): Promise<Dashboard> {
     return USAR_DEMO ? Promise.resolve(demo.dashboard(equipoId, semana)) : conRenovacion<Dashboard>(`/api/dashboard/${equipoId}?semana=${semana}`)
+  },
+  listarContactos(): Promise<ContactoAyuda[]> {
+    return USAR_DEMO ? Promise.resolve(demo.listarContactos()) : conRenovacion<ContactoAyuda[]>('/api/ayuda/contactos')
+  },
+  crearContacto(contacto: CrearContactoAyuda): Promise<ContactoAyuda> {
+    return USAR_DEMO ? Promise.resolve(demo.crearContacto(contacto)) : conRenovacion<ContactoAyuda>('/api/ayuda/contactos', { method: 'POST', body: JSON.stringify(contacto) })
+  },
+  async desactivarContacto(id: number): Promise<void> {
+    if (USAR_DEMO) {
+      demo.desactivarContacto(id)
+      return
+    }
+    await conRenovacion<void>(`/api/ayuda/contactos/${id}/desactivar`, { method: 'PATCH' })
   },
 }
 
