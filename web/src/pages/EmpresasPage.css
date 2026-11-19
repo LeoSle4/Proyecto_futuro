@@ -38,4 +38,7 @@
 .em-ficha div:first-child { border-top: 0; }
 .em-ficha dt { margin: 0; }
 .em-ficha dd { margin: 0; font-size: 1.0625rem; font-weight: 700; color: var(--tinta); text-align: right; }
+/* A row whose value is a phrase, not a number, stacks its label above it so both stay aligned with the other rows. */
+.em-ficha .ficha-texto { flex-direction: column; align-items: flex-start; gap: 4px; }
+.em-ficha .ficha-texto dd { font-size: 1rem; text-align: left; }
 @media (max-width: 1000px) { .em-cuerpo { grid-template-columns: 1fr; gap: 24px; } .em-rejilla, .em-rejilla.dos { grid-template-columns: 1fr; } .em-pagina h1 { font-size: 2.25rem; } }

@@ -220,7 +220,7 @@ export function EmpresasPage() {
           <h2>Plataforma</h2>
           <dl>
             <div><dt>Empresas</dt><dd>{empresas?.length ?? '—'}</dd></div>
-            <div><dt>Roles que crea</dt><dd>RRHH y coordinación</dd></div>
+            <div className="ficha-texto"><dt>Roles que crea</dt><dd>RRHH y coordinación</dd></div>
           </dl>
         </aside>
       </div>
