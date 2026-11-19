@@ -102,7 +102,7 @@ persona salen siempre del token; un recurso de otra empresa responde 404.
 | `GET /api/empresas/{id}/cuestionarios` | ADMIN, RRHH, coordinador | Cuestionarios activos; con `?incluirInactivos=true`, todo el catálogo con su campo `activo` |
 | `POST /api/empresas/{id}/cuestionarios/{cid}/activar` · `…/desactivar` | ADMIN | Activa (422 si excede el presupuesto) o apaga un cuestionario |
 | `GET/PUT /api/empresas/{id}/presupuesto` | GET: ADMIN, RRHH, coordinador; PUT: ADMIN | ε máximo por persona al mes (sigue vigente los meses siguientes) |
-| `GET /api/cuestionarios/pendientes` | EMPLEADO | Cuestionarios activos con ítems, escala y configuración LDP |
+| `GET /api/cuestionarios/pendientes` | EMPLEADO | Cuestionarios activos que la persona aún no respondió en la ventana actual, con ítems, escala y configuración LDP |
 | `POST /api/checkin` | EMPLEADO | Un ítem ya perturbado (202; 409 si ya respondió; 422 si la configuración no es la vigente) |
 | `POST /api/checkin/lote` | EMPLEADO | Hasta k ítems de una batería con una sola sesión |
 | `GET /api/dashboard/{equipoId}?semana=<lunes>` | RRHH, coordinador | Estimación de una semana del equipo (400 si no es lunes) |

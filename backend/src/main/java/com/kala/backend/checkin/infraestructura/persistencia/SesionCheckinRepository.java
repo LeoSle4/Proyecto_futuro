@@ -23,6 +23,11 @@ public interface SesionCheckinRepository extends JpaRepository<SesionCheckin, St
                            @Param("ventanaInicio") LocalDate ventanaInicio);
 
     @Override
+    default boolean existe(String hash) {
+        return existsById(hash);
+    }
+
+    @Override
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "DELETE FROM sesion_checkin WHERE ventana_inicio < :fecha", nativeQuery = true)
     int borrarAnterioresA(@Param("fecha") LocalDate fecha);

@@ -16,6 +16,7 @@ import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.Re
 import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.ResultadoPresupuesto;
 import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioConsultaService;
+import com.kala.backend.instrumentos.aplicacion.CuestionariosPorResponderService;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioPendienteResponse.Escala;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioPendienteResponse.ItemPendiente;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioPendienteResponse.Opcion;
@@ -61,6 +62,9 @@ class CuestionarioControllerTest {
 
     @MockitoBean
     private CuestionarioConsultaService consulta;
+
+    @MockitoBean
+    private CuestionariosPorResponderService porResponder;
 
     static RequestPostProcessor jwtDe(String rol, Long empresaId) {
         return jwt().jwt(jwt -> {
@@ -189,7 +193,7 @@ class CuestionarioControllerTest {
 
     @Test
     void pendientes_devuelveLosItemsConLaConfiguracionParaAleatorizar() throws Exception {
-        when(consulta.pendientes(1L)).thenReturn(List.of(new CuestionarioPendienteResponse(
+        when(porResponder.porResponder(1L, 5L)).thenReturn(List.of(new CuestionarioPendienteResponse(
                 10L, "PULSO", "Pulso semanal", 7, null, List.of(new ItemPendiente(
                         3L, 1, "Pulso", "¿Hoy te sentiste bien?",
                         new Escala("BINARIA", 0, 1, List.of(new Opcion(0, "No"), new Opcion(1, "Sí"))),
@@ -207,7 +211,7 @@ class CuestionarioControllerTest {
 
     @Test
     void pendientes_enUnItemLaplaceIncluyeElEpsilonParaEscalarElRuido() throws Exception {
-        when(consulta.pendientes(1L)).thenReturn(List.of(new CuestionarioPendienteResponse(
+        when(porResponder.porResponder(1L, 5L)).thenReturn(List.of(new CuestionarioPendienteResponse(
                 11L, "WHO5", "Bienestar", 14, null, List.of(new ItemPendiente(
                         4L, 1, "Calma", "Me he sentido tranquilo(a)",
                         new Escala("WHO5", 0, 5, List.of(new Opcion(0, "Nunca"), new Opcion(5, "Siempre"))),
@@ -218,6 +222,16 @@ class CuestionarioControllerTest {
                 .andExpect(jsonPath("$[0].items[0].mecanismo").value("LAPLACE"))
                 .andExpect(jsonPath("$[0].items[0].epsilon").value(1.0))
                 .andExpect(jsonPath("$[0].items[0].escala.valorMax").value(5));
+    }
+
+    @Test
+    void pendientes_pideSoloLosQueEstaPersonaNoHaRespondido() throws Exception {
+        when(porResponder.porResponder(1L, 5L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/cuestionarios/pendientes").with(jwtDe("ROLE_EMPLEADO", 1L)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+        verify(porResponder).porResponder(1L, 5L);
     }
 
     @Test

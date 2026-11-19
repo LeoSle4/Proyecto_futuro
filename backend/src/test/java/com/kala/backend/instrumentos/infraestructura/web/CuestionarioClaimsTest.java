@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.ResultadoActivacion;
 import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioConsultaService;
+import com.kala.backend.instrumentos.aplicacion.CuestionariosPorResponderService;
 import com.kala.backend.instrumentos.dominio.Cuestionario;
 import com.kala.backend.organizacion.infraestructura.web.OrganizacionTestSecurityConfig;
 import java.util.List;
@@ -44,6 +45,9 @@ class CuestionarioClaimsTest {
 
     @MockitoBean
     private CuestionarioConsultaService consulta;
+
+    @MockitoBean
+    private CuestionariosPorResponderService porResponder;
 
     @Test
     void adminSinEmpresaId_activaEnCualquierEmpresa() throws Exception {
@@ -84,16 +88,16 @@ class CuestionarioClaimsTest {
         mockMvc.perform(get("/api/cuestionarios/pendientes").with(jwtDe("ROLE_EMPLEADO", null)))
                 .andExpect(status().isForbidden());
 
-        verify(consulta, never()).pendientes(any());
+        verify(porResponder, never()).porResponder(any(), any());
     }
 
     @Test
     void elEmpleadoRecibeLosPendientesDeLaEmpresaDelToken() throws Exception {
-        when(consulta.pendientes(7L)).thenReturn(List.of());
+        when(porResponder.porResponder(7L, 5L)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/cuestionarios/pendientes").with(jwtDe("ROLE_EMPLEADO", 7L)))
                 .andExpect(status().isOk());
 
-        verify(consulta).pendientes(7L);
+        verify(porResponder).porResponder(7L, 5L);
     }
 }
