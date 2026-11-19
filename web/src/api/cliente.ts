@@ -1,4 +1,4 @@
-import type { ContactoAyuda, Cuestionario, Dashboard, Empleado, Empresa, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Sesion, Solicitud } from './tipos'
+import type { ContactoAyuda, Cuestionario, Dashboard, Empleado, Empresa, Equipo, NuevoEmpleadoSolicitud, Perfil, Presupuesto, Rol, Sesion, Solicitud } from './tipos'
 import { demo } from './demo'
 
 export class ErrorApi extends Error {
@@ -100,17 +100,23 @@ async function conRenovacion<T>(ruta: string, init?: RequestInit): Promise<T> {
   }
 }
 
+// The backend sends Spring authorities ("ROLE_RRHH"); the panel works with the bare role name.
+async function pedirPerfil(): Promise<Perfil> {
+  const perfil = await pedir<Perfil>('/api/auth/me')
+  return { ...perfil, roles: perfil.roles.map((r) => r.replace(/^ROLE_/, '') as Rol) }
+}
+
 export const api = {
   async iniciarSesion(username: string, password: string): Promise<Perfil> {
     if (USAR_DEMO) return demo.perfil
     const sesion = await pedir<Sesion>('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }, false)
     guardar(sesion)
-    return pedir<Perfil>('/api/auth/me')
+    return pedirPerfil()
   },
   async restaurarSesion(): Promise<Perfil | null> {
     if (USAR_DEMO) return demo.perfil
     if (!leerRefresh() || !(await refrescar())) return null
-    return pedir<Perfil>('/api/auth/me')
+    return pedirPerfil()
   },
   async cerrarSesion(): Promise<void> {
     const refreshToken = leerRefresh()

@@ -34,6 +34,28 @@ async function conSesion() {
   await api.iniciarSesion('a@b.pe', 'clave')
 }
 
+describe('roles del perfil', () => {
+  const perfilCon = (roles: string[]) => (ruta: string) =>
+    ruta === '/api/auth/login' ? { status: 200, cuerpo: sesion(1) } : { status: 200, cuerpo: { username: 'a', uid: 1, roles } }
+
+  it('el backend manda los roles con prefijo ROLE_: el panel los recibe sin él', async () => {
+    simular(perfilCon(['ROLE_RRHH']))
+    await expect(api.iniciarSesion('a@b.pe', 'clave')).resolves.toMatchObject({ roles: ['RRHH'] })
+  })
+
+  it('al restaurar la sesión también los normaliza', async () => {
+    simular(perfilCon(['ROLE_COORDINADOR_BIENESTAR']))
+    await api.iniciarSesion('a@b.pe', 'clave')
+    simular((ruta) => (ruta === '/api/auth/refresh' ? { status: 200, cuerpo: sesion(2) } : { status: 200, cuerpo: { username: 'a', uid: 1, roles: ['ROLE_COORDINADOR_BIENESTAR'] } }))
+    await expect(api.restaurarSesion()).resolves.toMatchObject({ roles: ['COORDINADOR_BIENESTAR'] })
+  })
+
+  it('un rol que ya viene sin prefijo se queda igual', async () => {
+    simular(perfilCon(['ADMIN']))
+    await expect(api.iniciarSesion('a@b.pe', 'clave')).resolves.toMatchObject({ roles: ['ADMIN'] })
+  })
+})
+
 describe('equipos', () => {
   it('filtra los equipos por empresa cuando se indica en la consulta', async () => {
     await conSesion()

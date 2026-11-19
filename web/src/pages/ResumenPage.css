@@ -11,6 +11,7 @@
 .semana span { padding: 0 14px; border-left: 1.5px solid var(--linea); border-right: 1.5px solid var(--linea); height: 44px; display: flex; align-items: center; }
 .resumen-contenido { animation: aparece 260ms var(--ease) both; }
 .resumen-pares { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
+.resumen-pares > :only-child { grid-column: 1 / -1; }
 .resumen-aviso, .resumen-demo { color: var(--tinta-2); }
 .resumen-demo { font-weight: 600; margin-bottom: 14px; }
 .resumen-notas { margin-top: 22px; font-size: 0.875rem; line-height: 1.6; color: var(--tinta-2); border-top: 1px solid var(--linea); padding-top: 14px; }
