@@ -6,6 +6,7 @@ import { usoDelPresupuesto, validarMaximo } from '../lib/presupuesto'
 import { Aviso } from '../components/Aviso'
 import { Selector } from '../components/Selector'
 import './CuestionariosPage.css'
+import { cantidad } from '../lib/texto'
 
 const retraso = (i: number) => ({ '--i': i }) as React.CSSProperties
 const num = (n: number) => (Math.round(n * 100) / 100).toLocaleString('es-PE', { maximumFractionDigits: 2 }).replace('.', ',')
@@ -131,7 +132,7 @@ export function CuestionariosPage() {
                   <li key={c.id} className={`cu-fila${c.activo ? '' : ' inactivo'}`}>
                     <div className="cu-quien">
                       <b>{c.nombre}</b>
-                      <span>{c.codigo} · cada {c.cadenciaDias} días · {c.itemsPorEnvio ? `${c.itemsPorEnvio} preguntas por envío` : 'todas las preguntas'}</span>
+                      <span>{c.codigo} · cada {cantidad(c.cadenciaDias, 'día', 'días')} · {c.itemsPorEnvio ? `${cantidad(c.itemsPorEnvio, 'pregunta', 'preguntas')} por envío` : 'todas las preguntas'}</span>
                     </div>
                     <span className={`cu-estado${c.activo ? '' : ' off'}`}>{c.activo ? 'Activo' : 'Inactivo'}</span>
                     {esAdmin && (
