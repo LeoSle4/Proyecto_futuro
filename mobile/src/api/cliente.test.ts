@@ -32,6 +32,18 @@ describe('login', () => {
     expect(mockAlmacen.get('kala.refresh')).toBe('refresh-1')
   })
 
+  it('acepta a un empleado cuyo rol llega con el prefijo ROLE_ del backend', async () => {
+    simular((ruta) => (ruta === '/api/auth/login' ? { status: 200, cuerpo: sesion(1) } : { status: 200, cuerpo: { roles: ['ROLE_EMPLEADO'] } }))
+    await expect(api.iniciarSesion('a@b.pe', 'clave')).resolves.toBeUndefined()
+    expect(mockAlmacen.get('kala.refresh')).toBe('refresh-1')
+  })
+
+  it('sigue rechazando a RRHH aunque su rol llegue con prefijo', async () => {
+    simular((ruta) => (ruta === '/api/auth/login' ? { status: 200, cuerpo: sesion(1) } : { status: 200, cuerpo: { roles: ['ROLE_RRHH'] } }))
+    await expect(api.iniciarSesion('a@b.pe', 'clave')).rejects.toMatchObject({ estado: 403 })
+    expect(mockAlmacen.has('kala.refresh')).toBe(false)
+  })
+
   it('rechaza una cuenta que no es de empleado y no guarda nada', async () => {
     simular((ruta) => (ruta === '/api/auth/login' ? { status: 200, cuerpo: sesion(1) } : { status: 200, cuerpo: { roles: ['RRHH'] } }))
     await expect(api.iniciarSesion('a@b.pe', 'clave')).rejects.toMatchObject({ estado: 403 })
@@ -90,19 +102,35 @@ describe('renovación de sesión', () => {
 })
 
 describe('envío del check-in', () => {
-  it('manda solo el envío ya perturbado y deja pasar el 409 de "ya respondió"', async () => {
+  it('manda todas las respuestas ya perturbadas en un solo lote a /api/checkin/lote', async () => {
+    let cuerpo = ''
+    const llamadas = simular((_ruta, init) => {
+      cuerpo = String(init.body)
+      return { status: 202 }
+    })
+    const lote = [
+      { itemId: 1, configuracionLdpId: 2, valorRuidoso: 3.2 },
+      { itemId: 2, configuracionLdpId: 2, valorRuidoso: 1.4 },
+    ]
+    await expect(api.enviar(lote)).resolves.toBeUndefined()
+    expect(llamadas).toHaveLength(1)
+    expect(llamadas[0].ruta).toBe('/api/checkin/lote')
+    expect(JSON.parse(cuerpo)).toEqual({ respuestas: lote })
+  })
+
+  it('un solo ítem también viaja como lote de uno', async () => {
     let cuerpo = ''
     simular((_ruta, init) => {
       cuerpo = String(init.body)
-      return { status: 409 }
+      return { status: 202 }
     })
-    await expect(api.enviar({ itemId: 1, configuracionLdpId: 2, respuestaRuidosa: true })).rejects.toMatchObject({ estado: 409 })
-    expect(JSON.parse(cuerpo)).toEqual({ itemId: 1, configuracionLdpId: 2, respuestaRuidosa: true })
+    await api.enviar([{ itemId: 1, configuracionLdpId: 2, respuestaRuidosa: true }])
+    expect(JSON.parse(cuerpo)).toEqual({ respuestas: [{ itemId: 1, configuracionLdpId: 2, respuestaRuidosa: true }] })
   })
 
-  it('un 202 sin cuerpo no rompe', async () => {
-    simular(() => ({ status: 202 }))
-    await expect(api.enviar({ itemId: 1, configuracionLdpId: 2, valorRuidoso: 3.2 })).resolves.toBeUndefined()
+  it('propaga el 409 de "ya respondió" para que la pantalla lo muestre y no lo dé por enviado', async () => {
+    simular(() => ({ status: 409 }))
+    await expect(api.enviar([{ itemId: 1, configuracionLdpId: 2, respuestaRuidosa: true }])).rejects.toMatchObject({ estado: 409 })
   })
 })
 
