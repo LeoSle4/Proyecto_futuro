@@ -44,6 +44,20 @@
 @media (max-width: 1000px) {
   .emp-cuerpo { grid-template-columns: 1fr; gap: 24px; }
   .emp-rejilla, .emp-filtros { grid-template-columns: 1fr; }
-  .emp-fila { grid-template-columns: 1fr; gap: 6px; }
-  .emp-acciones { justify-content: flex-start; }
+  /* Name and email on top, team and status side by side below, the action at the right spanning both lines. */
+  .emp-fila {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "quien quien acciones" "equipo estado acciones";
+    column-gap: 16px; row-gap: 4px;
+  }
+  .emp-quien { grid-area: quien; }
+  .emp-equipo { grid-area: equipo; }
+  .emp-estado { grid-area: estado; }
+  .emp-acciones { grid-area: acciones; align-self: center; }
+  .emp-aviso-fila { grid-column: 1 / -1; }
+}
+/* Phones: the action gets its own full-width row so its buttons stay easy to hit and nothing is squeezed. */
+@media (max-width: 560px) {
+  .emp-fila { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "quien quien" "equipo estado" "acciones acciones"; row-gap: 8px; }
+  .emp-acciones { justify-content: stretch; }
+  .emp-acciones .boton { flex: 1; }
 }
