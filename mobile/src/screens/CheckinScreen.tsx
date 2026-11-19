@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { api, ErrorApi } from '../api/cliente'
 import type { ItemCuestionario } from '../api/tipos'
@@ -18,6 +18,23 @@ interface Props {
 }
 
 type Fase = 'cargando' | 'elegir' | 'privacidad' | 'enviando' | 'listo' | 'yaRespondio' | 'vacio' | 'error'
+
+// A closing state (done, nothing to answer, already answered, error): one centred composition, so the screen is never
+// half empty. The ring-and-dot is the same mark the privacy moment uses; it is decoration, not a reward.
+function Estado({ titulo, texto, conMarca = true, children }: { titulo: string; texto: string; conMarca?: boolean; children: ReactNode }) {
+  return (
+    <View style={estilos.centro}>
+      {conMarca && (
+        <View style={estilos.marca} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <View style={estilos.marcaPunto} />
+        </View>
+      )}
+      <Text style={estilos.titulo} accessibilityRole="header">{titulo}</Text>
+      <Text style={estilos.texto}>{texto}</Text>
+      <View style={estilos.acciones}>{children}</View>
+    </View>
+  )
+}
 
 export function CheckinScreen({ alAyuda, alSalir, alCambiarClave, alSesionVencida }: Props) {
   const [items, setItems] = useState<ItemCuestionario[]>([])
@@ -111,38 +128,30 @@ export function CheckinScreen({ alAyuda, alSalir, alCambiarClave, alSesionVencid
         {fase === 'cargando' && <ActivityIndicator color={color.mar} size="large" accessibilityLabel="Cargando tus preguntas" />}
 
         {fase === 'error' && (
-          <View style={estilos.centro}>
-            <Text style={estilos.titulo}>No pudimos cargar tus preguntas</Text>
-            <Text style={estilos.texto}>{mensaje}</Text>
+          <Estado titulo="No pudimos cargar tus preguntas" texto={mensaje ?? ''} conMarca={false}>
             <Boton texto="Intentar de nuevo" alPulsar={() => void cargar()} />
-          </View>
+          </Estado>
         )}
 
         {fase === 'vacio' && (
-          <View style={estilos.centro}>
-            <Text style={estilos.titulo}>Hoy no hay nada que responder</Text>
-            <Text style={estilos.texto}>Cuando haya una pregunta nueva, la verás aquí.</Text>
+          <Estado titulo="Hoy no hay nada que responder" texto="Cuando haya una pregunta nueva, la verás aquí.">
             <Boton texto="Cambiar mi contraseña" variante="secundario" alPulsar={alCambiarClave} />
             <Boton texto="Salir" variante="secundario" alPulsar={alSalir} />
-          </View>
+          </Estado>
         )}
 
         {fase === 'listo' && (
-          <View style={estilos.centro}>
-            <Text style={estilos.titulo}>Listo por hoy</Text>
-            <Text style={estilos.texto}>Gracias por responder. Tus respuestas salieron mezcladas con ruido: nadie puede ver las tuyas.</Text>
+          <Estado titulo="Listo por hoy" texto="Gracias por responder. Tus respuestas salieron mezcladas con ruido: nadie puede ver las tuyas.">
             <Boton texto="Cambiar mi contraseña" variante="secundario" alPulsar={alCambiarClave} />
             <Boton texto="Salir" variante="secundario" alPulsar={alSalir} />
-          </View>
+          </Estado>
         )}
 
         {fase === 'yaRespondio' && (
-          <View style={estilos.centro}>
-            <Text style={estilos.titulo}>Ya respondiste esta vez</Text>
-            <Text style={estilos.texto}>Este cuestionario se responde una vez por periodo. Tus respuestas anteriores siguen guardadas y las de ahora no se enviaron.</Text>
+          <Estado titulo="Ya respondiste esta vez" texto="Este cuestionario se responde una vez por periodo. Tus respuestas anteriores siguen guardadas y las de ahora no se enviaron.">
             <Boton texto="Cambiar mi contraseña" variante="secundario" alPulsar={alCambiarClave} />
             <Boton texto="Salir" variante="secundario" alPulsar={alSalir} />
-          </View>
+          </Estado>
         )}
 
         {item && (fase === 'elegir' || fase === 'privacidad' || fase === 'enviando') && (
@@ -176,10 +185,13 @@ export function CheckinScreen({ alAyuda, alSalir, alCambiarClave, alSesionVencid
 }
 
 const estilos = StyleSheet.create({
-  cuerpo: { padding: 20, gap: 16, paddingBottom: 40 },
-  centro: { gap: 14, paddingTop: 24 },
-  titulo: { fontFamily: fuente.negrita, fontSize: 30, color: color.tinta },
-  texto: { fontFamily: fuente.regular, fontSize: 18, lineHeight: 26, color: color.tintaSuave },
+  cuerpo: { flexGrow: 1, padding: 20, gap: 16, paddingBottom: 40 },
+  centro: { flexGrow: 1, justifyContent: 'center', gap: 14, paddingBottom: 48 },
+  marca: { alignSelf: 'center', width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: color.turquesa, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  marcaPunto: { width: 24, height: 24, borderRadius: 12, backgroundColor: color.turquesa },
+  titulo: { fontFamily: fuente.negrita, fontSize: 30, color: color.tinta, textAlign: 'center' },
+  texto: { fontFamily: fuente.regular, fontSize: 18, lineHeight: 26, color: color.tintaSuave, textAlign: 'center', maxWidth: 320, alignSelf: 'center' },
+  acciones: { gap: 12, alignSelf: 'stretch', marginTop: 14 },
   restantes: { fontFamily: fuente.semi, fontSize: 16, color: color.tintaSuave },
   pregunta: { backgroundColor: color.superficie, borderColor: color.borde, borderWidth: 1, borderRadius: radio.tarjeta, padding: 24 },
   preguntaTexto: { fontFamily: fuente.negrita, fontSize: 28, lineHeight: 34, color: color.tinta },
