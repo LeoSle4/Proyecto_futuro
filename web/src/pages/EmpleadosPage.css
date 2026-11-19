@@ -46,7 +46,7 @@
   .emp-rejilla, .emp-filtros { grid-template-columns: 1fr; }
   /* Name and email on top, team and status side by side below, the action at the right spanning both lines. */
   .emp-fila {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "quien quien acciones" "equipo estado acciones";
+    grid-template-columns: 9.5rem minmax(0, 1fr) auto; grid-template-areas: "quien quien acciones" "equipo estado acciones";
     column-gap: 16px; row-gap: 4px;
   }
   .emp-quien { grid-area: quien; }
