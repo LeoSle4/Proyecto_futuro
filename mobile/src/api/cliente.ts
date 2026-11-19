@@ -91,7 +91,8 @@ export const api = {
       accessToken = sesion.accessToken
       return pedir<{ roles: string[] }>('/api/auth/me')
     })()
-    if (!perfil.roles.includes('EMPLEADO')) {
+    // The backend sends Spring authorities ("ROLE_EMPLEADO").
+    if (!perfil.roles.some((r) => r.replace(/^ROLE_/, '') === 'EMPLEADO')) {
       accessToken = null
       throw new ErrorApi(403, 'Esta app es para empleados. Usa el panel web de RRHH.')
     }
@@ -113,9 +114,10 @@ export const api = {
   pendientes(): Promise<Cuestionario[]> {
     return MODO_DEMO ? Promise.resolve(cuestionariosDemo) : conRenovacion<Cuestionario[]>('/api/cuestionarios/pendientes')
   },
-  async enviar(envio: EnvioItem): Promise<void> {
+  // The backend lets a person answer a questionnaire once per window, so every answer goes in one batch.
+  async enviar(envios: EnvioItem[]): Promise<void> {
     if (MODO_DEMO) return
-    await conRenovacion<void>('/api/checkin', { method: 'POST', body: JSON.stringify(envio) })
+    await conRenovacion<void>('/api/checkin/lote', { method: 'POST', body: JSON.stringify({ respuestas: envios }) })
   },
   // The server revokes every session on success, so the caller must sign out afterwards.
   async cambiarClave(claveActual: string, claveNueva: string): Promise<void> {

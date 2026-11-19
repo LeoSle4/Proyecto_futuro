@@ -13,22 +13,25 @@ import { color, fuente, radio } from '../theme'
 interface Props {
   alAyuda: () => void
   alSalir: () => void
+  alCambiarClave: () => void
   alSesionVencida: () => void
 }
 
-type Fase = 'cargando' | 'elegir' | 'privacidad' | 'enviando' | 'listo' | 'vacio' | 'error'
+type Fase = 'cargando' | 'elegir' | 'privacidad' | 'enviando' | 'listo' | 'yaRespondio' | 'vacio' | 'error'
 
-export function CheckinScreen({ alAyuda, alSalir, alSesionVencida }: Props) {
+export function CheckinScreen({ alAyuda, alSalir, alCambiarClave, alSesionVencida }: Props) {
   const [items, setItems] = useState<ItemCuestionario[]>([])
   const [indice, setIndice] = useState(0)
   const [fase, setFase] = useState<Fase>('cargando')
   const [valor, setValor] = useState<number | null>(null)
   const [envio, setEnvio] = useState<EnvioItem | null>(null)
+  const [envios, setEnvios] = useState<EnvioItem[]>([])
   const [mensaje, setMensaje] = useState<string | null>(null)
 
   const cargar = useCallback(async () => {
     setFase('cargando')
     setMensaje(null)
+    setEnvios([])
     try {
       const cuestionarios = await api.pendientes()
       const primero = cuestionarios[0]
@@ -60,27 +63,43 @@ export function CheckinScreen({ alAyuda, alSalir, alSesionVencida }: Props) {
     setFase('privacidad')
   }
 
+  // The questionnaire is one submission: each answer waits on the phone and the last one sends them all together.
   async function enviar() {
     if (!envio) return
-    setFase('enviando')
-    try {
-      await api.enviar(envio)
-    } catch (e) {
-      if (e instanceof ErrorApi && e.estado === 401) return alSesionVencida()
-      if (!(e instanceof ErrorApi && e.estado === 409)) {
-        setMensaje(e instanceof Error ? e.message : 'No pudimos enviar tu respuesta.')
-        setFase('privacidad')
-        return
-      }
-    }
+    const lote = [...envios.slice(0, indice), envio]
     setMensaje(null)
-    setValor(null)
-    setEnvio(null)
-    if (indice + 1 >= items.length) setFase('listo')
-    else {
+    if (indice + 1 < items.length) {
+      setEnvios(lote)
+      setValor(null)
+      setEnvio(null)
       setIndice(indice + 1)
       setFase('elegir')
+      return
     }
+    setFase('enviando')
+    try {
+      await api.enviar(lote)
+    } catch (e) {
+      if (e instanceof ErrorApi && e.estado === 401) return alSesionVencida()
+      if (e instanceof ErrorApi && e.estado === 409) {
+        setFase('yaRespondio')
+        return
+      }
+      setMensaje(e instanceof Error ? e.message : 'No pudimos enviar tus respuestas.')
+      setFase('privacidad')
+      return
+    }
+    setEnvios([])
+    setValor(null)
+    setEnvio(null)
+    setFase('listo')
+  }
+
+  // Going back keeps the earlier answers; only the one being changed is chosen again.
+  function cambiarRespuesta() {
+    setValor(null)
+    setEnvio(null)
+    setFase('elegir')
   }
 
   const opciones = useMemo(() => item?.escala.opciones ?? [], [item])
@@ -103,6 +122,7 @@ export function CheckinScreen({ alAyuda, alSalir, alSesionVencida }: Props) {
           <View style={estilos.centro}>
             <Text style={estilos.titulo}>Hoy no hay nada que responder</Text>
             <Text style={estilos.texto}>Cuando haya una pregunta nueva, la verás aquí.</Text>
+            <Boton texto="Cambiar mi contraseña" variante="secundario" alPulsar={alCambiarClave} />
             <Boton texto="Salir" variante="secundario" alPulsar={alSalir} />
           </View>
         )}
@@ -111,6 +131,16 @@ export function CheckinScreen({ alAyuda, alSalir, alSesionVencida }: Props) {
           <View style={estilos.centro}>
             <Text style={estilos.titulo}>Listo por hoy</Text>
             <Text style={estilos.texto}>Gracias por responder. Tus respuestas salieron mezcladas con ruido: nadie puede ver las tuyas.</Text>
+            <Boton texto="Cambiar mi contraseña" variante="secundario" alPulsar={alCambiarClave} />
+            <Boton texto="Salir" variante="secundario" alPulsar={alSalir} />
+          </View>
+        )}
+
+        {fase === 'yaRespondio' && (
+          <View style={estilos.centro}>
+            <Text style={estilos.titulo}>Ya respondiste esta vez</Text>
+            <Text style={estilos.texto}>Este cuestionario se responde una vez por periodo. Tus respuestas anteriores siguen guardadas y las de ahora no se enviaron.</Text>
+            <Boton texto="Cambiar mi contraseña" variante="secundario" alPulsar={alCambiarClave} />
             <Boton texto="Salir" variante="secundario" alPulsar={alSalir} />
           </View>
         )}
@@ -134,8 +164,8 @@ export function CheckinScreen({ alAyuda, alSalir, alSesionVencida }: Props) {
               <View style={estilos.opciones}>
                 <MomentoPrivacidad item={item} valorReal={valor} envio={envio} />
                 {mensaje && <Text style={estilos.error} accessibilityRole="alert">{mensaje}</Text>}
-                <Boton texto={fase === 'enviando' ? 'Enviando…' : 'Enviar'} alPulsar={() => void enviar()} deshabilitado={fase === 'enviando'} />
-                <Boton texto="Cambiar mi respuesta" variante="secundario" alPulsar={() => setFase('elegir')} deshabilitado={fase === 'enviando'} />
+                <Boton texto={fase === 'enviando' ? 'Enviando…' : restantes === 1 ? 'Enviar' : 'Siguiente'} alPulsar={() => void enviar()} deshabilitado={fase === 'enviando'} />
+                <Boton texto="Cambiar mi respuesta" variante="secundario" alPulsar={cambiarRespuesta} deshabilitado={fase === 'enviando'} />
               </View>
             )}
           </>
