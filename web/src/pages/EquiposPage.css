@@ -7,6 +7,9 @@
 .equipos-ficha div:first-child { border-top: 0; }
 .equipos-ficha dt { margin: 0; }
 .equipos-ficha dd { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--tinta); }
+/* A row whose value is a phrase, not a number, stacks its label above it so both stay aligned with the other rows. */
+.equipos-ficha .ficha-texto { flex-direction: column; align-items: flex-start; gap: 4px; }
+.equipos-ficha .ficha-texto dd { font-size: 1rem; }
 @media (max-width: 1000px) { .equipos-cuerpo { grid-template-columns: 1fr; gap: 24px; } }
 .equipos-pagina h1 { font-family: var(--serif); font-size: 3.25rem; line-height: 1.05; font-weight: 600; letter-spacing: -0.025em; }
 .equipos-intro { font-size: 1.125rem; color: var(--tinta-2); margin: 12px 0 28px; max-width: 60ch; }

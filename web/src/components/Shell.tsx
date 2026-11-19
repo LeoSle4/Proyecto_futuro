@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useSesion } from '../auth/SesionContext'
 import { MODO_DEMO } from '../api/cliente'
 import './Shell.css'
@@ -34,6 +35,11 @@ export function Shell() {
   const { perfil, cerrar } = useSesion()
   const rol = perfil?.roles.map((r) => ROL_TEXTO[r]).find(Boolean) ?? ''
   const secciones = perfil?.roles.includes('ADMIN') ? SECCIONES_ADMIN : SECCIONES_EMPRESA
+  const { pathname } = useLocation()
+  // On a narrow screen the menu scrolls sideways: bring the current section into view so it is never hidden.
+  useEffect(() => {
+    document.querySelector('.shell-tabs a.active')?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [pathname])
   return (
     <div className="shell">
       <a className="saltar" href="#contenido">Saltar al contenido</a>

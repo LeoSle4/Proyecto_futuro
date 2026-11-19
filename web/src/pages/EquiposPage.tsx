@@ -225,7 +225,7 @@ export function EquiposPage() {
         <dl>
           <div><dt>{esAdmin ? 'Empresa seleccionada' : 'En tu empresa'}</dt><dd>{equipos?.length ?? '—'}</dd></div>
           <div><dt>Mínimo para publicar</dt><dd>{N_MINIMO}</dd></div>
-          <div><dt>Quién los cambia</dt><dd>RRHH y administración</dd></div>
+          <div className="ficha-texto"><dt>Quién los cambia</dt><dd>RRHH y administración</dd></div>
         </dl>
       </aside>
       </div>

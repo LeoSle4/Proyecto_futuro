@@ -35,8 +35,15 @@
 .login-pie a { color: var(--mar); font-weight: 700; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; text-decoration: none; transition: background-size var(--m-in) var(--ease); }
 .login-pie a:hover { background-size: 100% 1px; }
 
+/* Phones: the dark panel shrinks to logo, headline and one line, so the form is on screen at once. The noise animation
+   and the two claims are for wide screens, where there is room to show them. */
 @media (max-width: 900px) {
   .login { grid-template-columns: 1fr; }
-  .login-marca, .login-lado { padding: 28px 22px; }
-  .login-marca { grid-template-rows: 44px auto auto; }
+  .login-marca { grid-template-rows: auto auto; row-gap: 18px; padding: 22px 22px 28px; }
+  .login-marca h1 { font-size: clamp(1.5rem, 6.4vw, 1.875rem); }
+  .login-lead { font-size: 1rem; margin-top: 10px; }
+  .login-medio > .asienta, .login-prueba { display: none; }
+  .login-lado { grid-template-rows: auto auto auto; row-gap: 20px; padding: 20px 22px 32px; }
+  .login-form h2 { font-size: 2rem; }
+  .login-sub { margin-bottom: 22px; }
 }
