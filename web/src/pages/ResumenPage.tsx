@@ -7,6 +7,7 @@ import { PanelPulso } from '../components/PanelPulso'
 import { ResumenSemana } from '../components/ResumenSemana'
 import { SelectorEquipos } from '../components/SelectorEquipos'
 import { TarjetaIndicador } from '../components/TarjetaIndicador'
+import { separarPrincipal } from '../lib/principal'
 import { etiquetaSemana, lunesActual, moverSemanas } from '../lib/semana'
 import './ResumenPage.css'
 
@@ -81,6 +82,7 @@ export function ResumenPage() {
   }
 
   const datos = resumen && resumen !== 'error' ? resumen : null
+  const { principal, resto } = separarPrincipal(datos?.items ?? [])
   return (
     <div className="resumen">
       <aside className="resumen-lateral" aria-label="Equipos">
@@ -113,10 +115,10 @@ export function ResumenPage() {
             <p className="resumen-aviso">Este equipo no tiene cuestionarios activos esta semana.</p>
           ) : (
             <>
-              <PanelPulso item={datos.items[0]} total={datos.totalRespuestas} />
-              {datos.items.length > 1 && (
+              {principal && <PanelPulso item={principal} total={datos.totalRespuestas} />}
+              {resto.length > 0 && (
                 <div className="resumen-pares">
-                  {datos.items.slice(1).map((item, i) => (
+                  {resto.map((item, i) => (
                     <TarjetaIndicador key={item.itemId} item={item} total={datos.totalRespuestas} retardo={900 + i * 100} />
                   ))}
                 </div>
