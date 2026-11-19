@@ -83,6 +83,15 @@ class CheckInRegistroRepositoryTest {
     }
 
     @Test
+    void existe_esFalsoAntesDeInsertarYVerdaderoDespues() {
+        String hash = (UUID.randomUUID().toString() + UUID.randomUUID()).replace("-", "").substring(0, 64);
+
+        assertThat(sesiones.existe(hash)).isFalse();
+        sesiones.insertarSiNoExiste(hash, cuestionarioId, DIA);
+        assertThat(sesiones.existe(hash)).isTrue();
+    }
+
+    @Test
     void laSesionGuardadaSoloTieneHashCuestionarioYFecha() {
         String hash = (UUID.randomUUID().toString() + UUID.randomUUID()).replace("-", "").substring(0, 64);
         sesiones.insertarSiNoExiste(hash, cuestionarioId, DIA);

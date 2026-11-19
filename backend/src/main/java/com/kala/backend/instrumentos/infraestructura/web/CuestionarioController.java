@@ -5,6 +5,7 @@ import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService.Re
 import com.kala.backend.instrumentos.aplicacion.ActivacionCuestionarioService;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioConsultaService;
 import com.kala.backend.instrumentos.aplicacion.CuestionarioPendienteResponse;
+import com.kala.backend.instrumentos.aplicacion.CuestionariosPorResponderService;
 import com.kala.backend.instrumentos.infraestructura.web.PresupuestoDtos.PresupuestoRequest;
 import com.kala.backend.instrumentos.infraestructura.web.PresupuestoDtos.PresupuestoResponse;
 import com.kala.backend.organizacion.dominio.EmpresaNoEncontradaException;
@@ -28,10 +29,13 @@ public class CuestionarioController {
 
     private final ActivacionCuestionarioService activacion;
     private final CuestionarioConsultaService consulta;
+    private final CuestionariosPorResponderService porResponder;
 
-    public CuestionarioController(ActivacionCuestionarioService activacion, CuestionarioConsultaService consulta) {
+    public CuestionarioController(ActivacionCuestionarioService activacion, CuestionarioConsultaService consulta,
+                                  CuestionariosPorResponderService porResponder) {
         this.activacion = activacion;
         this.consulta = consulta;
+        this.porResponder = porResponder;
     }
 
     // 200; 404 si la empresa o el cuestionario no existen; 422 si excede el presupuesto de privacidad.
@@ -87,16 +91,25 @@ public class CuestionarioController {
         return consulta.listarActivos(empresaId).stream().map(CuestionarioResponse::de).toList();
     }
 
-    // El empleado recibe los cuestionarios activos de su empresa (la del token) para aleatorizar en su dispositivo.
+    // El empleado recibe los cuestionarios activos de su empresa (la del token) que todavía no respondió en la
+    // ventana actual, para aleatorizar en su dispositivo.
     @GetMapping("/api/cuestionarios/pendientes")
     @PreAuthorize("hasRole('EMPLEADO')")
     public List<CuestionarioPendienteResponse> pendientes(@AuthenticationPrincipal Jwt jwt) {
-        return consulta.pendientes(empresaId(jwt));
+        return porResponder.porResponder(empresaId(jwt), usuarioId(jwt));
     }
 
     private static boolean esAdmin(Jwt jwt) {
         List<String> roles = jwt.getClaimAsStringList("roles");
         return roles != null && roles.contains("ROLE_ADMIN");
+    }
+
+    private static Long usuarioId(Jwt jwt) {
+        Long uid = jwt.getClaim("uid");
+        if (uid == null) {
+            throw new AccessDeniedException("El token no contiene uid");
+        }
+        return uid;
     }
 
     private static Long empresaId(Jwt jwt) {
